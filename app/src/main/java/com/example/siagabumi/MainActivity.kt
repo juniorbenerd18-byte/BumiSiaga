@@ -149,9 +149,10 @@ fun MainApp() {
             composable(Screen.About.route) {
                 Text(text = "Layar Tentang")
             }
-            composable(Screen.GempaDetail.route) { backStackEntry ->
-                val gempaId = backStackEntry.arguments?.getString("gempaId") ?: ""
-                Text(text = "Detail Gempa: $gempaId")
+            composable(Screen.GempaDetail.route) {
+                com.example.siagabumi.ui.gempa.detail.GempaDetailScreen(
+                    onNavigateBack = { navController.popBackStack() }
+                )
             }
         }
     }
