@@ -1,0 +1,78 @@
+<resources>
+    <string name="app_name">SiagaBumi</string>
+
+    <!-- Navigation -->
+    <string name="nav_gempa">Earthquake</string>
+    <string name="nav_cuaca">Weather</string>
+    <string name="nav_favorit">Favorites</string>
+    <string name="nav_about">About</string>
+
+    <!-- Attribution -->
+    <string name="bmkg_attribution">Data source: BMKG (Meteorological, Climatological, and Geophysical Agency)</string>
+
+    <!-- Gempa -->
+    <string name="gempa_terbaru_title">Latest Earthquake</string>
+    <string name="gempa_tab_terkini">M 5.0+</string>
+    <string name="gempa_tab_dirasakan">Felt</string>
+    <string name="gempa_filter_min_mag">Min Magnitude Filter: %1$.1f</string>
+    <string name="gempa_all_mag">All</string>
+    <string name="gempa_tsunami_warning">TSUNAMI POTENTIAL WARNING</string>
+    <string name="gempa_no_tsunami">No tsunami potential</string>
+    <string name="gempa_depth">Depth: %1$d km</string>
+    <string name="gempa_felt">Felt in: %1$s</string>
+    <string name="gempa_coordinates">Coordinates: %1$s</string>
+    <string name="gempa_share">Share</string>
+    <string name="gempa_share_text">BMKG Earthquake Info\nMagnitude: %1$.1f\nDepth: %2$d km\nLocation: %3$s\nTime: %4$s\nPotential: %5$s\n%6$s\n\nData source: BMKG</string>
+    <string name="gempa_detail_title">Earthquake Detail</string>
+    <string name="gempa_shakemap">Ground Shaking Map (Shakemap)</string>
+    <string name="gempa_epicenter_map">Epicenter Map</string>
+    <string name="gempa_empty">No earthquake data found.</string>
+
+    <!-- Cuaca -->
+    <string name="cuaca_title">Weather Forecast</string>
+    <string name="cuaca_search_hint">Search village or district...</string>
+    <string name="cuaca_current_condition">Current Conditions</string>
+    <string name="cuaca_hourly_title">3-Hourly Forecast</string>
+    <string name="cuaca_daily_title">Daily Forecast</string>
+    <string name="cuaca_temp">%1$d°C</string>
+    <string name="cuaca_temp_range">%1$d°C - %2$d°C</string>
+    <string name="cuaca_humidity">Humidity</string>
+    <string name="cuaca_humidity_val">%1$d%%</string>
+    <string name="cuaca_wind">Wind</string>
+    <string name="cuaca_wind_val">%1$.1f km/h (%2$s)</string>
+    <string name="cuaca_clouds">Cloud Cover</string>
+    <string name="cuaca_clouds_val">%1$d%%</string>
+    <string name="cuaca_rain">Rainfall</string>
+    <string name="cuaca_rain_val">%1$.1f mm</string>
+    <string name="cuaca_add_favorite">Save to Favorites</string>
+    <string name="cuaca_remove_favorite">Remove from Favorites</string>
+    <string name="cuaca_favorite_added">Added to favorites</string>
+    <string name="cuaca_favorite_removed">Removed from favorites</string>
+    <string name="cuaca_empty">Select a location to view weather forecasts</string>
+
+    <!-- Wilayah -->
+    <string name="wilayah_search_title">Select Location</string>
+    <string name="wilayah_search_placeholder">Type at least 3 letters of village/district</string>
+    <string name="wilayah_importing">Preparing location database…</string>
+    <string name="wilayah_empty">No locations found</string>
+
+    <!-- Favorit -->
+    <string name="favorit_title">Saved Locations</string>
+    <string name="favorit_empty">No favorite locations saved yet.\nSearch and bookmark your weather location.</string>
+
+    <!-- Tentang -->
+    <string name="about_title">About Application</string>
+    <string name="about_app_desc">SiagaBumi is a reliable application providing the latest earthquake monitoring and official weather forecasts across Indonesia.</string>
+    <string name="about_version">Version %1$s</string>
+    <string name="about_bmkg_title">Official BMKG Data Source</string>
+    <string name="about_bmkg_desc">Earthquake and weather data are provided by the Meteorological, Climatological, and Geophysical Agency (BMKG) via its open data portal.</string>
+    <string name="about_open_bmkg_web">Open BMKG Data Portal</string>
+
+    <!-- Status & Feedback -->
+    <string name="loading">Loading data…</string>
+    <string name="retry">Try Again</string>
+    <string name="error_unknown">An error occurred. Please try again.</string>
+    <string name="error_network">Failed to connect to BMKG server.</string>
+    <string name="cached_data_banner">Showing cached data (%1$s)</string>
+    <string name="last_updated">Last updated: %1$s</string>
+</resources>

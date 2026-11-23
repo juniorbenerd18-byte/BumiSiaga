@@ -1,3 +1,78 @@
 <resources>
-    <string name="app_name">BumiSiaga</string>
+    <string name="app_name">SiagaBumi</string>
+
+    <!-- Navigation -->
+    <string name="nav_gempa">Gempa</string>
+    <string name="nav_cuaca">Cuaca</string>
+    <string name="nav_favorit">Favorit</string>
+    <string name="nav_about">Tentang</string>
+
+    <!-- Attribution -->
+    <string name="bmkg_attribution">Sumber data: BMKG (Badan Meteorologi, Klimatologi, dan Geofisika)</string>
+
+    <!-- Gempa -->
+    <string name="gempa_terbaru_title">Gempa Terbaru</string>
+    <string name="gempa_tab_terkini">M 5.0+</string>
+    <string name="gempa_tab_dirasakan">Dirasakan</string>
+    <string name="gempa_filter_min_mag">Filter Magnitudo Min: %1$.1f</string>
+    <string name="gempa_all_mag">Semua</string>
+    <string name="gempa_tsunami_warning">PERINGATAN POTENSI TSUNAMI</string>
+    <string name="gempa_no_tsunami">Tidak berpotensi tsunami</string>
+    <string name="gempa_depth">Kedalaman: %1$d km</string>
+    <string name="gempa_felt">Dirasakan di: %1$s</string>
+    <string name="gempa_coordinates">Koordinat: %1$s</string>
+    <string name="gempa_share">Bagikan</string>
+    <string name="gempa_share_text">Info Gempa BMKG\nMagnitudo: %1$.1f\nKedalaman: %2$d km\nLokasi: %3$s\nWaktu: %4$s\nPotensi: %5$s\n%6$s\n\nSumber data: BMKG</string>
+    <string name="gempa_detail_title">Detail Gempa</string>
+    <string name="gempa_shakemap">Peta Guncangan (Shakemap)</string>
+    <string name="gempa_epicenter_map">Peta Episentrum</string>
+    <string name="gempa_empty">Tidak ada data gempa yang ditemukan.</string>
+
+    <!-- Cuaca -->
+    <string name="cuaca_title">Prakiraan Cuaca</string>
+    <string name="cuaca_search_hint">Cari kelurahan atau desa...</string>
+    <string name="cuaca_current_condition">Kondisi Terdekat</string>
+    <string name="cuaca_hourly_title">Prakiraan Per 3 Jam</string>
+    <string name="cuaca_daily_title">Prakiraan Harian</string>
+    <string name="cuaca_temp">%1$d°C</string>
+    <string name="cuaca_temp_range">%1$d°C - %2$d°C</string>
+    <string name="cuaca_humidity">Kelembapan</string>
+    <string name="cuaca_humidity_val">%1$d%%</string>
+    <string name="cuaca_wind">Angin</string>
+    <string name="cuaca_wind_val">%1$.1f km/j (%2$s)</string>
+    <string name="cuaca_clouds">Awan</string>
+    <string name="cuaca_clouds_val">%1$d%%</string>
+    <string name="cuaca_rain">Curah Hujan</string>
+    <string name="cuaca_rain_val">%1$.1f mm</string>
+    <string name="cuaca_add_favorite">Simpan ke Favorit</string>
+    <string name="cuaca_remove_favorite">Hapus dari Favorit</string>
+    <string name="cuaca_favorite_added">Ditambahkan ke favorit</string>
+    <string name="cuaca_favorite_removed">Dihapus dari favorit</string>
+    <string name="cuaca_empty">Pilih wilayah untuk melihat prakiraan cuaca</string>
+
+    <!-- Wilayah -->
+    <string name="wilayah_search_title">Pilih Wilayah</string>
+    <string name="wilayah_search_placeholder">Ketik minimal 3 huruf nama desa/kelurahan</string>
+    <string name="wilayah_importing">Menyiapkan data wilayah…</string>
+    <string name="wilayah_empty">Wilayah tidak ditemukan</string>
+
+    <!-- Favorit -->
+    <string name="favorit_title">Lokasi Tersimpan</string>
+    <string name="favorit_empty">Belum ada lokasi favorit tersimpan.\nCari dan simpan lokasi cuaca Anda.</string>
+
+    <!-- Tentang -->
+    <string name="about_title">Tentang Aplikasi</string>
+    <string name="about_app_desc">SiagaBumi adalah aplikasi pemantauan gempa bumi terkini dan prakiraan cuaca terpercaya di seluruh wilayah Indonesia.</string>
+    <string name="about_version">Versi %1$s</string>
+    <string name="about_bmkg_title">Sumber Data Resmi BMKG</string>
+    <string name="about_bmkg_desc">Data gempa dan cuaca disediakan oleh Badan Meteorologi, Klimatologi, dan Geofisika (BMKG) melalui portal data terbuka.</string>
+    <string name="about_open_bmkg_web">Buka Portal Data BMKG</string>
+
+    <!-- Status & Feedback -->
+    <string name="loading">Memuat data…</string>
+    <string name="retry">Coba Lagi</string>
+    <string name="error_unknown">Terjadi kesalahan. Silakan coba lagi.</string>
+    <string name="error_network">Gagal terhubung ke server BMKG.</string>
+    <string name="cached_data_banner">Menampilkan data tersimpan (%1$s)</string>
+    <string name="last_updated">Terakhir diperbarui: %1$s</string>
 </resources>

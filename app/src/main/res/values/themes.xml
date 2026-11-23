@@ -1,5 +1,4 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-
-    <style name="Theme.BumiSiaga" parent="android:Theme.Material.Light.NoActionBar" />
+    <style name="Theme.SiagaBumi" parent="android:Theme.Material.Light.NoActionBar" />
 </resources>
