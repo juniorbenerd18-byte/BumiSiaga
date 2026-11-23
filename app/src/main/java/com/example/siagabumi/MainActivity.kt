@@ -142,34 +142,20 @@ fun MainApp() {
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         topBar = {
-            TopAppBar(
-                title = {
-                    Text(
-                        text = when {
-                            currentDestination == Screen.Dashboard.route -> stringResource(R.string.dashboard_title)
-                            currentDestination == Screen.Gempa.route -> stringResource(R.string.nav_gempa)
-                            currentDestination?.startsWith("cuaca") == true -> stringResource(R.string.nav_cuaca)
-                            currentDestination == Screen.Favorit.route -> stringResource(R.string.nav_favorit)
-                            currentDestination == Screen.About.route -> stringResource(R.string.nav_about)
-                            currentDestination == Screen.Settings.route -> stringResource(R.string.settings_title)
-                            currentDestination?.startsWith("gempa_detail") == true -> stringResource(R.string.gempa_detail_title)
-                            currentDestination == Screen.WilayahSearch.route -> stringResource(R.string.wilayah_search_title)
-                            else -> stringResource(R.string.app_name)
-                        }
-                    )
-                },
-                navigationIcon = {
-                    if (!isTopLevelDestination) {
-                        IconButton(onClick = { navController.popBackStack() }) {
-                            Icon(
-                                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                                contentDescription = "Back"
-                            )
-                        }
-                    }
-                },
-                actions = {
-                    if (isTopLevelDestination) {
+            if (isTopLevelDestination) {
+                TopAppBar(
+                    title = {
+                        Text(
+                            text = when {
+                                currentDestination == Screen.Dashboard.route -> stringResource(R.string.dashboard_title)
+                                currentDestination == Screen.Gempa.route -> stringResource(R.string.nav_gempa)
+                                currentDestination?.startsWith("cuaca") == true -> stringResource(R.string.nav_cuaca)
+                                currentDestination == Screen.Favorit.route -> stringResource(R.string.nav_favorit)
+                                else -> stringResource(R.string.app_name)
+                            }
+                        )
+                    },
+                    actions = {
                         IconButton(onClick = { navController.navigate(Screen.Settings.route) }) {
                             Icon(
                                 imageVector = Icons.Default.Settings,
@@ -183,8 +169,8 @@ fun MainApp() {
                             )
                         }
                     }
-                }
-            )
+                )
+            }
         },
         bottomBar = {
             if (isTopLevelDestination) {

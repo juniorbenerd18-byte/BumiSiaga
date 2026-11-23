@@ -17,11 +17,19 @@ abstract class GempaDao {
     @Query("SELECT * FROM gempa WHERE category = :category ORDER BY dateTimeUtc DESC")
     abstract fun getGempaByCategory(category: String): Flow<List<GempaEntity>>
 
-    @Query("SELECT * FROM gempa WHERE id = :id LIMIT 1")
-    abstract fun getGempaById(id: String): Flow<GempaEntity?>
+    @Query("SELECT * FROM gempa WHERE id = :id OR id = :altId1 OR id = :altId2 LIMIT 1")
+    abstract fun getGempaById(
+        id: String,
+        altId1: String = id.replace(" ", "+"),
+        altId2: String = id.replace("+", " ")
+    ): Flow<GempaEntity?>
 
-    @Query("SELECT * FROM gempa WHERE id = :id LIMIT 1")
-    abstract suspend fun getGempaByIdSync(id: String): GempaEntity?
+    @Query("SELECT * FROM gempa WHERE id = :id OR id = :altId1 OR id = :altId2 LIMIT 1")
+    abstract suspend fun getGempaByIdSync(
+        id: String,
+        altId1: String = id.replace(" ", "+"),
+        altId2: String = id.replace("+", " ")
+    ): GempaEntity?
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     abstract suspend fun insert(entity: GempaEntity)

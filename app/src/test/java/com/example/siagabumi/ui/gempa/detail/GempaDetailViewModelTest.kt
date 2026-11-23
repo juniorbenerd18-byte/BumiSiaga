@@ -106,4 +106,43 @@ class GempaDetailViewModelTest {
         val state = viewModel.uiState.value
         assertTrue(state is UiState.Error)
     }
+
+    @Test
+    fun loadGempaById_rawIdWithPlus_emitsSuccess() = runTest {
+        val targetId = "2026-11-22T07:54:39+00:00_3.12,126.57"
+        val dummy = Gempa(
+            id = targetId,
+            tanggal = "22 Nov 2026",
+            jam = "14:54:39 WIB",
+            dateTimeUtc = "2026-11-22T07:54:39+00:00",
+            formattedLocalTime = "22 Nov 2026, 14:54:39",
+            coordinates = "3.12,126.57",
+            latitude = 3.12,
+            longitude = 126.57,
+            lintang = "3.12 LU",
+            bujur = "126.57 BT",
+            magnitude = 5.4,
+            kedalamanKm = 10,
+            kedalamanText = "10 km",
+            wilayah = "Melonguane",
+            potensi = "Tidak berpotensi tsunami",
+            dirasakan = null,
+            shakemapUrl = null,
+            isTsunamiWarning = false,
+            category = GempaCategory.TERKINI
+        )
+        val fakeRepo = FakeRepo(mapOf(targetId to dummy))
+
+        val savedStateHandle = SavedStateHandle(mapOf("gempaId" to targetId))
+
+        val viewModel = GempaDetailViewModel(savedStateHandle, fakeRepo)
+        backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) {
+            viewModel.uiState.collect()
+        }
+        advanceUntilIdle()
+
+        val state = viewModel.uiState.value
+        assertTrue(state is UiState.Success)
+        assertEquals(dummy, (state as UiState.Success).data)
+    }
 }

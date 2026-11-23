@@ -97,7 +97,7 @@ fun GempaDetailScreen(
             is UiState.Error -> {
                 ErrorView(
                     message = state.message,
-                    onRetry = onNavigateBack,
+                    onRetry = { viewModel.retry() },
                     modifier = Modifier.padding(innerPadding)
                 )
             }
