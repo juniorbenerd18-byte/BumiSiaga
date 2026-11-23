@@ -157,10 +157,19 @@ fun MainApp() {
                 )
             }
             composable(Screen.Favorit.route) {
-                Text(text = "Layar Favorit")
+                com.example.siagabumi.ui.favorit.FavoritScreen(
+                    onNavigateToCuaca = { adm4 ->
+                        navController.navigate(Screen.Cuaca.createRoute(adm4))
+                    },
+                    onNavigateToSearch = {
+                        navController.navigate(Screen.WilayahSearch.route)
+                    }
+                )
             }
             composable(Screen.About.route) {
-                Text(text = "Layar Tentang")
+                com.example.siagabumi.ui.about.AboutScreen(
+                    onNavigateBack = { navController.popBackStack() }
+                )
             }
             composable(Screen.GempaDetail.route) {
                 com.example.siagabumi.ui.gempa.detail.GempaDetailScreen(
