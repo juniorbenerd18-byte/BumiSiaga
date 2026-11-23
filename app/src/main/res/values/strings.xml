@@ -157,4 +157,18 @@
     <string name="dashboard_map_close_fullscreen">Tutup Peta</string>
     <string name="wilayah_search_empty_hint">Hanya memuat 10 wilayah contoh bawaan.\nMasukkan file assets/wilayah.csv untuk mencari lebih dari 80.000 kelurahan/desa se-Indonesia.</string>
     <string name="settings_notif_permission_missing">Izin notifikasi belum diaktifkan di sistem perangkat Anda. Buka Pengaturan untuk mengizinkannya.</string>
+
+    <!-- Radar Jarak Episentrum & Shakemap BMKG -->
+    <string name="dashboard_epicenter_title">Radar Jarak &amp; Shakemap BMKG</string>
+    <string name="dashboard_epicenter_subtitle">Estimasi guncangan lokal dan peta guncangan resmi BMKG</string>
+    <string name="dashboard_epicenter_distance_label">Jarak Episentrum</string>
+    <string name="dashboard_epicenter_direction_from">%1$d km arah %2$s dari %3$s</string>
+    <string name="dashboard_mmi_estimate_label">Estimasi Guncangan di Wilayah Anda</string>
+    <string name="dashboard_shakemap_official_badge">Peta Guncangan Resmi BMKG</string>
+    <string name="dashboard_shakemap_tap_to_zoom">Ketuk gambar untuk memperbesar Shakemap</string>
+    <string name="dashboard_depth_profile">Kedalaman: %1$d km (%2$s)</string>
+    <string name="depth_shallow">Gempa Dangkal (≤ 60 km)</string>
+    <string name="depth_intermediate">Gempa Menengah (60–300 km)</string>
+    <string name="depth_deep">Gempa Dalam (> 300 km)</string>
+    <string name="dashboard_btn_open_shakemap">Buka Shakemap Penuh</string>
 </resources>

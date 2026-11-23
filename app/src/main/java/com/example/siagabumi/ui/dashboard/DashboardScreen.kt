@@ -40,7 +40,7 @@ import com.example.siagabumi.ui.components.LoadingView
 import com.example.siagabumi.ui.components.OfflineBanner
 import com.example.siagabumi.ui.cuaca.components.CurrentWeatherCard
 import com.example.siagabumi.ui.dashboard.components.DashboardEmergencyGuide
-import com.example.siagabumi.ui.dashboard.components.DashboardMapRadar
+import com.example.siagabumi.ui.dashboard.components.DashboardEpicenterRadar
 import com.example.siagabumi.ui.dashboard.components.DashboardQuickStats
 import com.example.siagabumi.ui.dashboard.components.DashboardStatusHero
 import com.example.siagabumi.ui.dashboard.components.EmergencyFlashlightCard
@@ -195,13 +195,13 @@ fun DashboardContent(
                 )
             }
 
-            // Interactive Live Earthquake Radar (With map controls & marker click)
+            // Epicenter Impact Radar & Official BMKG Shakemap
             item {
-                val allQuakes = listOfNotNull(data.gempaTerbaru) + data.gempaTerkiniList
-                DashboardMapRadar(
-                    quakeList = allQuakes,
+                DashboardEpicenterRadar(
+                    gempa = data.gempaTerbaru ?: data.gempaTerkiniList.firstOrNull(),
+                    userPreferences = data.userPreferences,
                     onViewAllClick = onNavigateToGempa,
-                    onQuakeClick = { gempaId -> onNavigateToGempaDetail(gempaId) }
+                    onOpenDetailClick = onNavigateToGempaDetail
                 )
             }
 

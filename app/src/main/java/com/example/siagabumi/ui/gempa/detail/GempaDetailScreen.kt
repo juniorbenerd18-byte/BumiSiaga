@@ -46,7 +46,6 @@ import com.example.siagabumi.R
 import com.example.siagabumi.domain.model.Gempa
 import com.example.siagabumi.domain.model.UiState
 import com.example.siagabumi.ui.components.BmkgAttributionFooter
-import com.example.siagabumi.ui.components.EpicenterMapView
 import com.example.siagabumi.ui.components.ErrorView
 import com.example.siagabumi.ui.components.LoadingView
 import com.example.siagabumi.ui.components.MagnitudeBadge
@@ -203,34 +202,28 @@ fun GempaDetailContent(
             }
         }
 
-        // Epicenter Map
-        item {
-            Column {
-                Text(
-                    text = stringResource(R.string.gempa_epicenter_map),
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Bold,
-                    modifier = Modifier.padding(bottom = 8.dp)
-                )
-                EpicenterMapView(
-                    latitude = gempa.latitude,
-                    longitude = gempa.longitude,
-                    title = "Episentrum M ${gempa.magnitude}",
-                    snippet = gempa.wilayah
-                )
-            }
-        }
-
-        // Shakemap (if available)
+        // Official BMKG Shakemap (Peta Guncangan Resmi)
         if (!gempa.shakemapUrl.isNullOrEmpty()) {
             item {
                 Column {
-                    Text(
-                        text = stringResource(R.string.gempa_shakemap),
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.Bold,
-                        modifier = Modifier.padding(bottom = 8.dp)
-                    )
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(bottom = 8.dp),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = stringResource(R.string.gempa_shakemap),
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.Bold
+                        )
+                        Text(
+                            text = stringResource(R.string.dashboard_shakemap_tap_to_zoom),
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
                     ZoomableShakemap(imageUrl = gempa.shakemapUrl)
                 }
             }

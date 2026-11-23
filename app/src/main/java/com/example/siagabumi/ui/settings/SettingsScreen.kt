@@ -420,7 +420,7 @@ fun SettingsScreen(
                 }
             }
 
-            // SECTION 4: INFO PETA GRATIS & BMKG
+            // SECTION 4: SUMBER RESMI BMKG
             Card(
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(16.dp),
@@ -433,7 +433,7 @@ fun SettingsScreen(
                     verticalArrangement = Arrangement.spacedBy(4.dp)
                 ) {
                     Text(
-                        text = "🗺️ " + stringResource(R.string.map_free_source_badge),
+                        text = "🏛️ " + stringResource(R.string.about_bmkg_title),
                         style = MaterialTheme.typography.labelMedium,
                         fontWeight = FontWeight.Bold,
                         color = MaterialTheme.colorScheme.primary

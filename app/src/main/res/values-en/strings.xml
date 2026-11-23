@@ -157,4 +157,18 @@
     <string name="dashboard_map_close_fullscreen">Close Map</string>
     <string name="wilayah_search_empty_hint">Only sample regions loaded.\nAdd assets/wilayah.csv to search over 80,000 villages across Indonesia.</string>
     <string name="settings_notif_permission_missing">Notification permission is not enabled on your device. Please allow it in settings.</string>
+
+    <!-- Radar Jarak Episentrum & Shakemap BMKG -->
+    <string name="dashboard_epicenter_title">Epicenter Proximity &amp; BMKG Shakemap</string>
+    <string name="dashboard_epicenter_subtitle">Local shaking estimate and official BMKG shakemap</string>
+    <string name="dashboard_epicenter_distance_label">Epicenter Proximity</string>
+    <string name="dashboard_epicenter_direction_from">%1$d km %2$s from %3$s</string>
+    <string name="dashboard_mmi_estimate_label">Estimated Shaking in Your Area</string>
+    <string name="dashboard_shakemap_official_badge">Official BMKG Shakemap</string>
+    <string name="dashboard_shakemap_tap_to_zoom">Tap image to enlarge Shakemap</string>
+    <string name="dashboard_depth_profile">Depth: %1$d km (%2$s)</string>
+    <string name="depth_shallow">Shallow Quake (≤ 60 km)</string>
+    <string name="depth_intermediate">Intermediate Quake (60–300 km)</string>
+    <string name="depth_deep">Deep Quake (> 300 km)</string>
+    <string name="dashboard_btn_open_shakemap">Enlarge Shakemap</string>
 </resources>

@@ -1,13 +1,16 @@
 package com.example.siagabumi.ui.dashboard
 
 import com.example.siagabumi.data.repository.WilayahRepositoryImpl
+import com.example.siagabumi.domain.model.AppThemeMode
 import com.example.siagabumi.domain.model.Gempa
 import com.example.siagabumi.domain.model.GempaCategory
 import com.example.siagabumi.domain.model.PrakiraanCuaca
 import com.example.siagabumi.domain.model.UiState
+import com.example.siagabumi.domain.model.UserPreferences
 import com.example.siagabumi.domain.model.Wilayah
 import com.example.siagabumi.domain.repository.CuacaRepository
 import com.example.siagabumi.domain.repository.GempaRepository
+import com.example.siagabumi.domain.repository.UserPreferencesRepository
 import com.example.siagabumi.domain.repository.WilayahRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -60,22 +63,32 @@ class DashboardViewModelTest {
     }
 
     private class FakeCuacaRepo : CuacaRepository {
-        val cuacaFlow = MutableStateFlow<List<PrakiraanCuaca>>(emptyList())
-        val favFlow = MutableStateFlow<List<Wilayah>>(emptyList())
-
-        override fun getPrakiraanCuaca(adm4: String): Flow<List<PrakiraanCuaca>> = cuacaFlow
+        override fun getPrakiraanCuaca(adm4: String): Flow<List<PrakiraanCuaca>> = flowOf(emptyList())
         override fun getCacheLastUpdated(adm4: String): Flow<Long?> = flowOf(null)
-        override suspend fun refreshCuaca(adm4: String, force: Boolean): Result<Unit> = Result.success(Unit)
+        override fun getAllFavorit(): Flow<List<Wilayah>> = flowOf(emptyList())
         override fun isFavorit(adm4: String): Flow<Boolean> = flowOf(false)
         override suspend fun toggleFavorit(wilayah: Wilayah) {}
-        override fun getAllFavorit(): Flow<List<Wilayah>> = favFlow
+        override suspend fun refreshCuaca(adm4: String, force: Boolean): Result<Unit> = Result.success(Unit)
     }
 
     private class FakeWilayahRepo : WilayahRepository {
         override fun searchWilayah(query: String): Flow<List<Wilayah>> = flowOf(emptyList())
-        override suspend fun getWilayahByKode(kode: String): Wilayah? = WilayahRepositoryImpl.DEFAULT_WILAYAH
+        override suspend fun getWilayahByKode(kode: String): Wilayah? = null
         override suspend fun ensureWilayahDataSeeded(onProgress: ((Float) -> Unit)?) {}
         override suspend fun getDefaultWilayah(): Wilayah = WilayahRepositoryImpl.DEFAULT_WILAYAH
+    }
+
+    private class FakeUserPreferencesRepo : UserPreferencesRepository {
+        private val flow = MutableStateFlow(UserPreferences())
+        override fun getUserPreferences(): Flow<UserPreferences> = flow
+        override suspend fun getPreferencesSync(): UserPreferences = flow.value
+        override suspend fun setNotificationsEnabled(enabled: Boolean) { flow.value = flow.value.copy(notificationsEnabled = enabled) }
+        override suspend fun setVibrationEnabled(enabled: Boolean) { flow.value = flow.value.copy(vibrationEnabled = enabled) }
+        override suspend fun setMinMagnitudeAlert(minMag: Double) { flow.value = flow.value.copy(minMagnitudeAlert = minMag) }
+        override suspend fun setNearbyRadiusKm(radiusKm: Int) { flow.value = flow.value.copy(nearbyRadiusKm = radiusKm) }
+        override suspend fun setUserLocation(lat: Double, lon: Double, name: String) { flow.value = flow.value.copy(userLat = lat, userLon = lon, userLocationName = name) }
+        override suspend fun setLanguage(language: String) { flow.value = flow.value.copy(language = language) }
+        override suspend fun setThemeMode(themeMode: AppThemeMode) { flow.value = flow.value.copy(themeMode = themeMode) }
     }
 
     private fun createDummyGempa(id: String, magnitude: Double, isTsunami: Boolean): Gempa {
@@ -107,6 +120,7 @@ class DashboardViewModelTest {
         val gempaRepo = FakeGempaRepo()
         val cuacaRepo = FakeCuacaRepo()
         val wilayahRepo = FakeWilayahRepo()
+        val userPrefsRepo = FakeUserPreferencesRepo()
 
         val terbaru = createDummyGempa("1", 5.2, false)
         val terkiniList = listOf(
@@ -116,7 +130,7 @@ class DashboardViewModelTest {
         gempaRepo.terbaruFlow.value = terbaru
         gempaRepo.terkiniFlow.value = terkiniList
 
-        val viewModel = DashboardViewModel(gempaRepo, cuacaRepo, wilayahRepo)
+        val viewModel = DashboardViewModel(gempaRepo, cuacaRepo, wilayahRepo, userPrefsRepo)
 
         backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) {
             viewModel.uiState.collect()

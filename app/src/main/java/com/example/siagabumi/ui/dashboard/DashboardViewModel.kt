@@ -9,9 +9,11 @@ import com.example.siagabumi.domain.model.Gempa
 import com.example.siagabumi.domain.model.GempaCategory
 import com.example.siagabumi.domain.model.PrakiraanCuaca
 import com.example.siagabumi.domain.model.UiState
+import com.example.siagabumi.domain.model.UserPreferences
 import com.example.siagabumi.domain.model.Wilayah
 import com.example.siagabumi.domain.repository.CuacaRepository
 import com.example.siagabumi.domain.repository.GempaRepository
+import com.example.siagabumi.domain.repository.UserPreferencesRepository
 import com.example.siagabumi.domain.repository.WilayahRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -34,7 +36,8 @@ data class DashboardScreenData(
     val isTsunamiAlert: Boolean = false,
     val isRefreshing: Boolean = false,
     val isOfflineCached: Boolean = false,
-    val lastUpdatedText: String? = null
+    val lastUpdatedText: String? = null,
+    val userPreferences: UserPreferences = UserPreferences()
 ) {
     val m5PlusCount: Int
         get() = gempaTerkiniList.count { it.magnitude >= 5.0 }
@@ -47,7 +50,8 @@ private data class DashboardDataState(
     val terbaru: Gempa?,
     val terkini: List<Gempa>,
     val cuacaList: List<PrakiraanCuaca>,
-    val lastUpdatedMillis: Long?
+    val lastUpdatedMillis: Long?,
+    val userPreferences: UserPreferences
 )
 
 private data class DashboardStatusState(
@@ -60,7 +64,8 @@ private data class DashboardStatusState(
 class DashboardViewModel @Inject constructor(
     private val gempaRepository: GempaRepository,
     private val cuacaRepository: CuacaRepository,
-    private val wilayahRepository: WilayahRepository
+    private val wilayahRepository: WilayahRepository,
+    private val userPreferencesRepository: UserPreferencesRepository
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow<UiState<DashboardScreenData>>(UiState.Loading)
@@ -83,9 +88,10 @@ class DashboardViewModel @Inject constructor(
                     gempaRepository.getGempaTerbaru(),
                     gempaRepository.getGempaTerkini(),
                     cuacaRepository.getPrakiraanCuaca(primaryWilayah.kode),
-                    gempaRepository.getCacheLastUpdated(GempaCategory.TERKINI)
-                ) { terbaru, terkini, cuacaList, lastUpdatedMillis ->
-                    DashboardDataState(terbaru, terkini, cuacaList, lastUpdatedMillis)
+                    gempaRepository.getCacheLastUpdated(GempaCategory.TERKINI),
+                    userPreferencesRepository.getUserPreferences()
+                ) { terbaru, terkini, cuacaList, lastUpdatedMillis, prefs ->
+                    DashboardDataState(terbaru, terkini, cuacaList, lastUpdatedMillis, prefs)
                 }
 
                 val statusFlow = combine(
@@ -135,7 +141,8 @@ class DashboardViewModel @Inject constructor(
                                 isTsunamiAlert = isTsunami,
                                 isRefreshing = status.refreshing,
                                 isOfflineCached = status.networkError,
-                                lastUpdatedText = formattedLastUpdated
+                                lastUpdatedText = formattedLastUpdated,
+                                userPreferences = data.userPreferences
                             ),
                             isFromCache = status.networkError,
                             lastUpdated = formattedLastUpdated
