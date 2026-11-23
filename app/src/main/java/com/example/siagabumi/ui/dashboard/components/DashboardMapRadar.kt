@@ -56,9 +56,7 @@ fun DashboardMapRadar(
     val context = LocalContext.current
     val mapView = remember {
         MapView(context).apply {
-            setTileSource(TileSourceFactory.MAPNIK)
-            setMultiTouchControls(true)
-            isTilesScaledToDpi = true
+            com.example.siagabumi.util.OsmHelper.setupMapView(this)
         }
     }
 
