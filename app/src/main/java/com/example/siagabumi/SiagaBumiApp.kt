@@ -14,6 +14,10 @@ class SiagaBumiApp : Application(), ImageLoaderFactory {
         super.onCreate()
         // Osmdroid configuration for map tiles user agent
         Configuration.getInstance().userAgentValue = packageName
+
+        // Setup Notification Channel & Background WorkManager for Gempa Alerts
+        com.example.siagabumi.worker.NotificationHelper.createNotificationChannel(this)
+        com.example.siagabumi.worker.GempaCheckWorker.schedule(this)
     }
 
     override fun newImageLoader(): ImageLoader {

@@ -82,6 +82,9 @@ dependencies {
     implementation(libs.room.ktx)
     ksp(libs.room.compiler)
 
+    // WorkManager
+    implementation(libs.androidx.work.runtime.ktx)
+
     // Coil
     implementation(libs.coil.compose)
     implementation(libs.coil.svg)
