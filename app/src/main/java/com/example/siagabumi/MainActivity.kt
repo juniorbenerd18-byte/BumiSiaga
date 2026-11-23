@@ -140,8 +140,21 @@ fun MainApp() {
                     }
                 )
             }
-            composable(Screen.Cuaca.route) {
-                Text(text = "Layar Cuaca")
+            composable(
+                route = Screen.Cuaca.route,
+                arguments = listOf(
+                    androidx.navigation.navArgument("adm4") {
+                        type = androidx.navigation.NavType.StringType
+                        nullable = true
+                        defaultValue = null
+                    }
+                )
+            ) {
+                com.example.siagabumi.ui.cuaca.CuacaScreen(
+                    onNavigateToSearchWilayah = {
+                        navController.navigate(Screen.WilayahSearch.route)
+                    }
+                )
             }
             composable(Screen.Favorit.route) {
                 Text(text = "Layar Favorit")
@@ -152,6 +165,18 @@ fun MainApp() {
             composable(Screen.GempaDetail.route) {
                 com.example.siagabumi.ui.gempa.detail.GempaDetailScreen(
                     onNavigateBack = { navController.popBackStack() }
+                )
+            }
+            composable(Screen.WilayahSearch.route) {
+                com.example.siagabumi.ui.wilayah.WilayahSearchScreen(
+                    onNavigateBack = { navController.popBackStack() },
+                    onWilayahSelected = { adm4 ->
+                        navController.navigate(Screen.Cuaca.createRoute(adm4)) {
+                            popUpTo(Screen.Cuaca.route) {
+                                inclusive = true
+                            }
+                        }
+                    }
                 )
             }
         }
