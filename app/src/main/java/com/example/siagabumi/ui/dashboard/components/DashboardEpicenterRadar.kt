@@ -26,6 +26,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Explore
+import androidx.compose.material.icons.filled.MyLocation
 import androidx.compose.material.icons.filled.NearMe
 import androidx.compose.material.icons.filled.Verified
 import androidx.compose.material.icons.filled.Vibration
@@ -76,7 +77,9 @@ fun DashboardEpicenterRadar(
     userPreferences: UserPreferences,
     onViewAllClick: () -> Unit,
     onOpenDetailClick: (String) -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    onSyncGpsClick: (() -> Unit)? = null,
+    isSyncingGps: Boolean = false
 ) {
     if (gempa == null) return
 
@@ -255,6 +258,30 @@ fun DashboardEpicenterRadar(
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
+                        if (onSyncGpsClick != null) {
+                            Spacer(modifier = Modifier.height(6.dp))
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                modifier = Modifier
+                                    .clip(RoundedCornerShape(6.dp))
+                                    .clickable(enabled = !isSyncingGps) { onSyncGpsClick() }
+                                    .padding(vertical = 2.dp, horizontal = 4.dp)
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.MyLocation,
+                                    contentDescription = null,
+                                    tint = MaterialTheme.colorScheme.primary,
+                                    modifier = Modifier.size(13.dp)
+                                )
+                                Spacer(modifier = Modifier.width(4.dp))
+                                Text(
+                                    text = if (isSyncingGps) stringResource(R.string.settings_gps_detecting) else stringResource(R.string.dashboard_gps_sync),
+                                    style = MaterialTheme.typography.labelSmall,
+                                    color = MaterialTheme.colorScheme.primary,
+                                    fontWeight = FontWeight.Bold
+                                )
+                            }
+                        }
                     }
                 }
 

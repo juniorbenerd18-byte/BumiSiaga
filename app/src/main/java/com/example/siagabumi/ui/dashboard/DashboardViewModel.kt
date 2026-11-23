@@ -15,6 +15,8 @@ import com.example.siagabumi.domain.repository.CuacaRepository
 import com.example.siagabumi.domain.repository.GempaRepository
 import com.example.siagabumi.domain.repository.UserPreferencesRepository
 import com.example.siagabumi.domain.repository.WilayahRepository
+import com.example.siagabumi.util.GpsLocationResult
+import com.example.siagabumi.util.LocationHelper
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -65,7 +67,8 @@ class DashboardViewModel @Inject constructor(
     private val gempaRepository: GempaRepository,
     private val cuacaRepository: CuacaRepository,
     private val wilayahRepository: WilayahRepository,
-    private val userPreferencesRepository: UserPreferencesRepository
+    private val userPreferencesRepository: UserPreferencesRepository,
+    private val locationHelper: LocationHelper? = null
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow<UiState<DashboardScreenData>>(UiState.Loading)
@@ -73,6 +76,33 @@ class DashboardViewModel @Inject constructor(
 
     private val _isRefreshing = MutableStateFlow(false)
     private val _networkError = MutableStateFlow(false)
+    private val _isDetectingGps = MutableStateFlow(false)
+    val isDetectingGps: StateFlow<Boolean> = _isDetectingGps.asStateFlow()
+
+    fun hasLocationPermission(): Boolean = locationHelper?.hasLocationPermission() == true
+
+    fun detectGpsLocation(onResult: (GpsLocationResult?) -> Unit) {
+        val helper = locationHelper ?: run {
+            onResult(null)
+            return
+        }
+        viewModelScope.launch {
+            _isDetectingGps.value = true
+            try {
+                val result = helper.getCurrentLocation()
+                if (result != null) {
+                    userPreferencesRepository.setUserLocation(
+                        result.latitude,
+                        result.longitude,
+                        result.locationName
+                    )
+                }
+                onResult(result)
+            } finally {
+                _isDetectingGps.value = false
+            }
+        }
+    }
 
     init {
         loadData()

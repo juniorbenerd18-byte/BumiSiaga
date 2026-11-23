@@ -1,6 +1,9 @@
 package com.example.siagabumi.ui.settings
 
+import android.Manifest
 import android.widget.Toast
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
@@ -22,6 +25,7 @@ import androidx.compose.material.icons.filled.DarkMode
 import androidx.compose.material.icons.filled.Language
 import androidx.compose.material.icons.filled.LightMode
 import androidx.compose.material.icons.filled.LocationOn
+import androidx.compose.material.icons.filled.MyLocation
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.NotificationsActive
 import androidx.compose.material.icons.filled.PhoneAndroid
@@ -30,12 +34,15 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
@@ -61,7 +68,65 @@ fun SettingsScreen(
     viewModel: SettingsViewModel = hiltViewModel()
 ) {
     val prefs by viewModel.preferences.collectAsState()
+    val isDetectingGps by viewModel.isDetectingGps.collectAsState()
     val context = LocalContext.current
+
+    val locationPermissionLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestMultiplePermissions()
+    ) { permissions ->
+        val fineGranted = permissions[Manifest.permission.ACCESS_FINE_LOCATION] == true
+        val coarseGranted = permissions[Manifest.permission.ACCESS_COARSE_LOCATION] == true
+        if (fineGranted || coarseGranted) {
+            viewModel.detectGpsLocation { result ->
+                if (result != null) {
+                    Toast.makeText(
+                        context,
+                        context.getString(R.string.settings_gps_success, result.locationName),
+                        Toast.LENGTH_LONG
+                    ).show()
+                } else {
+                    Toast.makeText(
+                        context,
+                        context.getString(R.string.settings_gps_failed),
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
+            }
+        } else {
+            Toast.makeText(
+                context,
+                context.getString(R.string.settings_gps_permission_required),
+                Toast.LENGTH_SHORT
+            ).show()
+        }
+    }
+
+    val onTriggerGps: () -> Unit = {
+        if (viewModel.hasLocationPermission()) {
+            viewModel.detectGpsLocation { result ->
+                if (result != null) {
+                    Toast.makeText(
+                        context,
+                        context.getString(R.string.settings_gps_success, result.locationName),
+                        Toast.LENGTH_LONG
+                    ).show()
+                } else {
+                    Toast.makeText(
+                        context,
+                        context.getString(R.string.settings_gps_failed),
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
+            }
+        } else {
+            locationPermissionLauncher.launch(
+                arrayOf(
+                    Manifest.permission.ACCESS_FINE_LOCATION,
+                    Manifest.permission.ACCESS_COARSE_LOCATION
+                )
+            )
+        }
+    }
 
     Scaffold(
         topBar = {
@@ -239,38 +304,119 @@ fun SettingsScreen(
                         }
                     }
 
-                    // Lokasi Referensi
-                    Column {
+                    // Lokasi Referensi & Deteksi GPS
+                    Column(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalArrangement = Arrangement.spacedBy(10.dp)
+                    ) {
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             Icon(
                                 imageVector = Icons.Default.LocationOn,
                                 contentDescription = null,
                                 tint = MaterialTheme.colorScheme.primary,
-                                modifier = Modifier.size(18.dp)
+                                modifier = Modifier.size(20.dp)
                             )
                             Spacer(modifier = Modifier.width(6.dp))
                             Text(
-                                text = stringResource(R.string.settings_location_ref_title) + ": ${prefs.userLocationName}",
+                                text = stringResource(R.string.settings_location_ref_title),
                                 fontWeight = FontWeight.SemiBold,
-                                fontSize = 13.sp
+                                fontSize = 14.sp
                             )
                         }
-                        Spacer(modifier = Modifier.height(4.dp))
+
+                        // Current active location badge
+                        Surface(
+                            shape = RoundedCornerShape(12.dp),
+                            color = MaterialTheme.colorScheme.primary.copy(alpha = 0.08f),
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Row(
+                                modifier = Modifier.padding(12.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Column(modifier = Modifier.weight(1f)) {
+                                    Text(
+                                        text = stringResource(R.string.settings_location_active),
+                                        style = MaterialTheme.typography.labelSmall,
+                                        color = MaterialTheme.colorScheme.primary,
+                                        fontWeight = FontWeight.Bold
+                                    )
+                                    Spacer(modifier = Modifier.height(2.dp))
+                                    Text(
+                                        text = prefs.userLocationName,
+                                        style = MaterialTheme.typography.titleMedium,
+                                        fontWeight = FontWeight.Bold,
+                                        color = MaterialTheme.colorScheme.onSurface
+                                    )
+                                    Spacer(modifier = Modifier.height(2.dp))
+                                    Text(
+                                        text = "Koordinat: ${String.format(java.util.Locale.US, "%.4f", prefs.userLat)}, ${String.format(java.util.Locale.US, "%.4f", prefs.userLon)}",
+                                        style = MaterialTheme.typography.bodySmall,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                                    )
+                                }
+                            }
+                        }
+
+                        // GPS Auto-Detect Button
+                        OutlinedButton(
+                            onClick = onTriggerGps,
+                            modifier = Modifier.fillMaxWidth(),
+                            shape = RoundedCornerShape(12.dp),
+                            enabled = !isDetectingGps
+                        ) {
+                            if (isDetectingGps) {
+                                CircularProgressIndicator(
+                                    modifier = Modifier.size(16.dp),
+                                    strokeWidth = 2.dp,
+                                    color = MaterialTheme.colorScheme.primary
+                                )
+                                Spacer(modifier = Modifier.width(8.dp))
+                                Text(stringResource(R.string.settings_gps_detecting))
+                            } else {
+                                Icon(
+                                    imageVector = Icons.Default.MyLocation,
+                                    contentDescription = null,
+                                    modifier = Modifier.size(18.dp),
+                                    tint = MaterialTheme.colorScheme.primary
+                                )
+                                Spacer(modifier = Modifier.width(8.dp))
+                                Text(
+                                    text = stringResource(R.string.settings_gps_btn),
+                                    fontWeight = FontWeight.SemiBold
+                                )
+                            }
+                        }
+
+                        // Quick Presets
+                        Text(
+                            text = stringResource(R.string.settings_location_presets),
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            fontWeight = FontWeight.Medium
+                        )
+
                         FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                             val cities = listOf(
                                 Triple(-6.2088, 106.8456, "Jakarta"),
                                 Triple(-6.9175, 107.6191, "Bandung"),
                                 Triple(-7.2575, 112.7521, "Surabaya"),
+                                Triple(-7.7956, 110.3695, "Yogyakarta"),
+                                Triple(-7.9839, 112.6214, "Malang"),
+                                Triple(-6.9667, 110.4167, "Semarang"),
                                 Triple(3.5952, 98.6722, "Medan"),
                                 Triple(-5.1477, 119.4327, "Makassar"),
-                                Triple(-8.4095, 115.1889, "Bali")
+                                Triple(-8.4095, 115.1889, "Bali"),
+                                Triple(-0.9471, 100.4172, "Padang"),
+                                Triple(-1.2654, 116.8312, "Balikpapan"),
+                                Triple(-2.5489, 140.7181, "Jayapura")
                             )
                             cities.forEach { (lat, lon, name) ->
                                 FilterChip(
                                     selected = prefs.userLocationName == name,
                                     onClick = { viewModel.setUserLocation(lat, lon, name) },
                                     label = { Text(name) },
-                                    enabled = prefs.notificationsEnabled
+                                    enabled = !isDetectingGps
                                 )
                             }
                         }

@@ -101,7 +101,8 @@ class WilayahRepositoryImpl @Inject constructor(
     override suspend fun ensureWilayahDataSeeded(onProgress: ((Float) -> Unit)?) {
         withContext(Dispatchers.IO) {
             val count = wilayahDao.countWilayah()
-            if (count > 0) {
+            // If already seeded with the rich dataset (100+ entities), skip
+            if (count >= 100) {
                 onProgress?.invoke(1f)
                 return@withContext
             }

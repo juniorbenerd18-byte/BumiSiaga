@@ -139,6 +139,18 @@
 
     <string name="settings_location_ref_title">My Reference Location</string>
     <string name="settings_location_ref_desc">Reference point for nearby quake distance</string>
+    <string name="settings_gps_title">Automatic GPS Detection</string>
+    <string name="settings_gps_desc">Use device GPS coordinates for precise epicenter distance and nearby earthquake alerts</string>
+    <string name="settings_gps_btn">Use Current GPS Location</string>
+    <string name="settings_gps_detecting">Detecting GPS coordinates...</string>
+    <string name="settings_gps_success">Location updated to: %s</string>
+    <string name="settings_gps_failed">Failed to detect GPS location or GPS is disabled</string>
+    <string name="settings_gps_permission_required">Location permission is required to use GPS</string>
+    <string name="settings_location_active">Current Reference Location</string>
+    <string name="settings_location_presets">Or Select a Preset City:</string>
+    <string name="dashboard_gps_sync">Update GPS</string>
+    <string name="wilayah_gps_detect">Use My GPS Location</string>
+    <string name="wilayah_gps_desc">Automatically detect coordinates and region via device GPS</string>
 
     <!-- Map & Action Buttons -->
     <string name="map_btn_zoom_in">Zoom In</string>

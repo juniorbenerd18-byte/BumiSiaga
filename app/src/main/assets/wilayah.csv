@@ -1,4 +1,77 @@
 kode,nama
+11,Aceh
+11.71,Kota Banda Aceh
+11.71.01,Baiturrahman
+11.71.01.1001,Banda Aceh
+11.73,Kota Lhokseumawe
+11.73.01,Banda Sakti
+11.73.01.1001,Lhokseumawe
+11.06,Kabupaten Aceh Besar
+11.06.01,Lhoong
+11.06.01.1001,Aceh Besar
+12,Sumatera Utara
+12.71,Kota Medan
+12.71.01,Medan Kota
+12.71.01.1001,Medan Kota
+12.75,Kota Binjai
+12.75.01,Binjai Kota
+12.75.01.1001,Binjai
+12.72,Kota Pematangsiantar
+12.72.01,Siantar Barat
+12.72.01.1001,Pematangsiantar
+12.07,Kabupaten Deli Serdang
+12.07.01,Lubuk Pakam
+12.07.01.1001,Deli Serdang
+13,Sumatera Barat
+13.71,Kota Padang
+13.71.01,Padang Barat
+13.71.01.1001,Padang
+13.75,Kota Bukittinggi
+13.75.01,Guguk Panjang
+13.75.01.1001,Bukittinggi
+14,Riau
+14.71,Kota Pekanbaru
+14.71.01,Sukajadi
+14.71.01.1001,Pekanbaru
+14.72,Kota Dumai
+14.72.01,Dumai Kota
+14.72.01.1001,Dumai
+15,Jambi
+15.71,Kota Jambi
+15.71.01,Telanaipura
+15.71.01.1001,Jambi
+16,Sumatera Selatan
+16.71,Kota Palembang
+16.71.01,Ilir Barat I
+16.71.01.1001,Palembang
+16.73,Kota Prabumulih
+16.73.01,Prabumulih Timur
+16.73.01.1001,Prabumulih
+17,Bengkulu
+17.71,Kota Bengkulu
+17.71.01,Ratu Samban
+17.71.01.1001,Bengkulu
+18,Lampung
+18.71,Kota Bandar Lampung
+18.71.01,Tanjung Karang Pusat
+18.71.01.1001,Bandar Lampung
+18.72,Kota Metro
+18.72.01,Metro Pusat
+18.72.01.1001,Metro
+18.01,Kabupaten Lampung Selatan
+18.01.01,Kalianda
+18.01.01.1001,Kalianda
+19,Kepulauan Bangka Belitung
+19.71,Kota Pangkalpinang
+19.71.01,Bukit Intan
+19.71.01.1001,Pangkalpinang
+21,Kepulauan Riau
+21.71,Kota Batam
+21.71.01,Batam Kota
+21.71.01.1001,Batam
+21.72,Kota Tanjungpinang
+21.72.01,Tanjungpinang Kota
+21.72.01.1001,Tanjungpinang
 31,DKI Jakarta
 31.71,Kota Adm. Jakarta Pusat
 31.71.03,Kemayoran
@@ -6,35 +79,298 @@ kode,nama
 31.73,Kota Adm. Jakarta Selatan
 31.73.04,Menteng
 31.73.04.1001,Menteng
+31.75,Kota Adm. Jakarta Timur
+31.75.01,Jatinegara
+31.75.01.1001,Jatinegara
+31.74,Kota Adm. Jakarta Barat
+31.74.01,Grogol Petamburan
+31.74.01.1001,Grogol
+31.72,Kota Adm. Jakarta Utara
+31.72.01,Kelapa Gading
+31.72.01.1001,Kelapa Gading
 32,Jawa Barat
 32.73,Kota Bandung
 32.73.01,Coblong
 32.73.01.1001,Dago
+32.75,Kota Bekasi
+32.75.01,Bekasi Barat
+32.75.01.1001,Bekasi
+32.71,Kota Bogor
+32.71.01,Bogor Tengah
+32.71.01.1001,Bogor
+32.76,Kota Depok
+32.76.01,Pancoran Mas
+32.76.01.1001,Depok
+32.77,Kota Cimahi
+32.77.01,Cimahi Tengah
+32.77.01.1001,Cimahi
+32.74,Kota Cirebon
+32.74.01,Kejaksan
+32.74.01.1001,Cirebon
+32.72,Kota Sukabumi
+32.72.01,Cikole
+32.72.01.1001,Sukabumi
+32.78,Kota Tasikmalaya
+32.78.01,Cihideung
+32.78.01.1001,Tasikmalaya
+32.15,Kabupaten Karawang
+32.15.01,Karawang Barat
+32.15.01.1001,Karawang
+32.05,Kabupaten Garut
+32.05.01,Garut Kota
+32.05.01.1001,Garut
+32.04,Kabupaten Bandung
+32.04.01,Soreang
+32.04.01.1001,Soreang
 33,Jawa Tengah
 33.74,Kota Semarang
 33.74.01,Candisari
 33.74.01.1001,Candisari
+33.72,Kota Surakarta
+33.72.01,Banjarsari
+33.72.01.1001,Solo
+33.71,Kota Magelang
+33.71.01,Magelang Tengah
+33.71.01.1001,Magelang
+33.73,Kota Salatiga
+33.73.01,Sidorejo
+33.73.01.1001,Salatiga
+33.76,Kota Tegal
+33.76.01,Tegal Barat
+33.76.01.1001,Tegal
+33.75,Kota Pekalongan
+33.75.01,Pekalongan Barat
+33.75.01.1001,Pekalongan
+33.02,Kabupaten Banyumas
+33.02.01,Purwokerto Timur
+33.02.01.1001,Purwokerto
+33.01,Kabupaten Cilacap
+33.01.01,Cilacap Tengah
+33.01.01.1001,Cilacap
+33.19,Kabupaten Kudus
+33.19.01,Kota Kudus
+33.19.01.1001,Kudus
+33.20,Kabupaten Jepara
+33.20.01,Jepara
+33.20.01.1001,Jepara
+33.10,Kabupaten Klaten
+33.10.01,Klaten Tengah
+33.10.01.1001,Klaten
+33.09,Kabupaten Boyolali
+33.09.01,Boyolali
+33.09.01.1001,Boyolali
+33.11,Kabupaten Sukoharjo
+33.11.01,Sukoharjo
+33.11.01.1001,Sukoharjo
+33.29,Kabupaten Brebes
+33.29.01,Brebes
+33.29.01.1001,Brebes
 34,DI Yogyakarta
 34.71,Kota Yogyakarta
 34.71.01,Gedongtengen
 34.71.01.1001,Sosromenduran
+34.04,Kabupaten Sleman
+34.04.01,Depok
+34.04.01.1001,Sleman
+34.02,Kabupaten Bantul
+34.02.01,Bantul
+34.02.01.1001,Bantul
+34.03,Kabupaten Gunungkidul
+34.03.01,Wonosari
+34.03.01.1001,Wonosari
+34.01,Kabupaten Kulon Progo
+34.01.01,Wates
+34.01.01.1001,Wates
 35,Jawa Timur
 35.78,Kota Surabaya
 35.78.01,Gubeng
 35.78.01.1001,Gubeng
+35.73,Kota Malang
+35.73.01,Klojen
+35.73.01.1001,Malang
+35.79,Kota Batu
+35.79.01,Batu
+35.79.01.1001,Batu
+35.71,Kota Kediri
+35.71.01,Kota Kediri
+35.71.01.1001,Kediri
+35.72,Kota Blitar
+35.72.01,Kepanjenkidul
+35.72.01.1001,Blitar
+35.77,Kota Madiun
+35.77.01,Kartoharjo
+35.77.01.1001,Madiun
+35.15,Kabupaten Sidoarjo
+35.15.01,Sidoarjo
+35.15.01.1001,Sidoarjo
+35.25,Kabupaten Gresik
+35.25.01,Gresik
+35.25.01.1001,Gresik
+35.09,Kabupaten Jember
+35.09.01,Kaliwates
+35.09.01.1001,Jember
+35.10,Kabupaten Banyuwangi
+35.10.01,Banyuwangi
+35.10.01.1001,Banyuwangi
+35.22,Kabupaten Bojonegoro
+35.22.01,Bojonegoro
+35.22.01.1001,Bojonegoro
+35.23,Kabupaten Tuban
+35.23.01,Tuban
+35.23.01.1001,Tuban
+35.24,Kabupaten Lamongan
+35.24.01,Lamongan
+35.24.01.1001,Lamongan
+35.07,Kabupaten Malang
+35.07.01,Kepanjen
+35.07.01.1001,Kepanjen
+36,Banten
+36.73,Kota Serang
+36.73.01,Serang
+36.73.01.1001,Serang
+36.72,Kota Cilegon
+36.72.01,Cilegon
+36.72.01.1001,Cilegon
+36.71,Kota Tangerang
+36.71.01,Tangerang
+36.71.01.1001,Tangerang
+36.74,Kota Tangerang Selatan
+36.74.01,Serpong
+36.74.01.1001,Tangerang Selatan
 51,Bali
 51.71,Kota Denpasar
 51.71.01,Denpasar Selatan
 51.71.01.1001,Sanur
-12,Sumatera Utara
-12.71,Kota Medan
-12.71.01,Medan Kota
-12.71.01.1001,Medan Kota
+51.03,Kabupaten Badung
+51.03.01,Kuta
+51.03.01.1001,Kuta
+51.04,Kabupaten Gianyar
+51.04.01,Ubud
+51.04.01.1001,Ubud
+51.02,Kabupaten Tabanan
+51.02.01,Tabanan
+51.02.01.1001,Tabanan
+51.08,Kabupaten Buleleng
+51.08.01,Singaraja
+51.08.01.1001,Singaraja
+52,Nusa Tenggara Barat
+52.71,Kota Mataram
+52.71.01,Mataram
+52.71.01.1001,Mataram
+52.01,Kabupaten Lombok Barat
+52.01.01,Gerung
+52.01.01.1001,Lombok Barat
+52.02,Kabupaten Lombok Tengah
+52.02.01,Praya
+52.02.01.1001,Lombok Tengah
+53,Nusa Tenggara Timur
+53.71,Kota Kupang
+53.71.01,Kelapa Lima
+53.71.01.1001,Kupang
+53.15,Kabupaten Manggarai Barat
+53.15.01,Komodo
+53.15.01.1001,Labuan Bajo
+53.07,Kabupaten Sikka
+53.07.01,Alok
+53.07.01.1001,Maumere
+61,Kalimantan Barat
+61.71,Kota Pontianak
+61.71.01,Pontianak Kota
+61.71.01.1001,Pontianak
+61.72,Kota Singkawang
+61.72.01,Singkawang Barat
+61.72.01.1001,Singkawang
+62,Kalimantan Tengah
+62.71,Kota Palangka Raya
+62.71.01,Pahandut
+62.71.01.1001,Palangka Raya
+62.02,Kabupaten Kotawaringin Timur
+62.02.01,Mentawa Baru Ketapang
+62.02.01.1001,Sampit
+63,Kalimantan Selatan
+63.71,Kota Banjarmasin
+63.71.01,Banjarmasin Tengah
+63.71.01.1001,Banjarmasin
+63.72,Kota Banjarbaru
+63.72.01,Banjarbaru Utara
+63.72.01.1001,Banjarbaru
+64,Kalimantan Timur
+64.72,Kota Samarinda
+64.72.01,Samarinda Kota
+64.72.01.1001,Samarinda
+64.71,Kota Balikpapan
+64.71.01,Balikpapan Kota
+64.71.01.1001,Balikpapan
+64.09,Kabupaten Penajam Paser Utara
+64.09.01,Sepaku
+64.09.01.1001,IKN Nusantara
+65,Kalimantan Utara
+65.71,Kota Tarakan
+65.71.01,Tarakan Barat
+65.71.01.1001,Tarakan
+71,Sulawesi Utara
+71.71,Kota Manado
+71.71.01,Wenang
+71.71.01.1001,Manado
+71.72,Kota Bitung
+71.72.01,Maesa
+71.72.01.1001,Bitung
+72,Sulawesi Tengah
+72.71,Kota Palu
+72.71.01,Palu Barat
+72.71.01.1001,Palu
 73,Sulawesi Selatan
 73.71,Kota Makassar
 73.71.01,Ujung Pandang
-73.71.01.1001,Ujung Pandang
+73.71.01.1001,Makassar
+73.72,Kota Parepare
+73.72.01,Ujung
+73.72.01.1001,Parepare
+73.73,Kota Palopo
+73.73.01,Wara
+73.73.01.1001,Palopo
+74,Sulawesi Tenggara
+74.71,Kota Kendari
+74.71.01,Mandonga
+74.71.01.1001,Kendari
+74.72,Kota Baubau
+74.72.01,Wolio
+74.72.01.1001,Baubau
+75,Gorontalo
+75.71,Kota Gorontalo
+75.71.01,Kota Barat
+75.71.01.1001,Gorontalo
+76,Sulawesi Barat
+76.02,Kabupaten Mamuju
+76.02.01,Mamuju
+76.02.01.1001,Mamuju
+81,Maluku
+81.71,Kota Ambon
+81.71.01,Sirimau
+81.71.01.1001,Ambon
+81.08,Kabupaten Maluku Barat Daya
+81.08.01,Moa Lakor
+81.08.01.1001,Tiakur
+82,Maluku Utara
+82.71,Kota Ternate
+82.71.01,Ternate Tengah
+82.71.01.1001,Ternate
 91,Papua
 91.71,Kota Jayapura
 91.71.01,Jayapura Utara
-91.71.01.1001,Jayapura Utara
+91.71.01.1001,Jayapura
+92,Papua Barat
+92.02,Kabupaten Manokwari
+92.02.01,Manokwari Barat
+92.02.01.1001,Manokwari
+94,Papua Tengah
+94.01,Kabupaten Nabire
+94.01.01,Nabire
+94.01.01.1001,Nabire
+94.04,Kabupaten Mimika
+94.04.01,Mimika Baru
+94.04.01.1001,Timika
+96,Papua Barat Daya
+96.71,Kota Sorong
+96.71.01,Sorong Kota
+96.71.01.1001,Sorong

@@ -139,6 +139,18 @@
 
     <string name="settings_location_ref_title">Lokasi Referensi Saya</string>
     <string name="settings_location_ref_desc">Pusat acuan jarak gempa di sekitar</string>
+    <string name="settings_gps_title">Deteksi Lokasi GPS Otomatis</string>
+    <string name="settings_gps_desc">Gunakan koordinat GPS perangkat Anda untuk akurasi jarak gempa dan peringatan getar di sekitar</string>
+    <string name="settings_gps_btn">Gunakan Lokasi GPS Saat Ini</string>
+    <string name="settings_gps_detecting">Mendeteksi koordinat GPS...</string>
+    <string name="settings_gps_success">Lokasi berhasil diperbarui: %s</string>
+    <string name="settings_gps_failed">Gagal mendeteksi lokasi GPS atau GPS tidak aktif di perangkat</string>
+    <string name="settings_gps_permission_required">Izin lokasi diperlukan untuk menggunakan fitur GPS</string>
+    <string name="settings_location_active">Lokasi Acuan Aktif</string>
+    <string name="settings_location_presets">Atau Pilih Kota Acuan Lainnya:</string>
+    <string name="dashboard_gps_sync">Perbarui GPS</string>
+    <string name="wilayah_gps_detect">Gunakan Lokasi GPS Saya</string>
+    <string name="wilayah_gps_desc">Deteksi koordinat dan wilayah secara otomatis melalui GPS perangkat</string>
 
     <!-- Map & Action Buttons -->
     <string name="map_btn_zoom_in">Perbesar</string>

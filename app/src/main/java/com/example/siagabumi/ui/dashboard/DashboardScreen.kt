@@ -1,7 +1,11 @@
 package com.example.siagabumi.ui.dashboard
 
+import android.Manifest
 import android.content.Intent
 import android.net.Uri
+import android.widget.Toast
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -56,6 +60,65 @@ fun DashboardScreen(
     viewModel: DashboardViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
+    val isDetectingGps by viewModel.isDetectingGps.collectAsState()
+    val context = LocalContext.current
+
+    val locationPermissionLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestMultiplePermissions()
+    ) { permissions ->
+        val fine = permissions[Manifest.permission.ACCESS_FINE_LOCATION] == true
+        val coarse = permissions[Manifest.permission.ACCESS_COARSE_LOCATION] == true
+        if (fine || coarse) {
+            viewModel.detectGpsLocation { result ->
+                if (result != null) {
+                    Toast.makeText(
+                        context,
+                        context.getString(R.string.settings_gps_success, result.locationName),
+                        Toast.LENGTH_LONG
+                    ).show()
+                } else {
+                    Toast.makeText(
+                        context,
+                        context.getString(R.string.settings_gps_failed),
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
+            }
+        } else {
+            Toast.makeText(
+                context,
+                context.getString(R.string.settings_gps_permission_required),
+                Toast.LENGTH_SHORT
+            ).show()
+        }
+    }
+
+    val onTriggerGps: () -> Unit = {
+        if (viewModel.hasLocationPermission()) {
+            viewModel.detectGpsLocation { result ->
+                if (result != null) {
+                    Toast.makeText(
+                        context,
+                        context.getString(R.string.settings_gps_success, result.locationName),
+                        Toast.LENGTH_LONG
+                    ).show()
+                } else {
+                    Toast.makeText(
+                        context,
+                        context.getString(R.string.settings_gps_failed),
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
+            }
+        } else {
+            locationPermissionLauncher.launch(
+                arrayOf(
+                    Manifest.permission.ACCESS_FINE_LOCATION,
+                    Manifest.permission.ACCESS_COARSE_LOCATION
+                )
+            )
+        }
+    }
 
     when (val state = uiState) {
         is UiState.Loading -> {
@@ -77,6 +140,8 @@ fun DashboardScreen(
                 onNavigateToSearchWilayah = onNavigateToSearchWilayah,
                 onNavigateToGempaDetail = onNavigateToGempaDetail,
                 onNavigateToSettings = onNavigateToSettings,
+                onSyncGps = onTriggerGps,
+                isSyncingGps = isDetectingGps,
                 modifier = modifier
             )
         }
@@ -93,6 +158,8 @@ fun DashboardContent(
     onNavigateToSearchWilayah: () -> Unit,
     onNavigateToGempaDetail: (String) -> Unit,
     onNavigateToSettings: () -> Unit,
+    onSyncGps: () -> Unit = {},
+    isSyncingGps: Boolean = false,
     modifier: Modifier = Modifier
 ) {
     val context = LocalContext.current
@@ -201,7 +268,9 @@ fun DashboardContent(
                     gempa = data.gempaTerbaru ?: data.gempaTerkiniList.firstOrNull(),
                     userPreferences = data.userPreferences,
                     onViewAllClick = onNavigateToGempa,
-                    onOpenDetailClick = onNavigateToGempaDetail
+                    onOpenDetailClick = onNavigateToGempaDetail,
+                    onSyncGpsClick = onSyncGps,
+                    isSyncingGps = isSyncingGps
                 )
             }
 
