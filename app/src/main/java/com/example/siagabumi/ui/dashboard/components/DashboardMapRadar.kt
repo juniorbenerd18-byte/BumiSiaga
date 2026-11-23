@@ -1,11 +1,13 @@
 package com.example.siagabumi.ui.dashboard.components
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -16,6 +18,8 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ChevronRight
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Fullscreen
 import androidx.compose.material.icons.filled.GpsFixed
 import androidx.compose.material.icons.filled.Map
 import androidx.compose.material.icons.filled.Public
@@ -23,13 +27,17 @@ import androidx.compose.material.icons.filled.Remove
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SmallFloatingActionButton
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -39,9 +47,11 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
+import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
 import com.example.siagabumi.R
 import com.example.siagabumi.domain.model.Gempa
-import org.osmdroid.tileprovider.tilesource.TileSourceFactory
+import com.example.siagabumi.util.OsmHelper
 import org.osmdroid.util.GeoPoint
 import org.osmdroid.views.MapView
 import org.osmdroid.views.overlay.Marker
@@ -54,9 +64,11 @@ fun DashboardMapRadar(
     modifier: Modifier = Modifier
 ) {
     val context = LocalContext.current
+    var isFullscreen by remember { mutableStateOf(false) }
+
     val mapView = remember {
         MapView(context).apply {
-            com.example.siagabumi.util.OsmHelper.setupMapView(this)
+            OsmHelper.setupMapView(this)
         }
     }
 
@@ -127,6 +139,7 @@ fun DashboardMapRadar(
                                 val marker = Marker(map).apply {
                                     position = GeoPoint(gempa.latitude, gempa.longitude)
                                     setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)
+                                    icon = OsmHelper.createMagnitudeMarkerIcon(context, gempa.magnitude)
                                     title = "M ${gempa.magnitude}"
                                     snippet = "${gempa.wilayah} (${gempa.jam})"
                                     setOnMarkerClickListener { _, _ ->
@@ -180,6 +193,17 @@ fun DashboardMapRadar(
                         .padding(10.dp),
                     verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
+                    // Fullscreen Mode Button
+                    SmallFloatingActionButton(
+                        onClick = { isFullscreen = true },
+                        containerColor = MaterialTheme.colorScheme.surface,
+                        contentColor = MaterialTheme.colorScheme.primary,
+                        shape = CircleShape,
+                        modifier = Modifier.size(36.dp)
+                    ) {
+                        Icon(Icons.Default.Fullscreen, contentDescription = stringResource(R.string.dashboard_map_fullscreen), modifier = Modifier.size(18.dp))
+                    }
+
                     // Zoom In Button
                     SmallFloatingActionButton(
                         onClick = { mapView.controller.zoomIn() },
@@ -233,6 +257,107 @@ fun DashboardMapRadar(
                         modifier = Modifier.size(36.dp)
                     ) {
                         Icon(Icons.Default.Map, contentDescription = stringResource(R.string.map_btn_center_indonesia), modifier = Modifier.size(18.dp))
+                    }
+                }
+            }
+        }
+    }
+
+    // Fullscreen Map Dialog
+    if (isFullscreen) {
+        Dialog(
+            onDismissRequest = { isFullscreen = false },
+            properties = DialogProperties(usePlatformDefaultWidth = false)
+        ) {
+            Box(modifier = Modifier.fillMaxSize()) {
+                val fullMapView = remember {
+                    MapView(context).apply {
+                        OsmHelper.setupMapView(this)
+                    }
+                }
+
+                DisposableEffect(fullMapView) {
+                    fullMapView.onResume()
+                    onDispose { fullMapView.onPause() }
+                }
+
+                AndroidView(
+                    factory = { fullMapView },
+                    update = { map ->
+                        map.controller.setZoom(5.2)
+                        map.controller.setCenter(GeoPoint(-2.5, 118.0))
+                        map.overlays.clear()
+                        quakeList.forEach { gempa ->
+                            if (gempa.latitude != 0.0 && gempa.longitude != 0.0) {
+                                val marker = Marker(map).apply {
+                                    position = GeoPoint(gempa.latitude, gempa.longitude)
+                                    setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)
+                                    icon = OsmHelper.createMagnitudeMarkerIcon(context, gempa.magnitude)
+                                    title = "M ${gempa.magnitude} - ${gempa.wilayah}"
+                                    snippet = "Kedalaman: ${gempa.kedalamanKm} km | ${gempa.jam}"
+                                    setOnMarkerClickListener { _, _ ->
+                                        isFullscreen = false
+                                        onQuakeClick?.invoke(gempa.id)
+                                        true
+                                    }
+                                }
+                                map.overlays.add(marker)
+                            }
+                        }
+                        map.invalidate()
+                    },
+                    modifier = Modifier.fillMaxSize()
+                )
+
+                // Close Button Top End
+                IconButton(
+                    onClick = { isFullscreen = false },
+                    modifier = Modifier
+                        .align(Alignment.TopEnd)
+                        .padding(16.dp)
+                        .clip(CircleShape)
+                        .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.9f))
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Close,
+                        contentDescription = stringResource(R.string.dashboard_map_close_fullscreen),
+                        tint = MaterialTheme.colorScheme.onSurface
+                    )
+                }
+
+                // Fullscreen floating controls
+                Column(
+                    modifier = Modifier
+                        .align(Alignment.BottomEnd)
+                        .padding(20.dp),
+                    verticalArrangement = Arrangement.spacedBy(10.dp)
+                ) {
+                    SmallFloatingActionButton(
+                        onClick = { fullMapView.controller.zoomIn() },
+                        containerColor = MaterialTheme.colorScheme.surface,
+                        contentColor = MaterialTheme.colorScheme.primary,
+                        shape = CircleShape
+                    ) {
+                        Icon(Icons.Default.Add, contentDescription = null)
+                    }
+                    SmallFloatingActionButton(
+                        onClick = { fullMapView.controller.zoomOut() },
+                        containerColor = MaterialTheme.colorScheme.surface,
+                        contentColor = MaterialTheme.colorScheme.primary,
+                        shape = CircleShape
+                    ) {
+                        Icon(Icons.Default.Remove, contentDescription = null)
+                    }
+                    SmallFloatingActionButton(
+                        onClick = {
+                            fullMapView.controller.animateTo(GeoPoint(-2.5, 118.0))
+                            fullMapView.controller.setZoom(5.0)
+                        },
+                        containerColor = MaterialTheme.colorScheme.secondaryContainer,
+                        contentColor = MaterialTheme.colorScheme.secondary,
+                        shape = CircleShape
+                    ) {
+                        Icon(Icons.Default.Map, contentDescription = null)
                     }
                 }
             }

@@ -43,6 +43,7 @@ import com.example.siagabumi.ui.dashboard.components.DashboardEmergencyGuide
 import com.example.siagabumi.ui.dashboard.components.DashboardMapRadar
 import com.example.siagabumi.ui.dashboard.components.DashboardQuickStats
 import com.example.siagabumi.ui.dashboard.components.DashboardStatusHero
+import com.example.siagabumi.ui.dashboard.components.EmergencyFlashlightCard
 
 @Composable
 fun DashboardScreen(
@@ -213,6 +214,11 @@ fun DashboardContent(
                         onToggleFavoriteClick = { onNavigateToCuaca(cuaca.lokasi.kode) }
                     )
                 }
+            }
+
+            // Emergency Flashlight & SOS Strobe Tool
+            item {
+                EmergencyFlashlightCard()
             }
 
             // Emergency Call Hotlines & Mitigation Tips

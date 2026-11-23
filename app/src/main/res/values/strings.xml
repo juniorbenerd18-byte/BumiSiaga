@@ -149,4 +149,12 @@
     <string name="dashboard_btn_change_location">Ubah Lokasi</string>
     <string name="dashboard_btn_refresh">Perbarui Data</string>
     <string name="dashboard_btn_settings">Pengaturan</string>
+    <string name="dashboard_btn_flashlight">Senter Darurat</string>
+    <string name="dashboard_flashlight_sos">Sinyal SOS</string>
+    <string name="dashboard_flashlight_off">Matikan Senter</string>
+    <string name="dashboard_share_alert">Bagikan Info Gempa</string>
+    <string name="dashboard_map_fullscreen">Peta Layar Penuh</string>
+    <string name="dashboard_map_close_fullscreen">Tutup Peta</string>
+    <string name="wilayah_search_empty_hint">Hanya memuat 10 wilayah contoh bawaan.\nMasukkan file assets/wilayah.csv untuk mencari lebih dari 80.000 kelurahan/desa se-Indonesia.</string>
+    <string name="settings_notif_permission_missing">Izin notifikasi belum diaktifkan di sistem perangkat Anda. Buka Pengaturan untuk mengizinkannya.</string>
 </resources>

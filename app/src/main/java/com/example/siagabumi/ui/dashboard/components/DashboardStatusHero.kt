@@ -1,5 +1,6 @@
 package com.example.siagabumi.ui.dashboard.components
 
+import android.content.Intent
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.RepeatMode
@@ -24,10 +25,12 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material.icons.filled.CrisisAlert
+import androidx.compose.material.icons.filled.Share
 import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -38,9 +41,11 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.example.siagabumi.R
 import com.example.siagabumi.domain.model.Gempa
 
@@ -170,6 +175,32 @@ fun DashboardStatusHero(
                                 maxLines = 1,
                                 modifier = Modifier.weight(1f)
                             )
+                            val context = LocalContext.current
+                            val shareTitle = stringResource(R.string.dashboard_share_alert)
+                            IconButton(
+                                onClick = {
+                                    val shareText = "🚨 *Info Gempa BMKG - SiagaBumi*\n" +
+                                        "Magnitudo: M ${latestGempa.magnitude}\n" +
+                                        "Lokasi: ${latestGempa.wilayah}\n" +
+                                        "Waktu: ${latestGempa.jam} (${latestGempa.tanggal})\n" +
+                                        "Kedalaman: ${latestGempa.kedalamanKm} km\n" +
+                                        (if (latestGempa.isTsunamiWarning) "⚠️ PERINGATAN POTENSI TSUNAMI!\n" else "Potensi: ${latestGempa.potensi}\n") +
+                                        "\n_Sumber data resmi: BMKG_\n_Dipantau melalui aplikasi SiagaBumi_"
+                                    val sendIntent = Intent(Intent.ACTION_SEND).apply {
+                                        type = "text/plain"
+                                        putExtra(Intent.EXTRA_TEXT, shareText)
+                                    }
+                                    context.startActivity(Intent.createChooser(sendIntent, shareTitle))
+                                },
+                                modifier = Modifier.size(28.dp)
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.Share,
+                                    contentDescription = shareTitle,
+                                    tint = Color.White,
+                                    modifier = Modifier.size(16.dp)
+                                )
+                            }
                         }
                     }
                 }

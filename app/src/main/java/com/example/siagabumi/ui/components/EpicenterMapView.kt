@@ -70,9 +70,11 @@ fun EpicenterMapView(
                     map.controller.setCenter(point)
 
                     map.overlays.clear()
+                    val mag = title.replace(Regex("[^0-9.]"), "").toDoubleOrNull() ?: 5.0
                     val marker = Marker(map).apply {
                         position = point
                         setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)
+                        icon = OsmHelper.createMagnitudeMarkerIcon(context, mag)
                         this.title = title
                         this.snippet = snippet
                     }

@@ -279,12 +279,21 @@ fun SettingsScreen(
                     // Button Uji Coba Getar & Notifikasi
                     Button(
                         onClick = {
+                            val notifsEnabled = androidx.core.app.NotificationManagerCompat.from(context).areNotificationsEnabled()
                             viewModel.triggerTestAlert(context)
-                            Toast.makeText(
-                                context,
-                                context.getString(R.string.settings_test_alert_feedback),
-                                Toast.LENGTH_SHORT
-                            ).show()
+                            if (!notifsEnabled) {
+                                Toast.makeText(
+                                    context,
+                                    context.getString(R.string.settings_notif_permission_missing),
+                                    Toast.LENGTH_LONG
+                                ).show()
+                            } else {
+                                Toast.makeText(
+                                    context,
+                                    context.getString(R.string.settings_test_alert_feedback),
+                                    Toast.LENGTH_SHORT
+                                ).show()
+                            }
                         },
                         modifier = Modifier.fillMaxWidth(),
                         shape = RoundedCornerShape(12.dp),

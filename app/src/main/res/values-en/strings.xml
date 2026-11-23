@@ -149,4 +149,12 @@
     <string name="dashboard_btn_change_location">Change Location</string>
     <string name="dashboard_btn_refresh">Refresh Data</string>
     <string name="dashboard_btn_settings">Settings</string>
+    <string name="dashboard_btn_flashlight">Emergency Torch</string>
+    <string name="dashboard_flashlight_sos">SOS Strobe</string>
+    <string name="dashboard_flashlight_off">Turn Off</string>
+    <string name="dashboard_share_alert">Share Quake Info</string>
+    <string name="dashboard_map_fullscreen">Fullscreen Map</string>
+    <string name="dashboard_map_close_fullscreen">Close Map</string>
+    <string name="wilayah_search_empty_hint">Only sample regions loaded.\nAdd assets/wilayah.csv to search over 80,000 villages across Indonesia.</string>
+    <string name="settings_notif_permission_missing">Notification permission is not enabled on your device. Please allow it in settings.</string>
 </resources>
