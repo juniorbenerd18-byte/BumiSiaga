@@ -51,6 +51,7 @@
     <string name="gempa_no_tsunami">No tsunami potential</string>
     <string name="gempa_depth">Depth: %1$d km</string>
     <string name="gempa_felt">Felt in: %1$s</string>
+    <string name="gempa_felt_title">Felt Intensity (MMI)</string>
     <string name="gempa_coordinates">Coordinates: %1$s</string>
     <string name="gempa_share">Share</string>
     <string name="gempa_share_text">BMKG Earthquake Info\nMagnitude: %1$.1f\nDepth: %2$d km\nLocation: %3$s\nTime: %4$s\nPotential: %5$s\n%6$s\n\nData source: BMKG</string>

@@ -51,6 +51,7 @@
     <string name="gempa_no_tsunami">Tidak berpotensi tsunami</string>
     <string name="gempa_depth">Kedalaman: %1$d km</string>
     <string name="gempa_felt">Dirasakan di: %1$s</string>
+    <string name="gempa_felt_title">Dirasakan (Skala MMI)</string>
     <string name="gempa_coordinates">Koordinat: %1$s</string>
     <string name="gempa_share">Bagikan</string>
     <string name="gempa_share_text">Info Gempa BMKG\nMagnitudo: %1$.1f\nKedalaman: %2$d km\nLokasi: %3$s\nWaktu: %4$s\nPotensi: %5$s\n%6$s\n\nSumber data: BMKG</string>
