@@ -5,6 +5,7 @@ import com.example.siagabumi.data.local.dao.WilayahDao
 import com.example.siagabumi.data.local.entity.WilayahEntity
 import com.example.siagabumi.domain.model.Wilayah
 import com.example.siagabumi.domain.repository.WilayahRepository
+import com.example.siagabumi.util.GpsLocationResult
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
@@ -102,6 +103,56 @@ class WilayahRepositoryImpl @Inject constructor(
         if (kode.count { it == '.' } >= 3) return kode
         val entity = wilayahDao.findLevel4Wilayah(kode)
         return entity?.kode ?: kode
+    }
+
+    override suspend fun resolveGpsToAdm4(gps: GpsLocationResult): Wilayah? {
+        // 1. Try subLocality (Kelurahan / Desa)
+        gps.subLocality?.let { subLoc ->
+            val cleanName = cleanWilayahName(subLoc)
+            if (cleanName.length >= 3) {
+                val found = wilayahDao.findFirstLevel4ByName(cleanName)
+                if (found != null) return found.toDomain()
+            }
+        }
+
+        // 2. Try locality (Kecamatan / Kota)
+        gps.locality?.let { loc ->
+            val cleanName = cleanWilayahName(loc)
+            if (cleanName.length >= 3) {
+                val found = wilayahDao.findFirstLevel4ByName(cleanName)
+                if (found != null) return found.toDomain()
+            }
+        }
+
+        // 3. Try subAdminArea (Kabupaten / Kota)
+        gps.subAdminArea?.let { subAdmin ->
+            val cleanName = cleanWilayahName(subAdmin)
+            if (cleanName.length >= 3) {
+                val found = wilayahDao.findFirstLevel4ByName(cleanName)
+                if (found != null) return found.toDomain()
+            }
+        }
+
+        // 4. Try from locationName first segment
+        val firstSegment = gps.locationName.split(",").firstOrNull()?.let { cleanWilayahName(it) }
+        if (!firstSegment.isNullOrBlank() && firstSegment.length >= 3) {
+            val found = wilayahDao.findFirstLevel4ByName(firstSegment)
+            if (found != null) return found.toDomain()
+        }
+
+        return null
+    }
+
+    private fun cleanWilayahName(raw: String): String {
+        return raw.replace("Kota ", "", ignoreCase = true)
+            .replace("Kabupaten ", "", ignoreCase = true)
+            .replace("Kab. ", "", ignoreCase = true)
+            .replace("Kecamatan ", "", ignoreCase = true)
+            .replace("Kec. ", "", ignoreCase = true)
+            .replace("Kelurahan ", "", ignoreCase = true)
+            .replace("Kel. ", "", ignoreCase = true)
+            .replace("Desa ", "", ignoreCase = true)
+            .trim()
     }
 
     override suspend fun ensureWilayahDataSeeded(onProgress: ((Float) -> Unit)?) {

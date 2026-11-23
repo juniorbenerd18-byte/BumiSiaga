@@ -92,10 +92,16 @@ fun DashboardQuickStats(
                 if (isEn && it.weatherDescEn.isNotBlank()) it.weatherDescEn else it.weatherDesc
             } ?: stringResource(R.string.dashboard_stat_view_weather)
 
+            val weatherLabel = if (data.userPreferences.isGpsLocation) {
+                "📍 " + (cuaca?.lokasi?.nama ?: data.userPreferences.userLocationName.split(",").firstOrNull()?.trim() ?: stringResource(R.string.dashboard_stat_current_temp))
+            } else {
+                cuaca?.lokasi?.nama ?: stringResource(R.string.dashboard_stat_current_temp)
+            }
+
             QuickStatCard(
                 icon = Icons.Default.WbSunny,
                 iconTint = Color(0xFFF59E0B),
-                label = cuaca?.lokasi?.nama ?: stringResource(R.string.dashboard_stat_current_temp),
+                label = weatherLabel,
                 value = cuaca?.kondisiSaatIni?.let { "${it.suhu}°C" } ?: "-",
                 subValue = weatherDesc,
                 onClick = onWeatherClick,

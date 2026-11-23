@@ -26,7 +26,11 @@ import kotlin.coroutines.resume
 data class GpsLocationResult(
     val latitude: Double,
     val longitude: Double,
-    val locationName: String
+    val locationName: String,
+    val subLocality: String? = null,
+    val locality: String? = null,
+    val subAdminArea: String? = null,
+    val adminArea: String? = null
 )
 
 @Singleton
@@ -56,13 +60,7 @@ class LocationHelper @Inject constructor(
         if (!hasLocationPermission()) return null
 
         val location = getBestLocation() ?: return null
-        val locationName = reverseGeocode(location.latitude, location.longitude)
-
-        return GpsLocationResult(
-            latitude = location.latitude,
-            longitude = location.longitude,
-            locationName = locationName
-        )
+        return reverseGeocode(location.latitude, location.longitude)
     }
 
     @Suppress("DEPRECATION")
@@ -141,10 +139,14 @@ class LocationHelper @Inject constructor(
             }
         }
 
-    private suspend fun reverseGeocode(latitude: Double, longitude: Double): String = withContext(Dispatchers.IO) {
+    private suspend fun reverseGeocode(latitude: Double, longitude: Double): GpsLocationResult = withContext(Dispatchers.IO) {
         try {
             if (!Geocoder.isPresent()) {
-                return@withContext formatCoordFallback(latitude, longitude)
+                return@withContext GpsLocationResult(
+                    latitude = latitude,
+                    longitude = longitude,
+                    locationName = formatCoordFallback(latitude, longitude)
+                )
             }
 
             val geocoder = Geocoder(context, Locale.forLanguageTag("id-ID"))
@@ -158,17 +160,34 @@ class LocationHelper @Inject constructor(
             if (addr != null) {
                 val cityOrKab = addr.subAdminArea ?: addr.locality
                 val prov = addr.adminArea
-                when {
+                val locName = when {
                     !cityOrKab.isNullOrBlank() && !prov.isNullOrBlank() -> "$cityOrKab, $prov"
                     !cityOrKab.isNullOrBlank() -> cityOrKab
                     !prov.isNullOrBlank() -> prov
                     else -> formatCoordFallback(latitude, longitude)
                 }
+                GpsLocationResult(
+                    latitude = latitude,
+                    longitude = longitude,
+                    locationName = locName,
+                    subLocality = addr.subLocality,
+                    locality = addr.locality,
+                    subAdminArea = addr.subAdminArea,
+                    adminArea = addr.adminArea
+                )
             } else {
-                formatCoordFallback(latitude, longitude)
+                GpsLocationResult(
+                    latitude = latitude,
+                    longitude = longitude,
+                    locationName = formatCoordFallback(latitude, longitude)
+                )
             }
         } catch (_: Exception) {
-            formatCoordFallback(latitude, longitude)
+            GpsLocationResult(
+                latitude = latitude,
+                longitude = longitude,
+                locationName = formatCoordFallback(latitude, longitude)
+            )
         }
     }
 

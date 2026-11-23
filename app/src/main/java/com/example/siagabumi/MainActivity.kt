@@ -1,6 +1,8 @@
 package com.example.siagabumi
 
 import android.Manifest
+import android.content.Context
+import android.content.ContextWrapper
 import android.content.pm.PackageManager
 import android.content.res.Configuration
 import android.os.Build
@@ -77,20 +79,21 @@ class MainActivity : ComponentActivity() {
             val targetLocale = remember(userPrefs.language) {
                 if (userPrefs.language == "en") Locale.ENGLISH else Locale.forLanguageTag("in")
             }
-            val localizedContext = remember(userPrefs.language, context) {
+            val localizedContextWrapper = remember(userPrefs.language, context) {
                 val config = Configuration(context.resources.configuration).apply {
                     setLocale(targetLocale)
                     setLayoutDirection(targetLocale)
                 }
-                context.createConfigurationContext(config)
+                val localized = context.createConfigurationContext(config)
+                LocalizedContextWrapper(context, localized)
             }
-            val localizedConfig = remember(userPrefs.language, localizedContext) {
-                localizedContext.resources.configuration
+            val localizedConfig = remember(userPrefs.language, localizedContextWrapper) {
+                localizedContextWrapper.resources.configuration
             }
 
             CompositionLocalProvider(
                 LocalConfiguration provides localizedConfig,
-                LocalContext provides localizedContext
+                LocalContext provides localizedContextWrapper
             ) {
                 SiagaBumiTheme(darkTheme = isDark) {
                     MainApp()
@@ -298,5 +301,14 @@ fun MainApp() {
                 )
             }
         }
+    }
+}
+
+private class LocalizedContextWrapper(
+    base: Context,
+    private val localizedContext: Context
+) : ContextWrapper(base) {
+    override fun getResources(): android.content.res.Resources {
+        return localizedContext.resources
     }
 }

@@ -79,11 +79,24 @@ class DashboardViewModel @Inject constructor(
     private val _isDetectingGps = MutableStateFlow(false)
     val isDetectingGps: StateFlow<Boolean> = _isDetectingGps.asStateFlow()
 
+    private var hasAutoCheckedLocation = false
+
     fun hasLocationPermission(): Boolean = locationHelper?.hasLocationPermission() == true
 
-    fun detectGpsLocation(onResult: (GpsLocationResult?) -> Unit) {
+    fun onScreenEntered(onRequestPermission: (Boolean) -> Unit) {
+        if (hasAutoCheckedLocation) return
+        hasAutoCheckedLocation = true
+
+        if (hasLocationPermission()) {
+            detectGpsLocation()
+        } else {
+            onRequestPermission(true)
+        }
+    }
+
+    fun detectGpsLocation(onResult: ((GpsLocationResult?) -> Unit)? = null) {
         val helper = locationHelper ?: run {
-            onResult(null)
+            onResult?.invoke(null)
             return
         }
         viewModelScope.launch {
@@ -91,13 +104,18 @@ class DashboardViewModel @Inject constructor(
             try {
                 val result = helper.getCurrentLocation()
                 if (result != null) {
+                    val resolved = wilayahRepository.resolveGpsToAdm4(result)
+                    val adm4 = resolved?.kode ?: "31.71.03.1001"
                     userPreferencesRepository.setUserLocation(
-                        result.latitude,
-                        result.longitude,
-                        result.locationName
+                        lat = result.latitude,
+                        lon = result.longitude,
+                        name = result.locationName,
+                        adm4 = adm4,
+                        isGps = true
                     )
+                    cuacaRepository.refreshCuaca(adm4, force = true)
                 }
-                onResult(result)
+                onResult?.invoke(result)
             } finally {
                 _isDetectingGps.value = false
             }
@@ -111,17 +129,40 @@ class DashboardViewModel @Inject constructor(
 
     private fun observeDashboard() {
         viewModelScope.launch {
-            cuacaRepository.getAllFavorit().flatMapLatest { favoritList ->
-                val primaryWilayah = favoritList.firstOrNull() ?: WilayahRepositoryImpl.DEFAULT_WILAYAH
+            combine(
+                userPreferencesRepository.getUserPreferences(),
+                cuacaRepository.getAllFavorit()
+            ) { prefs, favoritList ->
+                prefs to favoritList
+            }.flatMapLatest { (prefs, favoritList) ->
+                val activeAdm4 = when {
+                    prefs.isGpsLocation && prefs.userAdm4.isNotBlank() -> prefs.userAdm4
+                    favoritList.isNotEmpty() -> favoritList.first().kode
+                    else -> prefs.userAdm4.ifBlank { WilayahRepositoryImpl.DEFAULT_WILAYAH.kode }
+                }
+
+                val activeWilayah = when {
+                    prefs.isGpsLocation && prefs.userLocationName.isNotBlank() -> {
+                        Wilayah(
+                            kode = activeAdm4,
+                            nama = prefs.userLocationName.split(",").firstOrNull()?.trim() ?: prefs.userLocationName,
+                            level = 4,
+                            parentKode = "",
+                            namaLengkap = prefs.userLocationName
+                        )
+                    }
+                    favoritList.isNotEmpty() -> favoritList.first()
+                    else -> WilayahRepositoryImpl.DEFAULT_WILAYAH
+                }
 
                 val dataFlow = combine(
                     gempaRepository.getGempaTerbaru(),
                     gempaRepository.getGempaTerkini(),
-                    cuacaRepository.getPrakiraanCuaca(primaryWilayah.kode),
+                    cuacaRepository.getPrakiraanCuaca(activeAdm4),
                     gempaRepository.getCacheLastUpdated(GempaCategory.TERKINI),
                     userPreferencesRepository.getUserPreferences()
-                ) { terbaru, terkini, cuacaList, lastUpdatedMillis, prefs ->
-                    DashboardDataState(terbaru, terkini, cuacaList, lastUpdatedMillis, prefs)
+                ) { terbaru, terkini, cuacaList, lastUpdatedMillis, currentPrefs ->
+                    DashboardDataState(terbaru, terkini, cuacaList, lastUpdatedMillis, currentPrefs)
                 }
 
                 val statusFlow = combine(
@@ -146,11 +187,11 @@ class DashboardViewModel @Inject constructor(
                             val hariIniList = data.cuacaList.filter { it.tanggal == today }.ifEmpty { data.cuacaList.take(8) }
                             val ringkasan = CuacaMapper.groupDailyForecast(data.cuacaList)
                             CuacaDetail(
-                                lokasi = primaryWilayah,
+                                lokasi = activeWilayah,
                                 kondisiSaatIni = kondisiSaatIni,
                                 prakiraanHariIni3Jam = hariIniList,
                                 ringkasanHarian = ringkasan,
-                                isFavorit = favoritList.any { it.kode == primaryWilayah.kode }
+                                isFavorit = favoritList.any { it.kode == activeAdm4 }
                             )
                         } else null
 
@@ -190,8 +231,9 @@ class DashboardViewModel @Inject constructor(
             _isRefreshing.value = true
             wilayahRepository.ensureWilayahDataSeeded()
             val r1 = gempaRepository.refreshAll(force = false)
-            val defaultWilayah = WilayahRepositoryImpl.DEFAULT_WILAYAH
-            val r2 = cuacaRepository.refreshCuaca(defaultWilayah.kode, force = false)
+            val prefs = userPreferencesRepository.getPreferencesSync()
+            val activeAdm4 = if (prefs.userAdm4.isNotBlank()) prefs.userAdm4 else WilayahRepositoryImpl.DEFAULT_WILAYAH.kode
+            val r2 = cuacaRepository.refreshCuaca(activeAdm4, force = false)
             _isRefreshing.value = false
             _networkError.value = r1.isFailure && r2.isFailure
         }
@@ -201,8 +243,9 @@ class DashboardViewModel @Inject constructor(
         viewModelScope.launch {
             _isRefreshing.value = true
             val r1 = gempaRepository.refreshAll(force = true)
-            val defaultWilayah = WilayahRepositoryImpl.DEFAULT_WILAYAH
-            val r2 = cuacaRepository.refreshCuaca(defaultWilayah.kode, force = true)
+            val prefs = userPreferencesRepository.getPreferencesSync()
+            val activeAdm4 = if (prefs.userAdm4.isNotBlank()) prefs.userAdm4 else WilayahRepositoryImpl.DEFAULT_WILAYAH.kode
+            val r2 = cuacaRepository.refreshCuaca(activeAdm4, force = true)
             _isRefreshing.value = false
             _networkError.value = r1.isFailure && r2.isFailure
         }

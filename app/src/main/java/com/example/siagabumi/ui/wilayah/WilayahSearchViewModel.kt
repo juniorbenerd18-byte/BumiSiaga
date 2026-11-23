@@ -86,10 +86,14 @@ class WilayahSearchViewModel @Inject constructor(
             try {
                 val result = helper.getCurrentLocation()
                 if (result != null) {
+                    val resolved = wilayahRepository.resolveGpsToAdm4(result)
+                    val adm4 = resolved?.kode ?: "31.71.03.1001"
                     userPreferencesRepository?.setUserLocation(
-                        result.latitude,
-                        result.longitude,
-                        result.locationName
+                        lat = result.latitude,
+                        lon = result.longitude,
+                        name = result.locationName,
+                        adm4 = adm4,
+                        isGps = true
                     )
                     val cityName = result.locationName
                         .split(",")

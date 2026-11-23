@@ -11,7 +11,13 @@ interface UserPreferencesRepository {
     suspend fun setVibrationEnabled(enabled: Boolean)
     suspend fun setMinMagnitudeAlert(minMag: Double)
     suspend fun setNearbyRadiusKm(radiusKm: Int)
-    suspend fun setUserLocation(lat: Double, lon: Double, name: String)
+    suspend fun setUserLocation(
+        lat: Double,
+        lon: Double,
+        name: String,
+        adm4: String = "31.71.03.1001",
+        isGps: Boolean = false
+    )
     suspend fun setLanguage(language: String)
     suspend fun setThemeMode(themeMode: AppThemeMode)
 }

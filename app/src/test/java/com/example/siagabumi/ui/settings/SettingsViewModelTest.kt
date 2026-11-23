@@ -107,8 +107,8 @@ private class FakeUserPreferencesRepository : UserPreferencesRepository {
         flow.value = flow.value.copy(nearbyRadiusKm = radiusKm)
     }
 
-    override suspend fun setUserLocation(lat: Double, lon: Double, name: String) {
-        flow.value = flow.value.copy(userLat = lat, userLon = lon, userLocationName = name)
+    override suspend fun setUserLocation(lat: Double, lon: Double, name: String, adm4: String, isGps: Boolean) {
+        flow.value = flow.value.copy(userLat = lat, userLon = lon, userLocationName = name, userAdm4 = adm4, isGpsLocation = isGps)
     }
 
     override suspend fun setLanguage(language: String) {

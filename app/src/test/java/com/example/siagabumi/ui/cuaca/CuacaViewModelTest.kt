@@ -6,6 +6,7 @@ import com.example.siagabumi.domain.model.UiState
 import com.example.siagabumi.domain.model.Wilayah
 import com.example.siagabumi.domain.repository.CuacaRepository
 import com.example.siagabumi.domain.repository.WilayahRepository
+import com.example.siagabumi.util.GpsLocationResult
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
@@ -68,6 +69,7 @@ class CuacaViewModelTest {
         override suspend fun ensureWilayahDataSeeded(onProgress: ((Float) -> Unit)?) {}
         override suspend fun getDefaultWilayah(): Wilayah = defaultWilayah
         override suspend fun resolveToAdm4(kode: String): String = kode
+        override suspend fun resolveGpsToAdm4(gps: GpsLocationResult): Wilayah? = defaultWilayah
     }
 
     private fun createDummyPrakiraan(adm4: String): PrakiraanCuaca {

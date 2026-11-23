@@ -12,6 +12,8 @@ data class UserPreferences(
     val userLat: Double = -6.2088,
     val userLon: Double = 106.8456,
     val userLocationName: String = "Jakarta / Nasional",
+    val userAdm4: String = "31.71.03.1001",
+    val isGpsLocation: Boolean = false,
     val language: String = "in", // "in" or "en"
     val themeMode: AppThemeMode = AppThemeMode.SYSTEM
 )

@@ -54,9 +54,10 @@ class SettingsViewModel @Inject constructor(
                 val result = helper.getCurrentLocation()
                 if (result != null) {
                     userPreferencesRepository.setUserLocation(
-                        result.latitude,
-                        result.longitude,
-                        result.locationName
+                        lat = result.latitude,
+                        lon = result.longitude,
+                        name = result.locationName,
+                        isGps = true
                     )
                 }
                 onResult(result)

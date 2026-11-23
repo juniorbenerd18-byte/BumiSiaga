@@ -12,6 +12,7 @@ import com.example.siagabumi.domain.repository.CuacaRepository
 import com.example.siagabumi.domain.repository.GempaRepository
 import com.example.siagabumi.domain.repository.UserPreferencesRepository
 import com.example.siagabumi.domain.repository.WilayahRepository
+import com.example.siagabumi.util.GpsLocationResult
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
@@ -77,6 +78,7 @@ class DashboardViewModelTest {
         override suspend fun ensureWilayahDataSeeded(onProgress: ((Float) -> Unit)?) {}
         override suspend fun getDefaultWilayah(): Wilayah = WilayahRepositoryImpl.DEFAULT_WILAYAH
         override suspend fun resolveToAdm4(kode: String): String = kode
+        override suspend fun resolveGpsToAdm4(gps: GpsLocationResult): Wilayah? = null
     }
 
     private class FakeUserPreferencesRepo : UserPreferencesRepository {
@@ -87,7 +89,9 @@ class DashboardViewModelTest {
         override suspend fun setVibrationEnabled(enabled: Boolean) { flow.value = flow.value.copy(vibrationEnabled = enabled) }
         override suspend fun setMinMagnitudeAlert(minMag: Double) { flow.value = flow.value.copy(minMagnitudeAlert = minMag) }
         override suspend fun setNearbyRadiusKm(radiusKm: Int) { flow.value = flow.value.copy(nearbyRadiusKm = radiusKm) }
-        override suspend fun setUserLocation(lat: Double, lon: Double, name: String) { flow.value = flow.value.copy(userLat = lat, userLon = lon, userLocationName = name) }
+        override suspend fun setUserLocation(lat: Double, lon: Double, name: String, adm4: String, isGps: Boolean) {
+            flow.value = flow.value.copy(userLat = lat, userLon = lon, userLocationName = name, userAdm4 = adm4, isGpsLocation = isGps)
+        }
         override suspend fun setLanguage(language: String) { flow.value = flow.value.copy(language = language) }
         override suspend fun setThemeMode(themeMode: AppThemeMode) { flow.value = flow.value.copy(themeMode = themeMode) }
     }

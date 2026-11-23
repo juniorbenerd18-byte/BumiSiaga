@@ -40,6 +40,8 @@ class UserPreferencesRepositoryImpl @Inject constructor(
         val lat = prefs.getFloat(KEY_LAT, -6.2088f).toDouble()
         val lon = prefs.getFloat(KEY_LON, 106.8456f).toDouble()
         val locName = prefs.getString(KEY_LOC_NAME, "Jakarta / Nasional") ?: "Jakarta / Nasional"
+        val adm4 = prefs.getString(KEY_ADM4, "31.71.03.1001") ?: "31.71.03.1001"
+        val isGps = prefs.getBoolean(KEY_IS_GPS, false)
         val lang = prefs.getString(KEY_LANG, "in") ?: "in"
         val themeStr = prefs.getString(KEY_THEME, AppThemeMode.SYSTEM.name) ?: AppThemeMode.SYSTEM.name
         val theme = try {
@@ -56,6 +58,8 @@ class UserPreferencesRepositoryImpl @Inject constructor(
             userLat = lat,
             userLon = lon,
             userLocationName = locName,
+            userAdm4 = adm4,
+            isGpsLocation = isGps,
             language = lang,
             themeMode = theme
         )
@@ -77,11 +81,19 @@ class UserPreferencesRepositoryImpl @Inject constructor(
         prefs.edit().putInt(KEY_RADIUS, radiusKm).apply()
     }
 
-    override suspend fun setUserLocation(lat: Double, lon: Double, name: String) {
+    override suspend fun setUserLocation(
+        lat: Double,
+        lon: Double,
+        name: String,
+        adm4: String,
+        isGps: Boolean
+    ) {
         prefs.edit()
             .putFloat(KEY_LAT, lat.toFloat())
             .putFloat(KEY_LON, lon.toFloat())
             .putString(KEY_LOC_NAME, name)
+            .putString(KEY_ADM4, adm4)
+            .putBoolean(KEY_IS_GPS, isGps)
             .apply()
     }
 
@@ -102,6 +114,8 @@ class UserPreferencesRepositoryImpl @Inject constructor(
         private const val KEY_LAT = "pref_user_lat"
         private const val KEY_LON = "pref_user_lon"
         private const val KEY_LOC_NAME = "pref_user_loc_name"
+        private const val KEY_ADM4 = "pref_user_adm4"
+        private const val KEY_IS_GPS = "pref_is_gps"
         private const val KEY_LANG = "pref_language"
         private const val KEY_THEME = "pref_theme_mode"
     }
