@@ -11,6 +11,8 @@ import androidx.work.WorkerParameters
 import com.example.siagabumi.data.mapper.GempaMapper
 import com.example.siagabumi.data.remote.GempaApi
 import com.example.siagabumi.domain.model.GempaCategory
+import com.example.siagabumi.domain.repository.UserPreferencesRepository
+import com.example.siagabumi.util.GeoUtils
 import dagger.hilt.EntryPoint
 import dagger.hilt.InstallIn
 import dagger.hilt.android.EntryPointAccessors
@@ -26,6 +28,7 @@ class GempaCheckWorker(
     @InstallIn(SingletonComponent::class)
     interface GempaWorkerEntryPoint {
         fun gempaApi(): GempaApi
+        fun userPreferencesRepository(): UserPreferencesRepository
     }
 
     override suspend fun doWork(): Result {
@@ -35,6 +38,12 @@ class GempaCheckWorker(
                 GempaWorkerEntryPoint::class.java
             )
             val gempaApi = hiltEntryPoint.gempaApi()
+            val userPrefsRepo = hiltEntryPoint.userPreferencesRepository()
+            val userPrefs = userPrefsRepo.getPreferencesSync()
+
+            if (!userPrefs.notificationsEnabled) {
+                return Result.success()
+            }
 
             val response = gempaApi.getAutoGempa()
             val dto = response.infoGempa?.gempa
@@ -44,9 +53,29 @@ class GempaCheckWorker(
                 val prefs = applicationContext.getSharedPreferences("gempa_alerts_pref", Context.MODE_PRIVATE)
                 val lastNotifiedId = prefs.getString("last_notified_gempa_id", null)
 
-                if (gempa.magnitude >= 5.0 && gempa.id != lastNotifiedId) {
-                    NotificationHelper.showGempaNotification(applicationContext, gempa)
-                    prefs.edit().putString("last_notified_gempa_id", gempa.id).apply()
+                // Check minimum magnitude threshold (tsunami warnings always alert)
+                if (gempa.magnitude >= userPrefs.minMagnitudeAlert || gempa.isTsunamiWarning) {
+                    var shouldNotify = true
+
+                    // Check radius if nearby radius filter is active (> 0 km)
+                    if (userPrefs.nearbyRadiusKm > 0 && !gempa.isTsunamiWarning) {
+                        val distanceKm = GeoUtils.calculateDistanceKm(
+                            userPrefs.userLat, userPrefs.userLon,
+                            gempa.latitude, gempa.longitude
+                        )
+                        if (distanceKm > userPrefs.nearbyRadiusKm) {
+                            shouldNotify = false
+                        }
+                    }
+
+                    if (shouldNotify && gempa.id != lastNotifiedId) {
+                        NotificationHelper.showGempaNotification(
+                            applicationContext,
+                            gempa,
+                            vibrate = userPrefs.vibrationEnabled
+                        )
+                        prefs.edit().putString("last_notified_gempa_id", gempa.id).apply()
+                    }
                 }
             }
             Result.success()

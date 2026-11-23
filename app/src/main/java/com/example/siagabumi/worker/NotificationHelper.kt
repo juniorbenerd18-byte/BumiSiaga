@@ -32,7 +32,7 @@ object NotificationHelper {
         }
     }
 
-    fun showGempaNotification(context: Context, gempa: Gempa) {
+    fun showGempaNotification(context: Context, gempa: Gempa, vibrate: Boolean = true) {
         val intent = Intent(context, MainActivity::class.java).apply {
             flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
         }
@@ -59,6 +59,44 @@ object NotificationHelper {
             .setPriority(NotificationCompat.PRIORITY_HIGH)
             .setContentIntent(pendingIntent)
             .setAutoCancel(true)
+
+        if (vibrate) {
+            VibrationHelper.vibrateAlert(context)
+        }
+
+        try {
+            NotificationManagerCompat.from(context).notify(NOTIFICATION_ID, builder.build())
+        } catch (_: SecurityException) {
+            // POST_NOTIFICATIONS permission might not be granted yet
+        }
+    }
+
+    fun showTestNotification(context: Context, vibrate: Boolean = true) {
+        val intent = Intent(context, MainActivity::class.java).apply {
+            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+        }
+        val pendingIntent = PendingIntent.getActivity(
+            context,
+            1,
+            intent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
+
+        val title = "🔔 Uji Coba: Peringatan Bencana Gempa"
+        val content = "Uji getaran HP dan sistem peringatan dini SiagaBumi berfungsi normal."
+
+        val builder = NotificationCompat.Builder(context, CHANNEL_ID)
+            .setSmallIcon(R.mipmap.ic_launcher)
+            .setContentTitle(title)
+            .setContentText(content)
+            .setStyle(NotificationCompat.BigTextStyle().bigText("$content\nSiagaBumi siap mendeteksi dan memberi peringatan gempa di sekitar Anda."))
+            .setPriority(NotificationCompat.PRIORITY_HIGH)
+            .setContentIntent(pendingIntent)
+            .setAutoCancel(true)
+
+        if (vibrate) {
+            VibrationHelper.vibrateAlert(context)
+        }
 
         try {
             NotificationManagerCompat.from(context).notify(NOTIFICATION_ID, builder.build())

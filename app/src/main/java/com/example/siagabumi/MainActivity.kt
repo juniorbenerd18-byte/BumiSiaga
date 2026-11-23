@@ -2,6 +2,7 @@ package com.example.siagabumi
 
 import android.Manifest
 import android.content.pm.PackageManager
+import android.content.res.Configuration
 import android.os.Build
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -9,6 +10,7 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
@@ -17,6 +19,7 @@ import androidx.compose.material.icons.filled.Cloud
 import androidx.compose.material.icons.filled.Dashboard
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -27,9 +30,13 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.core.content.ContextCompat
@@ -38,18 +45,46 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import com.example.siagabumi.domain.model.AppThemeMode
+import com.example.siagabumi.domain.model.UserPreferences
+import com.example.siagabumi.domain.repository.UserPreferencesRepository
 import com.example.siagabumi.ui.navigation.Screen
 import com.example.siagabumi.ui.theme.SiagaBumiTheme
 import dagger.hilt.android.AndroidEntryPoint
+import java.util.Locale
+import javax.inject.Inject
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
+
+    @Inject
+    lateinit var userPreferencesRepository: UserPreferencesRepository
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
-            SiagaBumiTheme {
-                MainApp()
+            val userPrefs by userPreferencesRepository.getUserPreferences()
+                .collectAsState(initial = UserPreferences())
+
+            val isDark = when (userPrefs.themeMode) {
+                AppThemeMode.LIGHT -> false
+                AppThemeMode.DARK -> true
+                AppThemeMode.SYSTEM -> isSystemInDarkTheme()
+            }
+
+            val currentConfig = LocalConfiguration.current
+            val locale = remember(userPrefs.language) { Locale.forLanguageTag(userPrefs.language) }
+            val localizedConfig = remember(userPrefs.language, currentConfig) {
+                Configuration(currentConfig).apply {
+                    setLocale(locale)
+                }
+            }
+
+            CompositionLocalProvider(LocalConfiguration provides localizedConfig) {
+                SiagaBumiTheme(darkTheme = isDark) {
+                    MainApp()
+                }
             }
         }
     }
@@ -102,6 +137,7 @@ fun MainApp() {
                             currentDestination?.startsWith("cuaca") == true -> stringResource(R.string.nav_cuaca)
                             currentDestination == Screen.Favorit.route -> stringResource(R.string.nav_favorit)
                             currentDestination == Screen.About.route -> stringResource(R.string.nav_about)
+                            currentDestination == Screen.Settings.route -> stringResource(R.string.settings_title)
                             currentDestination?.startsWith("gempa_detail") == true -> stringResource(R.string.gempa_detail_title)
                             currentDestination == Screen.WilayahSearch.route -> stringResource(R.string.wilayah_search_title)
                             else -> stringResource(R.string.app_name)
@@ -120,6 +156,12 @@ fun MainApp() {
                 },
                 actions = {
                     if (isTopLevelDestination) {
+                        IconButton(onClick = { navController.navigate(Screen.Settings.route) }) {
+                            Icon(
+                                imageVector = Icons.Default.Settings,
+                                contentDescription = stringResource(R.string.settings_title)
+                            )
+                        }
                         IconButton(onClick = { navController.navigate(Screen.About.route) }) {
                             Icon(
                                 imageVector = Icons.Default.Info,
@@ -178,6 +220,9 @@ fun MainApp() {
                     },
                     onNavigateToGempaDetail = { gempaId ->
                         navController.navigate(Screen.GempaDetail.createRoute(gempaId))
+                    },
+                    onNavigateToSettings = {
+                        navController.navigate(Screen.Settings.route)
                     }
                 )
             }
@@ -216,6 +261,11 @@ fun MainApp() {
             }
             composable(Screen.About.route) {
                 com.example.siagabumi.ui.about.AboutScreen(
+                    onNavigateBack = { navController.popBackStack() }
+                )
+            }
+            composable(Screen.Settings.route) {
+                com.example.siagabumi.ui.settings.SettingsScreen(
                     onNavigateBack = { navController.popBackStack() }
                 )
             }

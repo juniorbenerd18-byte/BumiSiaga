@@ -106,4 +106,47 @@
     <string name="error_network">Failed to connect to BMKG server.</string>
     <string name="cached_data_banner">Showing cached data (%1$s)</string>
     <string name="last_updated">Last updated: %1$s</string>
+
+    <!-- Settings -->
+    <string name="settings_title">Safety Settings</string>
+    <string name="settings_section_alerts">Disaster Alerts &amp; Notifications</string>
+    <string name="settings_notif_title">Automatic Earthquake Alerts</string>
+    <string name="settings_notif_desc">Receive notifications when latest earthquakes occur</string>
+    <string name="settings_vibrate_title">Phone Vibration on Alerts</string>
+    <string name="settings_vibrate_desc">Vibrate device with emergency pulse when disaster strikes</string>
+    <string name="settings_min_mag_title">Minimum Magnitude Threshold</string>
+    <string name="settings_min_mag_desc">Only alert if earthquake magnitude is equal or higher</string>
+    <string name="settings_nearby_radius_title">Nearby Earthquake Radius</string>
+    <string name="settings_nearby_radius_desc">Filter quakes around your reference location</string>
+    <string name="settings_radius_all">All Regions</string>
+    <string name="settings_radius_50km">50 km</string>
+    <string name="settings_radius_100km">100 km</string>
+    <string name="settings_radius_250km">250 km</string>
+    <string name="settings_radius_500km">500 km</string>
+    <string name="settings_test_alert_btn">⚡ Test Vibration &amp; Notification</string>
+    <string name="settings_test_alert_feedback">Sending alert &amp; vibrating device…</string>
+
+    <string name="settings_section_appearance">Appearance</string>
+    <string name="settings_theme_title">Dark / Light Theme</string>
+    <string name="settings_theme_system">System</string>
+    <string name="settings_theme_light">Light</string>
+    <string name="settings_theme_dark">Dark</string>
+
+    <string name="settings_section_language">Language</string>
+    <string name="settings_lang_id">Indonesian</string>
+    <string name="settings_lang_en">English</string>
+
+    <string name="settings_location_ref_title">My Reference Location</string>
+    <string name="settings_location_ref_desc">Reference point for nearby quake distance</string>
+
+    <!-- Map & Action Buttons -->
+    <string name="map_btn_zoom_in">Zoom In</string>
+    <string name="map_btn_zoom_out">Zoom Out</string>
+    <string name="map_btn_center_quake">Focus Latest Quake</string>
+    <string name="map_btn_center_indonesia">Center Indonesia</string>
+    <string name="map_free_source_badge">100% Free Open-Source Map (OpenStreetMap)</string>
+    <string name="dashboard_btn_quick_emergency">Emergency Call</string>
+    <string name="dashboard_btn_change_location">Change Location</string>
+    <string name="dashboard_btn_refresh">Refresh Data</string>
+    <string name="dashboard_btn_settings">Settings</string>
 </resources>

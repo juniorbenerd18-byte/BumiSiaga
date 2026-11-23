@@ -17,6 +17,7 @@ sealed class Screen(val route: String) {
     }
     data object Favorit : Screen("favorit")
     data object About : Screen("about")
+    data object Settings : Screen("settings")
     data object GempaDetail : Screen("gempa_detail/{gempaId}") {
         fun createRoute(gempaId: String): String {
             return "gempa_detail/${URLEncoder.encode(gempaId, StandardCharsets.UTF_8.toString())}"

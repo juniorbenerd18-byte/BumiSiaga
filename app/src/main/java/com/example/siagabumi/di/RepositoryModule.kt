@@ -2,9 +2,11 @@ package com.example.siagabumi.di
 
 import com.example.siagabumi.data.repository.CuacaRepositoryImpl
 import com.example.siagabumi.data.repository.GempaRepositoryImpl
+import com.example.siagabumi.data.repository.UserPreferencesRepositoryImpl
 import com.example.siagabumi.data.repository.WilayahRepositoryImpl
 import com.example.siagabumi.domain.repository.CuacaRepository
 import com.example.siagabumi.domain.repository.GempaRepository
+import com.example.siagabumi.domain.repository.UserPreferencesRepository
 import com.example.siagabumi.domain.repository.WilayahRepository
 import dagger.Binds
 import dagger.Module
@@ -33,4 +35,10 @@ abstract class RepositoryModule {
     abstract fun bindWilayahRepository(
         impl: WilayahRepositoryImpl
     ): WilayahRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindUserPreferencesRepository(
+        impl: UserPreferencesRepositoryImpl
+    ): UserPreferencesRepository
 }
