@@ -1,5 +1,6 @@
 package com.example.siagabumi.data.mapper
 
+import com.example.siagabumi.data.local.entity.GempaEntity
 import com.example.siagabumi.data.remote.dto.GempaItemDto
 import com.example.siagabumi.domain.model.Gempa
 import com.example.siagabumi.domain.model.GempaCategory
@@ -66,6 +67,60 @@ object GempaMapper {
             dirasakan = dto.dirasakan?.trim()?.takeIf { it.isNotEmpty() },
             shakemapUrl = shakemapUrl,
             isTsunamiWarning = isTsunami,
+            category = category
+        )
+    }
+
+    fun toEntity(domain: Gempa): GempaEntity {
+        return GempaEntity(
+            id = domain.id,
+            tanggal = domain.tanggal,
+            jam = domain.jam,
+            dateTimeUtc = domain.dateTimeUtc,
+            formattedLocalTime = domain.formattedLocalTime,
+            coordinates = domain.coordinates,
+            latitude = domain.latitude,
+            longitude = domain.longitude,
+            lintang = domain.lintang,
+            bujur = domain.bujur,
+            magnitude = domain.magnitude,
+            kedalamanKm = domain.kedalamanKm,
+            kedalamanText = domain.kedalamanText,
+            wilayah = domain.wilayah,
+            potensi = domain.potensi,
+            dirasakan = domain.dirasakan,
+            shakemapUrl = domain.shakemapUrl,
+            isTsunamiWarning = domain.isTsunamiWarning,
+            category = domain.category.name,
+            cachedAt = System.currentTimeMillis()
+        )
+    }
+
+    fun toDomain(entity: GempaEntity): Gempa {
+        val category = try {
+            GempaCategory.valueOf(entity.category)
+        } catch (_: Exception) {
+            GempaCategory.TERKINI
+        }
+        return Gempa(
+            id = entity.id,
+            tanggal = entity.tanggal,
+            jam = entity.jam,
+            dateTimeUtc = entity.dateTimeUtc,
+            formattedLocalTime = entity.formattedLocalTime,
+            coordinates = entity.coordinates,
+            latitude = entity.latitude,
+            longitude = entity.longitude,
+            lintang = entity.lintang,
+            bujur = entity.bujur,
+            magnitude = entity.magnitude,
+            kedalamanKm = entity.kedalamanKm,
+            kedalamanText = entity.kedalamanText,
+            wilayah = entity.wilayah,
+            potensi = entity.potensi,
+            dirasakan = entity.dirasakan,
+            shakemapUrl = entity.shakemapUrl,
+            isTsunamiWarning = entity.isTsunamiWarning,
             category = category
         )
     }

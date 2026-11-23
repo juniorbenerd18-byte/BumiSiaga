@@ -134,7 +134,11 @@ fun MainApp() {
             modifier = Modifier.padding(innerPadding)
         ) {
             composable(Screen.Gempa.route) {
-                Text(text = "Layar Gempa")
+                com.example.siagabumi.ui.gempa.GempaScreen(
+                    onNavigateToDetail = { gempaId ->
+                        navController.navigate(Screen.GempaDetail.createRoute(gempaId))
+                    }
+                )
             }
             composable(Screen.Cuaca.route) {
                 Text(text = "Layar Cuaca")
@@ -144,6 +148,10 @@ fun MainApp() {
             }
             composable(Screen.About.route) {
                 Text(text = "Layar Tentang")
+            }
+            composable(Screen.GempaDetail.route) { backStackEntry ->
+                val gempaId = backStackEntry.arguments?.getString("gempaId") ?: ""
+                Text(text = "Detail Gempa: $gempaId")
             }
         }
     }
