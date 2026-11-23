@@ -4,6 +4,7 @@ import java.net.URLEncoder
 import java.nio.charset.StandardCharsets
 
 sealed class Screen(val route: String) {
+    data object Dashboard : Screen("dashboard")
     data object Gempa : Screen("gempa")
     data object Cuaca : Screen("cuaca?adm4={adm4}") {
         fun createRoute(adm4: String? = null): String {

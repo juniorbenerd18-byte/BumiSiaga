@@ -2,10 +2,41 @@
     <string name="app_name">SiagaBumi</string>
 
     <!-- Navigation -->
+    <string name="nav_dashboard">Beranda</string>
     <string name="nav_gempa">Gempa</string>
     <string name="nav_cuaca">Cuaca</string>
     <string name="nav_favorit">Favorit</string>
     <string name="nav_about">Tentang</string>
+
+    <!-- Dashboard Inovasi -->
+    <string name="dashboard_title">Siaga Nusantara</string>
+    <string name="dashboard_status_safe">Status: Aman Terkendali</string>
+    <string name="dashboard_status_safe_desc">Aktivitas seismik terpantau normal tanpa ancaman tsunami aktif.</string>
+    <string name="dashboard_status_warning">Status: Waspada Gempa Signifikan</string>
+    <string name="dashboard_status_warning_desc">Terdeteksi gempa M ≥ 6.0 baru-baru ini. Pantau informasi resmi BMKG.</string>
+    <string name="dashboard_status_tsunami">PERINGATAN DINI POTENSI TSUNAMI</string>
+    <string name="dashboard_status_tsunami_desc">Segera jauhi wilayah pesisir dan pantai. Ikuti instruksi BPBD!</string>
+    <string name="dashboard_quick_stats">Statistik Siaga</string>
+    <string name="dashboard_stat_latest_quake">Gempa Terbaru</string>
+    <string name="dashboard_stat_m5_count">Gempa M5+</string>
+    <string name="dashboard_stat_current_temp">Cuaca Lokal</string>
+    <string name="dashboard_stat_tsunami_status">Potensi Tsunami</string>
+    <string name="dashboard_stat_safe_label">Nihil</string>
+    <string name="dashboard_stat_alert_label">WASPADA</string>
+    <string name="dashboard_map_title">Radar Sebaran Gempa</string>
+    <string name="dashboard_map_subtitle">Titik episentrum gempa bumi aktif di Indonesia</string>
+    <string name="dashboard_view_all_quakes">Lihat Katalog Gempa</string>
+    <string name="dashboard_view_all_weather">Detail Cuaca Wilayah</string>
+    <string name="dashboard_emergency_contacts">Nomor Darurat Bencana</string>
+    <string name="dashboard_call_action">Panggil</string>
+    <string name="dashboard_mitigation_guide">Panduan Tanggap Bencana</string>
+    <string name="dashboard_guide_quake_title">Saat Terjadi Gempa Bumi</string>
+    <string name="dashboard_guide_quake_desc">1. Lindungi kepala (Drop, Cover, Hold On).\n2. Jauhi kaca jendela dan barang gantung.\n3. Jangan gunakan lift; gunakan tangga darurat.\n4. Segera ke ruang terbuka setelah guncangan berhenti.</string>
+    <string name="dashboard_guide_tsunami_title">Jika Ada Peringatan Tsunami</string>
+    <string name="dashboard_guide_tsunami_desc">1. Segera evakuasi ke tempat tinggi jika guncangan gempa sangat kuat.\n2. Jauhi pantai, muara sungai, dan dataran rendah.\n3. Jangan menunggu sirine jika air laut tiba-tiba surut drastis.</string>
+    <string name="dashboard_guide_kit_title">Tas Siaga Bencana (Grab Bag)</string>
+    <string name="dashboard_guide_kit_desc">Siapkan di dekat pintu: dokumen penting dalam plastik kedap air, persediaan air &amp; makanan tahan lama 3 hari, senter, kotak P3K, masker, peluit, dan power bank.</string>
+
 
     <!-- Attribution -->
     <string name="bmkg_attribution">Sumber data: BMKG (Badan Meteorologi, Klimatologi, dan Geofisika)</string>

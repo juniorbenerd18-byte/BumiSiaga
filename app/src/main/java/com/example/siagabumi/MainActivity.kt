@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Cloud
+import androidx.compose.material.icons.filled.Dashboard
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Warning
@@ -76,12 +77,14 @@ fun MainApp() {
     val currentDestination = navBackStackEntry?.destination?.route
 
     val bottomNavItems = listOf(
+        Triple(Screen.Dashboard.route, R.string.nav_dashboard, Icons.Default.Dashboard),
         Triple(Screen.Gempa.route, R.string.nav_gempa, Icons.Default.Warning),
         Triple(Screen.Cuaca.route, R.string.nav_cuaca, Icons.Default.Cloud),
         Triple(Screen.Favorit.route, R.string.nav_favorit, Icons.Default.Favorite)
     )
 
     val isTopLevelDestination = currentDestination in listOf(
+        Screen.Dashboard.route,
         Screen.Gempa.route,
         Screen.Cuaca.route,
         Screen.Favorit.route
@@ -94,6 +97,7 @@ fun MainApp() {
                 title = {
                     Text(
                         text = when {
+                            currentDestination == Screen.Dashboard.route -> stringResource(R.string.dashboard_title)
                             currentDestination == Screen.Gempa.route -> stringResource(R.string.nav_gempa)
                             currentDestination?.startsWith("cuaca") == true -> stringResource(R.string.nav_cuaca)
                             currentDestination == Screen.Favorit.route -> stringResource(R.string.nav_favorit)
@@ -152,9 +156,31 @@ fun MainApp() {
     ) { innerPadding ->
         NavHost(
             navController = navController,
-            startDestination = Screen.Gempa.route,
+            startDestination = Screen.Dashboard.route,
             modifier = Modifier.padding(innerPadding)
         ) {
+            composable(Screen.Dashboard.route) {
+                com.example.siagabumi.ui.dashboard.DashboardScreen(
+                    onNavigateToGempa = {
+                        navController.navigate(Screen.Gempa.route) {
+                            popUpTo(navController.graph.findStartDestination().id) {
+                                saveState = true
+                            }
+                            launchSingleTop = true
+                            restoreState = true
+                        }
+                    },
+                    onNavigateToCuaca = { adm4 ->
+                        navController.navigate(Screen.Cuaca.createRoute(adm4))
+                    },
+                    onNavigateToSearchWilayah = {
+                        navController.navigate(Screen.WilayahSearch.route)
+                    },
+                    onNavigateToGempaDetail = { gempaId ->
+                        navController.navigate(Screen.GempaDetail.createRoute(gempaId))
+                    }
+                )
+            }
             composable(Screen.Gempa.route) {
                 com.example.siagabumi.ui.gempa.GempaScreen(
                     onNavigateToDetail = { gempaId ->

@@ -2,10 +2,41 @@
     <string name="app_name">SiagaBumi</string>
 
     <!-- Navigation -->
+    <string name="nav_dashboard">Home</string>
     <string name="nav_gempa">Earthquake</string>
     <string name="nav_cuaca">Weather</string>
     <string name="nav_favorit">Favorites</string>
     <string name="nav_about">About</string>
+
+    <!-- Dashboard Innovation -->
+    <string name="dashboard_title">National Safety Hub</string>
+    <string name="dashboard_status_safe">Status: Safe &amp; Controlled</string>
+    <string name="dashboard_status_safe_desc">Seismic activity monitored normal with no active tsunami threat.</string>
+    <string name="dashboard_status_warning">Status: Warning - Significant Earthquake</string>
+    <string name="dashboard_status_warning_desc">Recent M ≥ 6.0 earthquake detected. Monitor official BMKG updates.</string>
+    <string name="dashboard_status_tsunami">TSUNAMI POTENTIAL WARNING</string>
+    <string name="dashboard_status_tsunami_desc">Evacuate away from coastal areas immediately. Follow emergency guidance!</string>
+    <string name="dashboard_quick_stats">Safety Overview</string>
+    <string name="dashboard_stat_latest_quake">Latest Quake</string>
+    <string name="dashboard_stat_m5_count">M5+ Quakes</string>
+    <string name="dashboard_stat_current_temp">Local Weather</string>
+    <string name="dashboard_stat_tsunami_status">Tsunami Status</string>
+    <string name="dashboard_stat_safe_label">None</string>
+    <string name="dashboard_stat_alert_label">ALERT</string>
+    <string name="dashboard_map_title">Earthquake Radar</string>
+    <string name="dashboard_map_subtitle">Active earthquake epicenter distribution across Indonesia</string>
+    <string name="dashboard_view_all_quakes">View Earthquake Catalog</string>
+    <string name="dashboard_view_all_weather">Regional Weather Details</string>
+    <string name="dashboard_emergency_contacts">Disaster Emergency Hotlines</string>
+    <string name="dashboard_call_action">Call</string>
+    <string name="dashboard_mitigation_guide">Disaster Preparedness Guide</string>
+    <string name="dashboard_guide_quake_title">During an Earthquake</string>
+    <string name="dashboard_guide_quake_desc">1. Drop, Cover, and Hold On.\n2. Stay clear of glass windows and overhead fixtures.\n3. Do not use elevators; use stairwells.\n4. Move to an open area once shaking subsides.</string>
+    <string name="dashboard_guide_tsunami_title">Tsunami Warning Procedures</string>
+    <string name="dashboard_guide_tsunami_desc">1. Evacuate to high ground immediately after violent shaking.\n2. Move inland away from beaches and river mouths.\n3. Do not wait for sirens if sea water suddenly recedes.</string>
+    <string name="dashboard_guide_kit_title">Emergency Grab Bag</string>
+    <string name="dashboard_guide_kit_desc">Keep prepared near the exit: waterproof essential documents, 3 days of non-perishable food and water, flashlight, first-aid kit, whistle, and power bank.</string>
+
 
     <!-- Attribution -->
     <string name="bmkg_attribution">Data source: BMKG (Meteorological, Climatological, and Geophysical Agency)</string>
