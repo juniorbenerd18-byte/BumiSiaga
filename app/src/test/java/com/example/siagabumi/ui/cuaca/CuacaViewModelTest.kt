@@ -131,6 +131,47 @@ class CuacaViewModelTest {
         assertTrue(state is UiState.Error)
     }
 
+    private class FakeUserPreferencesRepo : com.example.siagabumi.domain.repository.UserPreferencesRepository {
+        val prefsFlow = MutableStateFlow(com.example.siagabumi.domain.model.UserPreferences(userAdm4 = "31.71.03.1001", userLocationName = "Kemayoran, Jakarta Pusat"))
+        override fun getUserPreferences(): Flow<com.example.siagabumi.domain.model.UserPreferences> = prefsFlow
+        override suspend fun getPreferencesSync(): com.example.siagabumi.domain.model.UserPreferences = prefsFlow.value
+        override suspend fun setNotificationsEnabled(enabled: Boolean) {}
+        override suspend fun setVibrationEnabled(enabled: Boolean) {}
+        override suspend fun setMinMagnitudeAlert(minMag: Double) {}
+        override suspend fun setNearbyRadiusKm(radiusKm: Int) {}
+        override suspend fun setUserLocation(lat: Double, lon: Double, name: String, adm4: String, isGps: Boolean) {
+            prefsFlow.value = prefsFlow.value.copy(userLat = lat, userLon = lon, userLocationName = name, userAdm4 = adm4, isGpsLocation = isGps)
+        }
+        override suspend fun setLanguage(language: String) {}
+        override suspend fun setThemeMode(themeMode: com.example.siagabumi.domain.model.AppThemeMode) {}
+    }
+
+    @Test
+    fun syncLocation_fromPreferences_updatesCuaca() = runTest {
+        val cuacaRepo = FakeCuacaRepository()
+        val wilayahRepo = FakeWilayahRepository()
+        val userPrefsRepo = FakeUserPreferencesRepo()
+        cuacaRepo.cuacaFlow.value = listOf(createDummyPrakiraan("31.71.03.1001"))
+
+        val savedStateHandle = SavedStateHandle()
+        val viewModel = CuacaViewModel(savedStateHandle, cuacaRepo, wilayahRepo, userPrefsRepo)
+
+        backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) {
+            viewModel.uiState.collect()
+        }
+        advanceUntilIdle()
+
+        val state = viewModel.uiState.value
+        assertTrue(state is UiState.Success)
+        assertEquals("Kemayoran", (state as UiState.Success).data.lokasi.nama)
+
+        // Now simulate user changing location in preferences (e.g. from WilayahSearch or GPS)
+        userPrefsRepo.setUserLocation(lat = 0.0, lon = 0.0, name = "Bandung, Jawa Barat", adm4 = "32.73.01.1001", isGps = false)
+        advanceUntilIdle()
+
+        assertEquals("32.73.01.1001", viewModel.currentAdm4.value)
+    }
+
     @Test
     fun toggleFavorit_callsRepository() = runTest {
         val cuacaRepo = FakeCuacaRepository()

@@ -63,12 +63,12 @@ fun EmergencyFlashlightCard(
         shape = RoundedCornerShape(18.dp),
         colors = CardDefaults.cardColors(
             containerColor = if (isActive) {
-                MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.5f)
+                MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.7f)
             } else {
-                MaterialTheme.colorScheme.surface
+                MaterialTheme.colorScheme.surface.copy(alpha = 0.85f)
             }
         ),
-        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)),
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.35f)),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
     ) {
         Row(

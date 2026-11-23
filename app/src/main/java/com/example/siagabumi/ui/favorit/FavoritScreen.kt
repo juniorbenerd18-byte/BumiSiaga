@@ -96,7 +96,10 @@ fun FavoritScreen(
             ) { wilayah ->
                 FavoritItemCard(
                     wilayah = wilayah,
-                    onClick = { onNavigateToCuaca(wilayah.kode) },
+                    onClick = {
+                        viewModel.selectFavoritAsActive(wilayah)
+                        onNavigateToCuaca(wilayah.kode)
+                    },
                     onDelete = { viewModel.removeFavorit(wilayah) }
                 )
             }
@@ -122,9 +125,9 @@ fun FavoritItemCard(
             .clickable { onClick() },
         shape = RoundedCornerShape(14.dp),
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surface
+            containerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.88f)
         ),
-        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)),
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.35f)),
         elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
     ) {
         Row(

@@ -194,8 +194,9 @@ fun DashboardEpicenterRadar(
                 .clickable { onOpenDetailClick(gempa.id) },
             shape = RoundedCornerShape(20.dp),
             colors = CardDefaults.cardColors(
-                containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
+                containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.55f)
             ),
+            border = androidx.compose.foundation.BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.35f)),
             elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
         ) {
             Column(

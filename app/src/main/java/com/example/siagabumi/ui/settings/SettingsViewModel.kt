@@ -18,9 +18,14 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
+import com.example.siagabumi.domain.repository.CuacaRepository
+import com.example.siagabumi.domain.repository.WilayahRepository
+
 @HiltViewModel
 class SettingsViewModel @Inject constructor(
     private val userPreferencesRepository: UserPreferencesRepository,
+    private val wilayahRepository: WilayahRepository? = null,
+    private val cuacaRepository: CuacaRepository? = null,
     private val locationHelper: LocationHelper? = null
 ) : ViewModel() {
 
@@ -53,12 +58,16 @@ class SettingsViewModel @Inject constructor(
             try {
                 val result = helper.getCurrentLocation()
                 if (result != null) {
+                    val resolved = wilayahRepository?.resolveGpsToAdm4(result)
+                    val adm4 = resolved?.kode ?: "31.71.03.1001"
                     userPreferencesRepository.setUserLocation(
                         lat = result.latitude,
                         lon = result.longitude,
                         name = result.locationName,
+                        adm4 = adm4,
                         isGps = true
                     )
+                    cuacaRepository?.refreshCuaca(adm4, force = true)
                 }
                 onResult(result)
             } finally {

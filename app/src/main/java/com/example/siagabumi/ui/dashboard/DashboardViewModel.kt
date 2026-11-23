@@ -135,24 +135,18 @@ class DashboardViewModel @Inject constructor(
             ) { prefs, favoritList ->
                 prefs to favoritList
             }.flatMapLatest { (prefs, favoritList) ->
-                val activeAdm4 = when {
-                    prefs.isGpsLocation && prefs.userAdm4.isNotBlank() -> prefs.userAdm4
-                    favoritList.isNotEmpty() -> favoritList.first().kode
-                    else -> prefs.userAdm4.ifBlank { WilayahRepositoryImpl.DEFAULT_WILAYAH.kode }
-                }
+                val activeAdm4 = prefs.userAdm4.ifBlank { WilayahRepositoryImpl.DEFAULT_WILAYAH.kode }
 
-                val activeWilayah = when {
-                    prefs.isGpsLocation && prefs.userLocationName.isNotBlank() -> {
-                        Wilayah(
-                            kode = activeAdm4,
-                            nama = prefs.userLocationName.split(",").firstOrNull()?.trim() ?: prefs.userLocationName,
-                            level = 4,
-                            parentKode = "",
-                            namaLengkap = prefs.userLocationName
-                        )
-                    }
-                    favoritList.isNotEmpty() -> favoritList.first()
-                    else -> WilayahRepositoryImpl.DEFAULT_WILAYAH
+                val activeWilayah = if (prefs.userLocationName.isNotBlank() && prefs.userLocationName != "Jakarta / Nasional") {
+                    Wilayah(
+                        kode = activeAdm4,
+                        nama = prefs.userLocationName.split(",").firstOrNull()?.trim() ?: prefs.userLocationName,
+                        level = 4,
+                        parentKode = "",
+                        namaLengkap = prefs.userLocationName
+                    )
+                } else {
+                    wilayahRepository.getWilayahByKode(activeAdm4) ?: WilayahRepositoryImpl.DEFAULT_WILAYAH
                 }
 
                 val dataFlow = combine(

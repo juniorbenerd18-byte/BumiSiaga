@@ -26,11 +26,13 @@ import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
@@ -127,7 +129,7 @@ fun MainApp() {
     val bottomNavItems = listOf(
         Triple(Screen.Dashboard.route, R.string.nav_dashboard, Icons.Default.Dashboard),
         Triple(Screen.Gempa.route, R.string.nav_gempa, Icons.Default.Warning),
-        Triple(Screen.Cuaca.createRoute(), R.string.nav_cuaca, Icons.Default.Cloud),
+        Triple(Screen.Cuaca.route, R.string.nav_cuaca, Icons.Default.Cloud),
         Triple(Screen.Favorit.route, R.string.nav_favorit, Icons.Default.Favorite)
     )
 
@@ -135,7 +137,6 @@ fun MainApp() {
         Screen.Dashboard.route,
         Screen.Gempa.route,
         Screen.Cuaca.route,
-        Screen.Cuaca.createRoute(),
         Screen.Favorit.route
     )
 
@@ -144,13 +145,16 @@ fun MainApp() {
         topBar = {
             if (isTopLevelDestination) {
                 TopAppBar(
+                    colors = TopAppBarDefaults.topAppBarColors(
+                        containerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.92f)
+                    ),
                     title = {
                         Text(
-                            text = when {
-                                currentDestination == Screen.Dashboard.route -> stringResource(R.string.dashboard_title)
-                                currentDestination == Screen.Gempa.route -> stringResource(R.string.nav_gempa)
-                                currentDestination?.startsWith("cuaca") == true -> stringResource(R.string.nav_cuaca)
-                                currentDestination == Screen.Favorit.route -> stringResource(R.string.nav_favorit)
+                            text = when (currentDestination) {
+                                Screen.Dashboard.route -> stringResource(R.string.dashboard_title)
+                                Screen.Gempa.route -> stringResource(R.string.nav_gempa)
+                                Screen.Cuaca.route -> stringResource(R.string.nav_cuaca)
+                                Screen.Favorit.route -> stringResource(R.string.nav_favorit)
                                 else -> stringResource(R.string.app_name)
                             }
                         )
@@ -174,18 +178,22 @@ fun MainApp() {
         },
         bottomBar = {
             if (isTopLevelDestination) {
-                NavigationBar {
+                NavigationBar(
+                    containerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.92f)
+                ) {
                     bottomNavItems.forEach { (route, labelRes, icon) ->
-                        val selected = currentDestination == route || (route.startsWith("cuaca") && currentDestination?.startsWith("cuaca") == true)
+                        val selected = currentDestination == route
                         NavigationBarItem(
                             selected = selected,
                             onClick = {
-                                navController.navigate(route) {
-                                    popUpTo(navController.graph.findStartDestination().id) {
-                                        saveState = true
+                                if (!selected) {
+                                    navController.navigate(route) {
+                                        popUpTo(navController.graph.findStartDestination().id) {
+                                            saveState = true
+                                        }
+                                        launchSingleTop = true
+                                        restoreState = true
                                     }
-                                    launchSingleTop = true
-                                    restoreState = true
                                 }
                             },
                             icon = { Icon(icon, contentDescription = stringResource(labelRes)) },
@@ -212,8 +220,14 @@ fun MainApp() {
                             restoreState = true
                         }
                     },
-                    onNavigateToCuaca = { adm4 ->
-                        navController.navigate(Screen.Cuaca.createRoute(adm4))
+                    onNavigateToCuaca = { _ ->
+                        navController.navigate(Screen.Cuaca.route) {
+                            popUpTo(navController.graph.findStartDestination().id) {
+                                saveState = true
+                            }
+                            launchSingleTop = true
+                            restoreState = true
+                        }
                     },
                     onNavigateToSearchWilayah = {
                         navController.navigate(Screen.WilayahSearch.route)
@@ -233,16 +247,7 @@ fun MainApp() {
                     }
                 )
             }
-            composable(
-                route = Screen.Cuaca.route,
-                arguments = listOf(
-                    androidx.navigation.navArgument("adm4") {
-                        type = androidx.navigation.NavType.StringType
-                        nullable = true
-                        defaultValue = null
-                    }
-                )
-            ) {
+            composable(route = Screen.Cuaca.route) {
                 com.example.siagabumi.ui.cuaca.CuacaScreen(
                     onNavigateToSearchWilayah = {
                         navController.navigate(Screen.WilayahSearch.route)
@@ -251,8 +256,14 @@ fun MainApp() {
             }
             composable(Screen.Favorit.route) {
                 com.example.siagabumi.ui.favorit.FavoritScreen(
-                    onNavigateToCuaca = { adm4 ->
-                        navController.navigate(Screen.Cuaca.createRoute(adm4))
+                    onNavigateToCuaca = { _ ->
+                        navController.navigate(Screen.Cuaca.route) {
+                            popUpTo(navController.graph.findStartDestination().id) {
+                                saveState = true
+                            }
+                            launchSingleTop = true
+                            restoreState = true
+                        }
                     },
                     onNavigateToSearch = {
                         navController.navigate(Screen.WilayahSearch.route)
@@ -277,12 +288,8 @@ fun MainApp() {
             composable(Screen.WilayahSearch.route) {
                 com.example.siagabumi.ui.wilayah.WilayahSearchScreen(
                     onNavigateBack = { navController.popBackStack() },
-                    onWilayahSelected = { adm4 ->
-                        navController.navigate(Screen.Cuaca.createRoute(adm4)) {
-                            popUpTo(Screen.Cuaca.route) {
-                                inclusive = true
-                            }
-                        }
+                    onWilayahSelected = { _ ->
+                        navController.popBackStack()
                     }
                 )
             }

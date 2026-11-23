@@ -70,6 +70,13 @@ class WilayahSearchViewModel @Inject constructor(
     fun resolveAdm4(wilayah: Wilayah, onResolved: (String) -> Unit) {
         viewModelScope.launch {
             val adm4 = wilayahRepository.resolveToAdm4(wilayah.kode)
+            userPreferencesRepository?.setUserLocation(
+                lat = 0.0,
+                lon = 0.0,
+                name = wilayah.namaLengkap,
+                adm4 = adm4,
+                isGps = false
+            )
             onResolved(adm4)
         }
     }

@@ -4,11 +4,13 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.siagabumi.data.mapper.CuacaMapper
+import com.example.siagabumi.data.repository.WilayahRepositoryImpl
 import com.example.siagabumi.domain.model.CuacaDetail
 import com.example.siagabumi.domain.model.PrakiraanCuaca
 import com.example.siagabumi.domain.model.UiState
 import com.example.siagabumi.domain.model.Wilayah
 import com.example.siagabumi.domain.repository.CuacaRepository
+import com.example.siagabumi.domain.repository.UserPreferencesRepository
 import com.example.siagabumi.domain.repository.WilayahRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -32,7 +34,8 @@ import javax.inject.Inject
 class CuacaViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
     private val cuacaRepository: CuacaRepository,
-    private val wilayahRepository: WilayahRepository
+    private val wilayahRepository: WilayahRepository,
+    private val userPreferencesRepository: UserPreferencesRepository? = null
 ) : ViewModel() {
 
     private val navAdm4: String? = savedStateHandle.get<String>("adm4")?.let { raw ->
@@ -56,13 +59,26 @@ class CuacaViewModel @Inject constructor(
     init {
         viewModelScope.launch {
             wilayahRepository.ensureWilayahDataSeeded()
-            val initial = _currentAdm4.value
-            if (initial == null) {
-                val defaultWilayah = wilayahRepository.getDefaultWilayah()
-                _currentAdm4.value = defaultWilayah.kode
+            if (userPreferencesRepository != null) {
+                userPreferencesRepository.getUserPreferences().collect { prefs ->
+                    val adm4 = if (navAdm4 != null && _currentAdm4.value == navAdm4) {
+                        navAdm4
+                    } else {
+                        prefs.userAdm4.ifBlank { WilayahRepositoryImpl.DEFAULT_WILAYAH.kode }
+                    }
+                    if (_currentAdm4.value != adm4) {
+                        _currentAdm4.value = adm4
+                    }
+                }
             } else {
-                val resolved = wilayahRepository.resolveToAdm4(initial)
-                _currentAdm4.value = resolved
+                val initial = _currentAdm4.value
+                if (initial == null) {
+                    val defaultWilayah = wilayahRepository.getDefaultWilayah()
+                    _currentAdm4.value = defaultWilayah.kode
+                } else {
+                    val resolved = wilayahRepository.resolveToAdm4(initial)
+                    _currentAdm4.value = resolved
+                }
             }
         }
         observeCuacaData()
@@ -81,13 +97,24 @@ class CuacaViewModel @Inject constructor(
                         _isRefreshing,
                         _networkError
                     ) { list, lastUpdatedMillis, isFav, refreshing, networkErr ->
-                        val wilayah = wilayahRepository.getWilayahByKode(adm4)
-                            ?: Wilayah(adm4, "Kemayoran", 4, null, "Kemayoran, Jakarta Pusat")
+                        val currentPrefs = userPreferencesRepository?.getPreferencesSync()
+                        val wilayah = if (currentPrefs != null && currentPrefs.userAdm4 == adm4 && currentPrefs.userLocationName.isNotBlank() && currentPrefs.userLocationName != "Jakarta / Nasional") {
+                            Wilayah(
+                                kode = adm4,
+                                nama = currentPrefs.userLocationName.split(",").firstOrNull()?.trim() ?: currentPrefs.userLocationName,
+                                level = 4,
+                                parentKode = "",
+                                namaLengkap = currentPrefs.userLocationName
+                            )
+                        } else {
+                            wilayahRepository.getWilayahByKode(adm4)
+                                ?: Wilayah(adm4, "Kemayoran", 4, null, "Kemayoran, Jakarta Pusat")
+                        }
 
                         if (list.isEmpty() && networkErr && !refreshing) {
-                            UiState.Error("Gagal mengambil prakiraan cuaca dari BMKG.")
+                            UiState.Error("Gagal mengambil prakiraan cuaca dari BMKG. Periksa koneksi internet.")
                         } else if (list.isEmpty() && !refreshing) {
-                            UiState.Loading
+                            UiState.Error("Data prakiraan cuaca untuk wilayah ini belum tersedia.")
                         } else {
                             val kondisiSaatIni = CuacaMapper.findKondisiSaatIni(list)
                             val today = LocalDate.now().toString()
@@ -136,6 +163,15 @@ class CuacaViewModel @Inject constructor(
     fun selectAdm4(adm4: String) {
         viewModelScope.launch {
             val resolved = wilayahRepository.resolveToAdm4(adm4)
+            val wilayah = wilayahRepository.getWilayahByKode(resolved)
+            val name = wilayah?.namaLengkap ?: wilayah?.nama ?: resolved
+            userPreferencesRepository?.setUserLocation(
+                lat = 0.0,
+                lon = 0.0,
+                name = name,
+                adm4 = resolved,
+                isGps = false
+            )
             _currentAdm4.value = resolved
         }
     }

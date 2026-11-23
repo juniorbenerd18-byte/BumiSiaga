@@ -64,9 +64,12 @@ class DashboardViewModelTest {
     }
 
     private class FakeCuacaRepo : CuacaRepository {
-        override fun getPrakiraanCuaca(adm4: String): Flow<List<PrakiraanCuaca>> = flowOf(emptyList())
+        val cuacaFlow = MutableStateFlow<List<PrakiraanCuaca>>(emptyList())
+        val favoritListFlow = MutableStateFlow<List<Wilayah>>(emptyList())
+
+        override fun getPrakiraanCuaca(adm4: String): Flow<List<PrakiraanCuaca>> = cuacaFlow
         override fun getCacheLastUpdated(adm4: String): Flow<Long?> = flowOf(null)
-        override fun getAllFavorit(): Flow<List<Wilayah>> = flowOf(emptyList())
+        override fun getAllFavorit(): Flow<List<Wilayah>> = favoritListFlow
         override fun isFavorit(adm4: String): Flow<Boolean> = flowOf(false)
         override suspend fun toggleFavorit(wilayah: Wilayah) {}
         override suspend fun refreshCuaca(adm4: String, force: Boolean): Result<Unit> = Result.success(Unit)
@@ -150,5 +153,52 @@ class DashboardViewModelTest {
         assertEquals(2, data.m5PlusCount)
         assertTrue(data.hasSignificantQuake) // because of 6.2 in list
         assertFalse(data.isTsunamiAlert)
+    }
+
+    @Test
+    fun dashboard_userLocation_isNotOverriddenByFavorites() = runTest {
+        val gempaRepo = FakeGempaRepo()
+        val cuacaRepo = FakeCuacaRepo()
+        val wilayahRepo = FakeWilayahRepo()
+        val userPrefsRepo = FakeUserPreferencesRepo()
+
+        // User selected Bandung
+        userPrefsRepo.setUserLocation(lat = 0.0, lon = 0.0, name = "Bandung, Jawa Barat", adm4 = "32.73.01.1001", isGps = false)
+
+        // But user has Jakarta in favorites
+        cuacaRepo.favoritListFlow.value = listOf(com.example.siagabumi.domain.model.Wilayah("31.71.03.1001", "Kemayoran", 4, "", "Kemayoran, Jakarta Pusat"))
+        cuacaRepo.cuacaFlow.value = listOf(
+            com.example.siagabumi.domain.model.PrakiraanCuaca(
+                id = "dummy",
+                adm4 = "32.73.01.1001",
+                datetimeUtc = "2026-11-23T02:00:00Z",
+                localDatetime = "2026-11-23 09:00:00",
+                formattedHour = "09:00",
+                suhu = 28,
+                tutupanAwan = 50,
+                curahHujan = 0.0,
+                weatherCode = 1,
+                weatherDesc = "Cerah Berawan",
+                weatherDescEn = "Partly Cloudy",
+                arahAngin = "E",
+                kecepatanAngin = 5.0,
+                kelembapan = 70,
+                imageUrl = "",
+                tanggal = "2026-11-23"
+            )
+        )
+
+        val viewModel = DashboardViewModel(gempaRepo, cuacaRepo, wilayahRepo, userPrefsRepo)
+
+        backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) {
+            viewModel.uiState.collect()
+        }
+        advanceUntilIdle()
+
+        val state = viewModel.uiState.value
+        assertTrue(state is UiState.Success)
+        val data = (state as UiState.Success).data
+        assertEquals("32.73.01.1001", data.cuacaDetail?.lokasi?.kode)
+        assertEquals("Bandung", data.cuacaDetail?.lokasi?.nama)
     }
 }
