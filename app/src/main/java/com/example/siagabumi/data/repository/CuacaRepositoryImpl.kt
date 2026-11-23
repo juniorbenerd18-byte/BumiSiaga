@@ -12,6 +12,7 @@ import com.example.siagabumi.domain.model.Wilayah
 import com.example.siagabumi.domain.repository.CuacaRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
+import com.example.siagabumi.data.local.dao.WilayahDao
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -20,7 +21,8 @@ class CuacaRepositoryImpl @Inject constructor(
     private val cuacaApi: CuacaApi,
     private val cuacaDao: CuacaDao,
     private val favoritDao: FavoritDao,
-    private val cacheMetaDao: CacheMetaDao
+    private val cacheMetaDao: CacheMetaDao,
+    private val wilayahDao: WilayahDao
 ) : CuacaRepository {
 
     companion object {
@@ -40,16 +42,32 @@ class CuacaRepositoryImpl @Inject constructor(
 
     override suspend fun refreshCuaca(adm4: String, force: Boolean): Result<Unit> {
         return try {
-            val key = cacheKey(adm4)
+            val cleanAdm4 = if (adm4.isBlank() || adm4 == "{adm4}") {
+                WilayahRepositoryImpl.DEFAULT_WILAYAH.kode
+            } else {
+                adm4
+            }
+
+            // If adm4 has fewer than 3 dots (e.g. 35.78 or 32), resolve to a level 4 child
+            val resolvedAdm4 = if (cleanAdm4.count { it == '.' } < 3) {
+                wilayahDao.findLevel4Wilayah(cleanAdm4)?.kode ?: cleanAdm4
+            } else {
+                cleanAdm4
+            }
+
+            val key = cacheKey(resolvedAdm4)
             val lastUpdated = cacheMetaDao.getLastUpdatedSync(key)
             if (!force && isCacheValid(lastUpdated)) {
                 return Result.success(Unit)
             }
 
-            val response = cuacaApi.getPrakiraanCuaca(adm4)
-            val entities = CuacaMapper.toPrakiraanList(adm4, response)
+            val response = cuacaApi.getPrakiraanCuaca(resolvedAdm4)
+            val entities = CuacaMapper.toPrakiraanList(resolvedAdm4, response)
             if (entities.isNotEmpty()) {
-                cuacaDao.replacePrakiraan(adm4, entities)
+                cuacaDao.replacePrakiraan(resolvedAdm4, entities)
+                if (resolvedAdm4 != cleanAdm4) {
+                    cuacaDao.replacePrakiraan(cleanAdm4, entities)
+                }
                 cacheMetaDao.setLastUpdated(CacheMetaEntity(key, System.currentTimeMillis()))
             }
             Result.success(Unit)

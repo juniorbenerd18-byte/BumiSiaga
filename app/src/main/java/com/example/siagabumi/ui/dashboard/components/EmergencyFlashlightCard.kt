@@ -1,6 +1,7 @@
 package com.example.siagabumi.ui.dashboard.components
 
 import androidx.compose.animation.animateColorAsState
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -62,11 +63,12 @@ fun EmergencyFlashlightCard(
         shape = RoundedCornerShape(18.dp),
         colors = CardDefaults.cardColors(
             containerColor = if (isActive) {
-                MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.45f)
+                MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.5f)
             } else {
-                MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
+                MaterialTheme.colorScheme.surface
             }
         ),
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
     ) {
         Row(
@@ -101,13 +103,14 @@ fun EmergencyFlashlightCard(
                     Text(
                         text = stringResource(R.string.dashboard_btn_flashlight),
                         fontWeight = FontWeight.Bold,
-                        fontSize = 15.sp
+                        fontSize = 15.sp,
+                        color = MaterialTheme.colorScheme.onSurface
                     )
                     Text(
                         text = when {
-                            isSosActive -> "Sinyal Darurat SOS Aktif"
-                            isTorchOn -> "Senter Menyala"
-                            else -> "Bantuan penerangan saat mati listrik"
+                            isSosActive -> stringResource(R.string.dashboard_flashlight_sos_active)
+                            isTorchOn -> stringResource(R.string.dashboard_flashlight_torch_on)
+                            else -> stringResource(R.string.dashboard_flashlight_hint)
                         },
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
@@ -127,7 +130,7 @@ fun EmergencyFlashlightCard(
                     )
                 ) {
                     Text(
-                        text = if (isTorchOn) stringResource(R.string.dashboard_flashlight_off) else "Senter",
+                        text = if (isTorchOn) stringResource(R.string.dashboard_flashlight_off) else stringResource(R.string.dashboard_flashlight_btn_on),
                         fontSize = 12.sp,
                         fontWeight = FontWeight.Bold
                     )
@@ -139,7 +142,7 @@ fun EmergencyFlashlightCard(
                     shape = RoundedCornerShape(10.dp)
                 ) {
                     Text(
-                        text = if (isSosActive) "Stop" else "SOS",
+                        text = if (isSosActive) stringResource(R.string.dashboard_flashlight_btn_stop) else stringResource(R.string.dashboard_flashlight_btn_sos),
                         fontSize = 12.sp,
                         fontWeight = FontWeight.Bold,
                         color = if (isSosActive) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.primary

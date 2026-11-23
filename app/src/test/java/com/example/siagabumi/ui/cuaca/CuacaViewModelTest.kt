@@ -67,6 +67,7 @@ class CuacaViewModelTest {
         override suspend fun getWilayahByKode(kode: String): Wilayah = defaultWilayah
         override suspend fun ensureWilayahDataSeeded(onProgress: ((Float) -> Unit)?) {}
         override suspend fun getDefaultWilayah(): Wilayah = defaultWilayah
+        override suspend fun resolveToAdm4(kode: String): String = kode
     }
 
     private fun createDummyPrakiraan(adm4: String): PrakiraanCuaca {

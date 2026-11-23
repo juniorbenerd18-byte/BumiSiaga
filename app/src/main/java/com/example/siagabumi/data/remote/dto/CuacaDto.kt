@@ -48,19 +48,17 @@ data class CuacaLokasiDto(
 @Serializable
 data class CuacaItemDto(
     @SerialName("datetime") val datetime: String? = null,
-    @SerialName("t") val t: Int? = null, // suhu °C
-    @SerialName("tcc") val tcc: Int? = null, // tutupan awan %
+    @SerialName("t") val t: Double? = null, // suhu °C (tolerant to float or int)
+    @SerialName("tcc") val tcc: Double? = null, // tutupan awan %
     @SerialName("tp") val tp: Double? = null, // curah hujan mm
     @SerialName("weather") val weather: Int? = null,
     @SerialName("weather_desc") val weatherDesc: String? = null,
     @SerialName("weather_desc_en") val weatherDescEn: String? = null,
-    @SerialName("wd_deg") val wdDeg: Int? = null,
+    @SerialName("wd_deg") val wdDeg: Double? = null,
     @SerialName("wd") val wd: String? = null,
     @SerialName("wd_to") val wdTo: String? = null,
     @SerialName("ws") val ws: Double? = null, // kecepatan angin km/jam
-    @SerialName("hu") val hu: Int? = null, // kelembapan %
-    @SerialName("vs") val vs: String? = null,
-    @SerialName("vs_text") val vsText: String? = null,
+    @SerialName("hu") val hu: Double? = null, // kelembapan %
     @SerialName("time_index") val timeIndex: String? = null,
     @SerialName("analysis_date") val analysisDate: String? = null,
     @SerialName("image") val image: String? = null,

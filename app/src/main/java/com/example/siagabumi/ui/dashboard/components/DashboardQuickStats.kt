@@ -1,5 +1,6 @@
 package com.example.siagabumi.ui.dashboard.components
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -23,6 +24,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
@@ -70,8 +72,8 @@ fun DashboardQuickStats(
                 icon = Icons.AutoMirrored.Filled.ListAlt,
                 iconTint = MaterialTheme.colorScheme.primary,
                 label = stringResource(R.string.dashboard_stat_m5_count),
-                value = "${data.m5PlusCount} Aktif",
-                subValue = "Katalog BMKG",
+                value = stringResource(R.string.dashboard_stat_m5_active, data.m5PlusCount),
+                subValue = stringResource(R.string.dashboard_stat_bmkg_catalog),
                 onClick = onQuakeClick,
                 modifier = Modifier.weight(1f)
             )
@@ -84,13 +86,18 @@ fun DashboardQuickStats(
             horizontalArrangement = Arrangement.spacedBy(10.dp)
         ) {
             // Stat 3: Cuaca Lokal
+            val isEn = LocalConfiguration.current.locales[0].language == "en"
             val cuaca = data.cuacaDetail
+            val weatherDesc = cuaca?.kondisiSaatIni?.let {
+                if (isEn && it.weatherDescEn.isNotBlank()) it.weatherDescEn else it.weatherDesc
+            } ?: stringResource(R.string.dashboard_stat_view_weather)
+
             QuickStatCard(
                 icon = Icons.Default.WbSunny,
                 iconTint = Color(0xFFF59E0B),
                 label = cuaca?.lokasi?.nama ?: stringResource(R.string.dashboard_stat_current_temp),
                 value = cuaca?.kondisiSaatIni?.let { "${it.suhu}°C" } ?: "-",
-                subValue = cuaca?.kondisiSaatIni?.weatherDesc ?: "Lihat Cuaca",
+                subValue = weatherDesc,
                 onClick = onWeatherClick,
                 modifier = Modifier.weight(1f)
             )
@@ -102,7 +109,7 @@ fun DashboardQuickStats(
                 iconTint = if (isTsunami) MagRed else MagGreen,
                 label = stringResource(R.string.dashboard_stat_tsunami_status),
                 value = if (isTsunami) stringResource(R.string.dashboard_stat_alert_label) else stringResource(R.string.dashboard_stat_safe_label),
-                subValue = if (isTsunami) "Peringatan Aktif" else "Kondisi Aman",
+                subValue = if (isTsunami) stringResource(R.string.dashboard_stat_tsunami_active) else stringResource(R.string.dashboard_stat_tsunami_safe),
                 onClick = onQuakeClick,
                 modifier = Modifier.weight(1f)
             )
@@ -124,9 +131,10 @@ private fun QuickStatCard(
         modifier = modifier.clickable { onClick() },
         shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceVariant
+            containerColor = MaterialTheme.colorScheme.surface
         ),
-        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)),
+        elevation = CardDefaults.cardElevation(defaultElevation = 1.5.dp)
     ) {
         Column(modifier = Modifier.padding(14.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically) {

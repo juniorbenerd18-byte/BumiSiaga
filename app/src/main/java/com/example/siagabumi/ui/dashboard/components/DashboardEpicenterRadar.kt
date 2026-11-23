@@ -302,7 +302,7 @@ fun DashboardEpicenterRadar(
                         ) {
                             Text(
                                 text = mmiEstimate.scale,
-                                color = Color.White,
+                                color = if (mmiEstimate.level == 3) Color(0xFF1E293B) else Color.White,
                                 fontWeight = FontWeight.ExtraBold,
                                 fontSize = 13.sp,
                                 modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)

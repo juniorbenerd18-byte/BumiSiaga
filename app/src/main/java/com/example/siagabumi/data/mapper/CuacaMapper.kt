@@ -53,15 +53,15 @@ object CuacaMapper {
                 adm4 = adm4,
                 datetimeUtc = datetimeUtc,
                 localDatetime = localDt,
-                suhu = item.t ?: 0,
-                tutupanAwan = item.tcc ?: 0,
+                suhu = item.t?.toInt() ?: 0,
+                tutupanAwan = item.tcc?.toInt() ?: 0,
                 curahHujan = item.tp ?: 0.0,
                 weatherCode = item.weather ?: 0,
                 weatherDesc = item.weatherDesc?.trim().orEmpty(),
                 weatherDescEn = item.weatherDescEn?.trim().orEmpty(),
                 arahAngin = item.wd?.trim().orEmpty(),
                 kecepatanAngin = item.ws ?: 0.0,
-                kelembapan = item.hu ?: 0,
+                kelembapan = item.hu?.toInt() ?: 0,
                 imageUrl = encodeImageUrl(item.image),
                 tanggal = tanggal,
                 cachedAt = System.currentTimeMillis()
@@ -97,6 +97,8 @@ object CuacaMapper {
             val suhuMax = items.maxOfOrNull { it.suhu } ?: 0
             val dominantDesc = items.groupBy { it.weatherDesc }
                 .maxByOrNull { it.value.size }?.key ?: items.firstOrNull()?.weatherDesc.orEmpty()
+            val dominantDescEn = items.groupBy { it.weatherDescEn }
+                .maxByOrNull { it.value.size }?.key ?: items.firstOrNull()?.weatherDescEn.orEmpty()
             val dominantIcon = items.firstOrNull { it.weatherDesc == dominantDesc }?.imageUrl
                 ?: items.firstOrNull()?.imageUrl.orEmpty()
             val totalRain = items.sumOf { it.curahHujan }
@@ -109,6 +111,7 @@ object CuacaMapper {
                 suhuMin = suhuMin,
                 suhuMax = suhuMax,
                 cuacaDominan = dominantDesc,
+                cuacaDominanEn = dominantDescEn,
                 iconDominanUrl = dominantIcon,
                 totalCurahHujan = totalRain,
                 daftarPrakiraan = items

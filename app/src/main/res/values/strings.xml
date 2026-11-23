@@ -53,6 +53,7 @@
     <string name="gempa_felt">Dirasakan di: %1$s</string>
     <string name="gempa_felt_title">Dirasakan (Skala MMI)</string>
     <string name="gempa_coordinates">Koordinat: %1$s</string>
+    <string name="gempa_potential_label">Potensi Tsunami</string>
     <string name="gempa_share">Bagikan</string>
     <string name="gempa_share_text">Info Gempa BMKG\nMagnitudo: %1$.1f\nKedalaman: %2$d km\nLokasi: %3$s\nWaktu: %4$s\nPotensi: %5$s\n%6$s\n\nSumber data: BMKG</string>
     <string name="gempa_detail_title">Detail Gempa</string>
@@ -184,4 +185,17 @@
     <string name="depth_intermediate">Gempa Menengah (60–300 km)</string>
     <string name="depth_deep">Gempa Dalam (> 300 km)</string>
     <string name="dashboard_btn_open_shakemap">Buka Shakemap Penuh</string>
+
+    <!-- Additional Flashlight & Quick Stats -->
+    <string name="dashboard_flashlight_sos_active">Sinyal Darurat SOS Aktif</string>
+    <string name="dashboard_flashlight_torch_on">Senter Menyala</string>
+    <string name="dashboard_flashlight_hint">Bantuan penerangan saat mati listrik</string>
+    <string name="dashboard_flashlight_btn_on">Senter</string>
+    <string name="dashboard_flashlight_btn_stop">Stop</string>
+    <string name="dashboard_flashlight_btn_sos">SOS</string>
+    <string name="dashboard_stat_m5_active">%1$d Aktif</string>
+    <string name="dashboard_stat_bmkg_catalog">Katalog BMKG</string>
+    <string name="dashboard_stat_tsunami_active">Peringatan Aktif</string>
+    <string name="dashboard_stat_tsunami_safe">Kondisi Aman</string>
+    <string name="dashboard_stat_view_weather">Lihat Cuaca</string>
 </resources>

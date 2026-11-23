@@ -8,4 +8,5 @@ interface WilayahRepository {
     suspend fun getWilayahByKode(kode: String): Wilayah?
     suspend fun ensureWilayahDataSeeded(onProgress: ((Float) -> Unit)? = null)
     suspend fun getDefaultWilayah(): Wilayah
+    suspend fun resolveToAdm4(kode: String): String
 }

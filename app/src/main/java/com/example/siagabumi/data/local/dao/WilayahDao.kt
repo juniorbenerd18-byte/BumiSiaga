@@ -16,6 +16,9 @@ interface WilayahDao {
     @Query("SELECT * FROM wilayah WHERE kode = :kode LIMIT 1")
     suspend fun getWilayahByKode(kode: String): WilayahEntity?
 
+    @Query("SELECT * FROM wilayah WHERE (kode = :kode OR kode LIKE :kode || '.%') AND level = 4 LIMIT 1")
+    suspend fun findLevel4Wilayah(kode: String): WilayahEntity?
+
     @Query("SELECT COUNT(*) FROM wilayah")
     suspend fun countWilayah(): Int
 

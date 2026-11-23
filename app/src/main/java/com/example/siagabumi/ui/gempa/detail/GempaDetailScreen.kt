@@ -2,6 +2,7 @@ package com.example.siagabumi.ui.gempa.detail
 
 import android.content.Context
 import android.content.Intent
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -135,8 +136,9 @@ fun GempaDetailContent(
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(16.dp),
                 colors = CardDefaults.cardColors(
-                    containerColor = MaterialTheme.colorScheme.surfaceVariant
+                    containerColor = MaterialTheme.colorScheme.surface
                 ),
+                border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)),
                 elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
             ) {
                 Column(modifier = Modifier.padding(16.dp)) {
@@ -186,7 +188,7 @@ fun GempaDetailContent(
 
                     DetailItemRow(
                         icon = Icons.Default.Info,
-                        label = "Potensi",
+                        label = stringResource(R.string.gempa_potential_label),
                         value = gempa.potensi
                     )
 
@@ -194,7 +196,7 @@ fun GempaDetailContent(
                         Spacer(modifier = Modifier.height(8.dp))
                         DetailItemRow(
                             icon = Icons.Default.Info,
-                            label = "Dirasakan",
+                            label = stringResource(R.string.gempa_felt_title),
                             value = gempa.dirasakan
                         )
                     }

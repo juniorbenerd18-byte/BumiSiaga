@@ -25,6 +25,7 @@ data class RingkasanHarianCuaca(
     val suhuMin: Int,
     val suhuMax: Int,
     val cuacaDominan: String,
+    val cuacaDominanEn: String = "",
     val iconDominanUrl: String,
     val totalCurahHujan: Double,
     val daftarPrakiraan: List<PrakiraanCuaca>

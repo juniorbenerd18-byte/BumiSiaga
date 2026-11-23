@@ -5,6 +5,7 @@ import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkVertically
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -32,6 +33,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -70,6 +72,8 @@ fun DailyExpandableItem(
     modifier: Modifier = Modifier
 ) {
     var expanded by remember { mutableStateOf(false) }
+    val isEn = LocalConfiguration.current.locales[0].language == "en"
+    val displayDominant = if (isEn && daily.cuacaDominanEn.isNotBlank()) daily.cuacaDominanEn else daily.cuacaDominan
 
     Card(
         modifier = modifier
@@ -79,6 +83,7 @@ fun DailyExpandableItem(
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.surface
         ),
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)),
         elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
     ) {
         Column(modifier = Modifier.padding(14.dp)) {
@@ -92,7 +97,7 @@ fun DailyExpandableItem(
                             .data(daily.iconDominanUrl)
                             .crossfade(true)
                             .build(),
-                        contentDescription = daily.cuacaDominan,
+                        contentDescription = displayDominant,
                         modifier = Modifier.size(36.dp)
                     )
                     Spacer(modifier = Modifier.width(12.dp))
@@ -106,7 +111,7 @@ fun DailyExpandableItem(
                         color = MaterialTheme.colorScheme.onSurface
                     )
                     Text(
-                        text = daily.cuacaDominan,
+                        text = displayDominant,
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -146,6 +151,7 @@ fun DailyExpandableItem(
                     HorizontalDivider(modifier = Modifier.padding(bottom = 10.dp))
 
                     daily.daftarPrakiraan.forEach { item ->
+                        val itemDesc = if (isEn && item.weatherDescEn.isNotBlank()) item.weatherDescEn else item.weatherDesc
                         Row(
                             modifier = Modifier
                                 .fillMaxWidth()
@@ -165,14 +171,14 @@ fun DailyExpandableItem(
                                         .data(item.imageUrl)
                                         .crossfade(true)
                                         .build(),
-                                    contentDescription = item.weatherDesc,
+                                    contentDescription = itemDesc,
                                     modifier = Modifier.size(24.dp)
                                 )
                                 Spacer(modifier = Modifier.width(8.dp))
                             }
 
                             Text(
-                                text = item.weatherDesc,
+                                text = itemDesc,
                                 style = MaterialTheme.typography.bodySmall,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                                 modifier = Modifier.weight(1f)

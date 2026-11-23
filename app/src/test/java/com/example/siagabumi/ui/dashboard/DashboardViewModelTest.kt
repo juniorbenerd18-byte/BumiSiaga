@@ -76,6 +76,7 @@ class DashboardViewModelTest {
         override suspend fun getWilayahByKode(kode: String): Wilayah? = null
         override suspend fun ensureWilayahDataSeeded(onProgress: ((Float) -> Unit)?) {}
         override suspend fun getDefaultWilayah(): Wilayah = WilayahRepositoryImpl.DEFAULT_WILAYAH
+        override suspend fun resolveToAdm4(kode: String): String = kode
     }
 
     private class FakeUserPreferencesRepo : UserPreferencesRepository {

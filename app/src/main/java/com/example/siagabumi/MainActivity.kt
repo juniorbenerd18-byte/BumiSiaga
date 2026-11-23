@@ -73,15 +73,25 @@ class MainActivity : ComponentActivity() {
                 AppThemeMode.SYSTEM -> isSystemInDarkTheme()
             }
 
-            val currentConfig = LocalConfiguration.current
-            val locale = remember(userPrefs.language) { Locale.forLanguageTag(userPrefs.language) }
-            val localizedConfig = remember(userPrefs.language, currentConfig) {
-                Configuration(currentConfig).apply {
-                    setLocale(locale)
+            val context = LocalContext.current
+            val targetLocale = remember(userPrefs.language) {
+                if (userPrefs.language == "en") Locale.ENGLISH else Locale.forLanguageTag("in")
+            }
+            val localizedContext = remember(userPrefs.language, context) {
+                val config = Configuration(context.resources.configuration).apply {
+                    setLocale(targetLocale)
+                    setLayoutDirection(targetLocale)
                 }
+                context.createConfigurationContext(config)
+            }
+            val localizedConfig = remember(userPrefs.language, localizedContext) {
+                localizedContext.resources.configuration
             }
 
-            CompositionLocalProvider(LocalConfiguration provides localizedConfig) {
+            CompositionLocalProvider(
+                LocalConfiguration provides localizedConfig,
+                LocalContext provides localizedContext
+            ) {
                 SiagaBumiTheme(darkTheme = isDark) {
                     MainApp()
                 }
@@ -114,7 +124,7 @@ fun MainApp() {
     val bottomNavItems = listOf(
         Triple(Screen.Dashboard.route, R.string.nav_dashboard, Icons.Default.Dashboard),
         Triple(Screen.Gempa.route, R.string.nav_gempa, Icons.Default.Warning),
-        Triple(Screen.Cuaca.route, R.string.nav_cuaca, Icons.Default.Cloud),
+        Triple(Screen.Cuaca.createRoute(), R.string.nav_cuaca, Icons.Default.Cloud),
         Triple(Screen.Favorit.route, R.string.nav_favorit, Icons.Default.Favorite)
     )
 
@@ -122,6 +132,7 @@ fun MainApp() {
         Screen.Dashboard.route,
         Screen.Gempa.route,
         Screen.Cuaca.route,
+        Screen.Cuaca.createRoute(),
         Screen.Favorit.route
     )
 

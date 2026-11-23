@@ -67,6 +67,13 @@ class WilayahSearchViewModel @Inject constructor(
         _searchQuery.value = newQuery
     }
 
+    fun resolveAdm4(wilayah: Wilayah, onResolved: (String) -> Unit) {
+        viewModelScope.launch {
+            val adm4 = wilayahRepository.resolveToAdm4(wilayah.kode)
+            onResolved(adm4)
+        }
+    }
+
     fun hasLocationPermission(): Boolean = locationHelper?.hasLocationPermission() == true
 
     fun detectGpsLocation(onResult: (GpsLocationResult?) -> Unit) {

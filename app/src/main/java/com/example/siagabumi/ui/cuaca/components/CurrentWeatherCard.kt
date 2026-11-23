@@ -29,6 +29,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -100,6 +101,9 @@ fun CurrentWeatherCard(
 
             // Main Weather Hero
             if (current != null) {
+                val isEn = LocalConfiguration.current.locales[0].language == "en"
+                val displayDesc = if (isEn && current.weatherDescEn.isNotBlank()) current.weatherDescEn else current.weatherDesc
+
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     verticalAlignment = Alignment.CenterVertically,
@@ -113,7 +117,7 @@ fun CurrentWeatherCard(
                             color = MaterialTheme.colorScheme.onPrimaryContainer
                         )
                         Text(
-                            text = current.weatherDesc,
+                            text = displayDesc,
                             style = MaterialTheme.typography.titleMedium,
                             fontWeight = FontWeight.Medium,
                             color = MaterialTheme.colorScheme.onPrimaryContainer
@@ -126,7 +130,7 @@ fun CurrentWeatherCard(
                                 .data(current.imageUrl)
                                 .crossfade(true)
                                 .build(),
-                            contentDescription = current.weatherDesc,
+                            contentDescription = displayDesc,
                             modifier = Modifier.size(90.dp)
                         )
                     }

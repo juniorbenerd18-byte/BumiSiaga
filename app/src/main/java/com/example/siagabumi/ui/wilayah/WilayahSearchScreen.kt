@@ -4,6 +4,7 @@ import android.Manifest
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -183,7 +184,8 @@ fun WilayahSearchScreen(
                 shape = RoundedCornerShape(14.dp),
                 colors = CardDefaults.cardColors(
                     containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.5f)
-                )
+                ),
+                border = BorderStroke(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.3f))
             ) {
                 Row(
                     modifier = Modifier.padding(14.dp),
@@ -253,7 +255,11 @@ fun WilayahSearchScreen(
                     items(items = results, key = { it.kode }) { wilayah ->
                         WilayahItemCard(
                             wilayah = wilayah,
-                            onClick = { onWilayahSelected(wilayah.kode) }
+                            onClick = {
+                                viewModel.resolveAdm4(wilayah) { adm4 ->
+                                    onWilayahSelected(adm4)
+                                }
+                            }
                         )
                     }
                 }
@@ -277,6 +283,7 @@ fun WilayahItemCard(
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.surface
         ),
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)),
         elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
     ) {
         Row(

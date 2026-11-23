@@ -53,6 +53,7 @@
     <string name="gempa_felt">Felt in: %1$s</string>
     <string name="gempa_felt_title">Felt Intensity (MMI)</string>
     <string name="gempa_coordinates">Coordinates: %1$s</string>
+    <string name="gempa_potential_label">Tsunami Potential</string>
     <string name="gempa_share">Share</string>
     <string name="gempa_share_text">BMKG Earthquake Info\nMagnitude: %1$.1f\nDepth: %2$d km\nLocation: %3$s\nTime: %4$s\nPotential: %5$s\n%6$s\n\nData source: BMKG</string>
     <string name="gempa_detail_title">Earthquake Detail</string>
@@ -184,4 +185,17 @@
     <string name="depth_intermediate">Intermediate Quake (60–300 km)</string>
     <string name="depth_deep">Deep Quake (> 300 km)</string>
     <string name="dashboard_btn_open_shakemap">Enlarge Shakemap</string>
+
+    <!-- Additional Flashlight & Quick Stats -->
+    <string name="dashboard_flashlight_sos_active">SOS Emergency Signal Active</string>
+    <string name="dashboard_flashlight_torch_on">Flashlight Turned On</string>
+    <string name="dashboard_flashlight_hint">Emergency illumination support</string>
+    <string name="dashboard_flashlight_btn_on">Torch</string>
+    <string name="dashboard_flashlight_btn_stop">Stop</string>
+    <string name="dashboard_flashlight_btn_sos">SOS</string>
+    <string name="dashboard_stat_m5_active">%1$d Active</string>
+    <string name="dashboard_stat_bmkg_catalog">BMKG Catalog</string>
+    <string name="dashboard_stat_tsunami_active">Warning Active</string>
+    <string name="dashboard_stat_tsunami_safe">Safe Condition</string>
+    <string name="dashboard_stat_view_weather">View Weather</string>
 </resources>

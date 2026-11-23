@@ -35,12 +35,13 @@ class CuacaViewModel @Inject constructor(
     private val wilayahRepository: WilayahRepository
 ) : ViewModel() {
 
-    private val navAdm4: String? = savedStateHandle.get<String>("adm4")?.let {
-        try {
-            URLDecoder.decode(it, StandardCharsets.UTF_8.toString())
+    private val navAdm4: String? = savedStateHandle.get<String>("adm4")?.let { raw ->
+        val decoded = try {
+            URLDecoder.decode(raw, StandardCharsets.UTF_8.toString())
         } catch (_: Exception) {
-            it
+            raw
         }
+        if (decoded.isBlank() || decoded == "{adm4}") null else decoded
     }
 
     private val _currentAdm4 = MutableStateFlow<String?>(navAdm4)
@@ -55,9 +56,13 @@ class CuacaViewModel @Inject constructor(
     init {
         viewModelScope.launch {
             wilayahRepository.ensureWilayahDataSeeded()
-            if (_currentAdm4.value == null) {
+            val initial = _currentAdm4.value
+            if (initial == null) {
                 val defaultWilayah = wilayahRepository.getDefaultWilayah()
                 _currentAdm4.value = defaultWilayah.kode
+            } else {
+                val resolved = wilayahRepository.resolveToAdm4(initial)
+                _currentAdm4.value = resolved
             }
         }
         observeCuacaData()
@@ -129,7 +134,10 @@ class CuacaViewModel @Inject constructor(
     }
 
     fun selectAdm4(adm4: String) {
-        _currentAdm4.value = adm4
+        viewModelScope.launch {
+            val resolved = wilayahRepository.resolveToAdm4(adm4)
+            _currentAdm4.value = resolved
+        }
     }
 
     fun refresh() {

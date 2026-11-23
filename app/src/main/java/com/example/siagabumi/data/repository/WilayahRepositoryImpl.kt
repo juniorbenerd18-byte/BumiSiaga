@@ -98,6 +98,12 @@ class WilayahRepositoryImpl @Inject constructor(
         return local?.toDomain() ?: DEFAULT_WILAYAH
     }
 
+    override suspend fun resolveToAdm4(kode: String): String {
+        if (kode.count { it == '.' } >= 3) return kode
+        val entity = wilayahDao.findLevel4Wilayah(kode)
+        return entity?.kode ?: kode
+    }
+
     override suspend fun ensureWilayahDataSeeded(onProgress: ((Float) -> Unit)?) {
         withContext(Dispatchers.IO) {
             val count = wilayahDao.countWilayah()
