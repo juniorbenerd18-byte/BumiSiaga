@@ -3,6 +3,7 @@ package com.example.siagabumi.ui.wilayah
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.siagabumi.domain.model.Wilayah
+import com.example.siagabumi.domain.repository.CuacaRepository
 import com.example.siagabumi.domain.repository.UserPreferencesRepository
 import com.example.siagabumi.domain.repository.WilayahRepository
 import com.example.siagabumi.util.GpsLocationResult
@@ -26,9 +27,27 @@ import javax.inject.Inject
 @HiltViewModel
 class WilayahSearchViewModel @Inject constructor(
     private val wilayahRepository: WilayahRepository,
+    private val cuacaRepository: CuacaRepository? = null,
     private val userPreferencesRepository: UserPreferencesRepository? = null,
     private val locationHelper: LocationHelper? = null
 ) : ViewModel() {
+
+    val popularWilayahList: List<Wilayah> = listOf(
+        Wilayah("31.71.03.1001", "Kemayoran", 4, "31.71.03", "Kemayoran, Jakarta Pusat, DKI Jakarta"),
+        Wilayah("31.74.04.1001", "Kebayoran Baru", 4, "31.74.04", "Kebayoran Baru, Jakarta Selatan, DKI Jakarta"),
+        Wilayah("32.73.01.1001", "Bandung", 4, "32.73.01", "Sukasari, Kota Bandung, Jawa Barat"),
+        Wilayah("32.76.01.1001", "Depok", 4, "32.76.01", "Pancoran Mas, Kota Depok, Jawa Barat"),
+        Wilayah("32.75.01.1001", "Bekasi", 4, "32.75.01", "Bekasi Timur, Kota Bekasi, Jawa Barat"),
+        Wilayah("32.71.01.1001", "Bogor", 4, "32.71.01", "Bogor Tengah, Kota Bogor, Jawa Barat"),
+        Wilayah("35.78.01.1001", "Surabaya", 4, "35.78.01", "Genteng, Kota Surabaya, Jawa Timur"),
+        Wilayah("33.74.01.1001", "Semarang", 4, "33.74.01", "Semarang Tengah, Kota Semarang, Jawa Tengah"),
+        Wilayah("34.71.01.1001", "Yogyakarta", 4, "34.71.01", "Danurejan, Kota Yogyakarta, D.I. Yogyakarta"),
+        Wilayah("51.71.01.1001", "Denpasar", 4, "51.71.01", "Denpasar Barat, Kota Denpasar, Bali"),
+        Wilayah("12.71.01.1001", "Medan", 4, "12.71.01", "Medan Kota, Kota Medan, Sumatera Utara"),
+        Wilayah("73.71.01.1001", "Makassar", 4, "73.71.01", "Ujung Pandang, Kota Makassar, Sulawesi Selatan"),
+        Wilayah("16.71.01.1001", "Palembang", 4, "16.71.01", "Ilir Barat I, Kota Palembang, Sumatera Selatan"),
+        Wilayah("64.71.01.1001", "Balikpapan", 4, "64.71.01", "Balikpapan Kota, Kota Balikpapan, Kalimantan Timur")
+    )
 
     private val _searchQuery = MutableStateFlow("")
     val searchQuery: StateFlow<String> = _searchQuery.asStateFlow()
@@ -77,6 +96,7 @@ class WilayahSearchViewModel @Inject constructor(
                 adm4 = adm4,
                 isGps = false
             )
+            cuacaRepository?.refreshCuaca(adm4, force = true)
             onResolved(adm4)
         }
     }
@@ -102,6 +122,7 @@ class WilayahSearchViewModel @Inject constructor(
                         adm4 = adm4,
                         isGps = true
                     )
+                    cuacaRepository?.refreshCuaca(adm4, force = true)
                     val cityName = result.locationName
                         .split(",")
                         .firstOrNull()

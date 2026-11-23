@@ -85,6 +85,7 @@
 
     <!-- Wilayah -->
     <string name="wilayah_search_title">Select Location</string>
+    <string name="wilayah_popular_title">Popular Cities &amp; Regions</string>
     <string name="wilayah_search_placeholder">Type at least 3 letters of village/district</string>
     <string name="wilayah_importing">Preparing location database…</string>
     <string name="wilayah_empty">No locations found</string>

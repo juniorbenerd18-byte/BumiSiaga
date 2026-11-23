@@ -57,7 +57,8 @@ class CuacaRepositoryImpl @Inject constructor(
 
             val key = cacheKey(resolvedAdm4)
             val lastUpdated = cacheMetaDao.getLastUpdatedSync(key)
-            if (!force && isCacheValid(lastUpdated)) {
+            val cachedCount = cuacaDao.countByAdm4(resolvedAdm4)
+            if (!force && isCacheValid(lastUpdated) && cachedCount > 0) {
                 return Result.success(Unit)
             }
 
@@ -66,7 +67,13 @@ class CuacaRepositoryImpl @Inject constructor(
             if (entities.isNotEmpty()) {
                 cuacaDao.replacePrakiraan(resolvedAdm4, entities)
                 if (resolvedAdm4 != cleanAdm4) {
-                    cuacaDao.replacePrakiraan(cleanAdm4, entities)
+                    val cleanEntities = entities.map {
+                        it.copy(
+                            id = "${cleanAdm4}_${it.datetimeUtc.ifEmpty { it.localDatetime }}",
+                            adm4 = cleanAdm4
+                        )
+                    }
+                    cuacaDao.replacePrakiraan(cleanAdm4, cleanEntities)
                 }
                 cacheMetaDao.setLastUpdated(CacheMetaEntity(key, System.currentTimeMillis()))
             }

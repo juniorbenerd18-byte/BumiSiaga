@@ -14,6 +14,9 @@ abstract class CuacaDao {
     @Query("SELECT * FROM prakiraan_cuaca WHERE adm4 = :adm4 ORDER BY datetimeUtc ASC")
     abstract fun getPrakiraanByAdm4(adm4: String): Flow<List<PrakiraanEntity>>
 
+    @Query("SELECT COUNT(*) FROM prakiraan_cuaca WHERE adm4 = :adm4")
+    abstract suspend fun countByAdm4(adm4: String): Int
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     abstract suspend fun insertAll(list: List<PrakiraanEntity>)
 

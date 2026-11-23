@@ -85,6 +85,7 @@
 
     <!-- Wilayah -->
     <string name="wilayah_search_title">Pilih Wilayah</string>
+    <string name="wilayah_popular_title">Pilihan Wilayah &amp; Kota Populer</string>
     <string name="wilayah_search_placeholder">Ketik minimal 3 huruf nama desa/kelurahan</string>
     <string name="wilayah_importing">Menyiapkan data wilayah…</string>
     <string name="wilayah_empty">Wilayah tidak ditemukan</string>

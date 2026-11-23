@@ -248,11 +248,24 @@ fun WilayahSearchScreen(
                     }
                 }
             } else {
+                val displayList = if (query.length < 2) viewModel.popularWilayahList else results
+                
+                if (query.length < 2) {
+                    Spacer(modifier = Modifier.height(6.dp))
+                    Text(
+                        text = stringResource(R.string.wilayah_popular_title),
+                        style = MaterialTheme.typography.titleSmall,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp)
+                    )
+                }
+
                 LazyColumn(
                     modifier = Modifier.fillMaxSize(),
-                    contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp)
+                    contentPadding = PaddingValues(horizontal = 16.dp, vertical = 6.dp)
                 ) {
-                    items(items = results, key = { it.kode }) { wilayah ->
+                    items(items = displayList, key = { it.kode }) { wilayah ->
                         WilayahItemCard(
                             wilayah = wilayah,
                             onClick = {

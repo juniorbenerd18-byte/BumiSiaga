@@ -53,10 +53,15 @@ class CuacaViewModel @Inject constructor(
     private val _uiState = MutableStateFlow<UiState<CuacaDetail>>(UiState.Loading)
     val uiState: StateFlow<UiState<CuacaDetail>> = _uiState.asStateFlow()
 
-    private val _isRefreshing = MutableStateFlow(false)
+    private val _isRefreshing = MutableStateFlow(true)
     private val _networkError = MutableStateFlow(false)
 
     init {
+        loadData()
+        observeCuacaData()
+    }
+
+    private fun loadData() {
         viewModelScope.launch {
             wilayahRepository.ensureWilayahDataSeeded()
             if (userPreferencesRepository != null) {
@@ -68,20 +73,22 @@ class CuacaViewModel @Inject constructor(
                     }
                     if (_currentAdm4.value != adm4) {
                         _currentAdm4.value = adm4
+                        refreshCuaca(adm4, force = false)
+                    } else {
+                        refreshCuaca(adm4, force = false)
                     }
                 }
             } else {
                 val initial = _currentAdm4.value
-                if (initial == null) {
-                    val defaultWilayah = wilayahRepository.getDefaultWilayah()
-                    _currentAdm4.value = defaultWilayah.kode
+                val resolved = if (initial == null) {
+                    wilayahRepository.getDefaultWilayah().kode
                 } else {
-                    val resolved = wilayahRepository.resolveToAdm4(initial)
-                    _currentAdm4.value = resolved
+                    wilayahRepository.resolveToAdm4(initial)
                 }
+                _currentAdm4.value = resolved
+                refreshCuaca(resolved, force = false)
             }
         }
-        observeCuacaData()
     }
 
     private fun observeCuacaData() {
@@ -111,10 +118,12 @@ class CuacaViewModel @Inject constructor(
                                 ?: Wilayah(adm4, "Kemayoran", 4, null, "Kemayoran, Jakarta Pusat")
                         }
 
-                        if (list.isEmpty() && networkErr && !refreshing) {
-                            UiState.Error("Gagal mengambil prakiraan cuaca dari BMKG. Periksa koneksi internet.")
-                        } else if (list.isEmpty() && !refreshing) {
-                            UiState.Error("Data prakiraan cuaca untuk wilayah ini belum tersedia.")
+                        if (list.isEmpty()) {
+                            if (networkErr && !refreshing) {
+                                UiState.Error("Gagal mengambil prakiraan cuaca dari BMKG. Periksa koneksi internet.")
+                            } else {
+                                UiState.Loading
+                            }
                         } else {
                             val kondisiSaatIni = CuacaMapper.findKondisiSaatIni(list)
                             val today = LocalDate.now().toString()
@@ -147,15 +156,6 @@ class CuacaViewModel @Inject constructor(
                 }
             }.collect { state ->
                 _uiState.value = state
-            }
-        }
-
-        // Also trigger refresh when adm4 is set or changed
-        viewModelScope.launch {
-            _currentAdm4.collect { adm4 ->
-                if (adm4 != null) {
-                    refreshCuaca(adm4, force = false)
-                }
             }
         }
     }

@@ -40,6 +40,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
@@ -207,7 +208,10 @@ fun MainApp() {
         NavHost(
             navController = navController,
             startDestination = Screen.Dashboard.route,
-            modifier = Modifier.padding(innerPadding)
+            modifier = Modifier.padding(
+                top = if (isTopLevelDestination) innerPadding.calculateTopPadding() else 0.dp,
+                bottom = if (isTopLevelDestination) innerPadding.calculateBottomPadding() else 0.dp
+            )
         ) {
             composable(Screen.Dashboard.route) {
                 com.example.siagabumi.ui.dashboard.DashboardScreen(
