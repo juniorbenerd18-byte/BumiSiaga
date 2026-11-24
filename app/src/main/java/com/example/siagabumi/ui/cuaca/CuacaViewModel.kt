@@ -165,9 +165,13 @@ class CuacaViewModel @Inject constructor(
             val resolved = wilayahRepository.resolveToAdm4(adm4)
             val wilayah = wilayahRepository.getWilayahByKode(resolved)
             val name = wilayah?.namaLengkap ?: wilayah?.nama ?: resolved
+            val (lat, lon) = com.example.siagabumi.util.GeoUtils.getApproximateCoordinates(
+                admCode = resolved,
+                locationName = name
+            )
             userPreferencesRepository?.setUserLocation(
-                lat = 0.0,
-                lon = 0.0,
+                lat = lat,
+                lon = lon,
                 name = name,
                 adm4 = resolved,
                 isGps = false

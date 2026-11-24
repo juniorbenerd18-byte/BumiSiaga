@@ -204,6 +204,14 @@
     <string name="depth_intermediate">Intermediate Quake (60–300 km)</string>
     <string name="depth_deep">Deep Quake (> 300 km)</string>
     <string name="dashboard_btn_open_shakemap">Enlarge Shakemap</string>
+    <string name="dashboard_radar_target_nearest">Nearest Quake</string>
+    <string name="dashboard_radar_target_latest">Latest Quake (M 5.0+)</string>
+    <string name="dashboard_radar_showing_nearest">🎯 Target: Nearest earthquake to your location (%1$s)</string>
+    <string name="dashboard_radar_showing_latest">⚡ Target: Latest BMKG significant earthquake (%1$s)</string>
+    <string name="dashboard_radar_detected_count">%1$d Earthquakes Detected</string>
+    <string name="dashboard_radar_select_chip">%1$s • M%2$.1f (%3$d km)</string>
+    <string name="dashboard_shakemap_fallback_notice">Showing official BMKG shakemap from latest earthquake (M %1$.1f). BMKG releases shakemaps for significant earthquakes (M ≥ 5.0).</string>
+    <string name="dashboard_shakemap_policy_desc">BMKG only releases official Shakemaps for significant earthquakes (M ≥ 5.0). Micro-quakes do not include an official BMKG shakemap.</string>
 
     <!-- Additional Flashlight & Quick Stats -->
     <string name="dashboard_flashlight_sos_active">SOS Emergency Signal Active</string>

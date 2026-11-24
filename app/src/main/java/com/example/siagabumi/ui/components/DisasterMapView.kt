@@ -43,6 +43,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.siagabumi.R
+import com.example.siagabumi.domain.model.Gempa
 import com.example.siagabumi.ui.theme.MagOrange
 import com.example.siagabumi.ui.theme.MagRed
 import com.example.siagabumi.ui.theme.MagYellow
@@ -61,7 +62,8 @@ fun DisasterMapView(
     userLon: Double,
     userLocationName: String,
     modifier: Modifier = Modifier,
-    isInteractive: Boolean = true
+    isInteractive: Boolean = true,
+    allQuakes: List<Gempa> = emptyList()
 ) {
     val infiniteTransition = rememberInfiniteTransition(label = "radarMapAnim")
     
@@ -87,17 +89,36 @@ fun DisasterMapView(
         label = "pulseWave"
     )
 
-    // Calculate bearing angle from user to epicenter
-    val bearingRad = remember(epicenterLat, epicenterLon, userLat, userLon) {
-        if (userLat == 0.0 && userLon == 0.0) {
-            0.0
-        } else {
-            val dLon = Math.toRadians(epicenterLon - userLon)
-            val lat1 = Math.toRadians(userLat)
-            val lat2 = Math.toRadians(epicenterLat)
+    // Safe user coordinates
+    val safeUserLat = if (userLat == 0.0 && userLon == 0.0) -6.2088 else userLat
+    val safeUserLon = if (userLat == 0.0 && userLon == 0.0) 106.8456 else userLon
+
+    // Calculate bearing angle from user to primary epicenter
+    val bearingRad = remember(epicenterLat, epicenterLon, safeUserLat, safeUserLon) {
+        val dLon = Math.toRadians(epicenterLon - safeUserLon)
+        val lat1 = Math.toRadians(safeUserLat)
+        val lat2 = Math.toRadians(epicenterLat)
+        val y = sin(dLon) * cos(lat2)
+        val x = cos(lat1) * sin(lat2) - sin(lat1) * cos(lat2) * cos(dLon)
+        atan2(y, x) - Math.PI / 2.0 // Math angle: 0 = East, -PI/2 = North
+    }
+
+    // Calculate positions for other detected earthquakes on the radar
+    val otherQuakeBlips = remember(allQuakes, epicenterLat, epicenterLon, safeUserLat, safeUserLon) {
+        allQuakes.filter { q ->
+            (q.latitude != epicenterLat || q.longitude != epicenterLon) &&
+                    (q.latitude != 0.0 || q.longitude != 0.0)
+        }.take(12).map { q ->
+            val dLon = Math.toRadians(q.longitude - safeUserLon)
+            val lat1 = Math.toRadians(safeUserLat)
+            val lat2 = Math.toRadians(q.latitude)
             val y = sin(dLon) * cos(lat2)
             val x = cos(lat1) * sin(lat2) - sin(lat1) * cos(lat2) * cos(dLon)
-            atan2(y, x) - Math.PI / 2.0 // Math angle: 0 = East, -PI/2 = North
+            val bearing = atan2(y, x) - Math.PI / 2.0
+            val distKm = com.example.siagabumi.util.GeoUtils.calculateDistanceKm(safeUserLat, safeUserLon, q.latitude, q.longitude)
+            // Distance factor scaled across radar rings (up to 3000 km)
+            val factor = (0.22f + (distKm.toFloat() / 3200f) * 0.65f).coerceIn(0.20f, 0.88f)
+            Triple(bearing, factor, q)
         }
     }
 
@@ -147,7 +168,28 @@ fun DisasterMapView(
                 strokeWidth = 1.dp.toPx()
             )
 
-            // 3. Animated Radar Sweep Beam
+            // 3. Secondary Quake Blips detected across Indonesia
+            otherQuakeBlips.forEach { (bearing, factor, q) ->
+                val qX = centerX + (maxRadius * factor * cos(bearing)).toFloat()
+                val qY = centerY + (maxRadius * factor * sin(bearing)).toFloat()
+                val qColor = when {
+                    q.magnitude >= 6.0 -> MagRed
+                    q.magnitude >= 5.0 -> MagOrange
+                    else -> MagYellow
+                }
+                drawCircle(
+                    color = qColor.copy(alpha = 0.45f),
+                    radius = 4.5.dp.toPx(),
+                    center = Offset(qX, qY)
+                )
+                drawCircle(
+                    color = qColor,
+                    radius = 2.5.dp.toPx(),
+                    center = Offset(qX, qY)
+                )
+            }
+
+            // 4. Animated Radar Sweep Beam
             val sweepRad = Math.toRadians(sweepAngle.toDouble())
             val sweepEndX = centerX + (maxRadius * cos(sweepRad)).toFloat()
             val sweepEndY = centerY + (maxRadius * sin(sweepRad)).toFloat()
@@ -162,12 +204,12 @@ fun DisasterMapView(
                 strokeWidth = 2.dp.toPx()
             )
 
-            // 4. Epicenter Position (relative to user center)
+            // 5. Active Target Epicenter Position (relative to user center)
             val targetDistanceFactor = 0.68f // placed gracefully in the outer ring
             val epiX = centerX + (maxRadius * targetDistanceFactor * cos(bearingRad)).toFloat()
             val epiY = centerY + (maxRadius * targetDistanceFactor * sin(bearingRad)).toFloat()
 
-            // 5. Trajectory Dotted Line from User to Epicenter
+            // 6. Trajectory Dotted Line from User to Active Epicenter
             drawLine(
                 color = Color(0xFF38BDF8).copy(alpha = 0.7f),
                 start = Offset(centerX, centerY),
@@ -176,7 +218,7 @@ fun DisasterMapView(
                 pathEffect = PathEffect.dashPathEffect(floatArrayOf(8f, 6f))
             )
 
-            // 6. Shaking Zone / Impact Radius Circle
+            // 7. Shaking Zone / Impact Radius Circle
             val impactRadius = 36.dp.toPx()
             drawCircle(
                 color = magColor.copy(alpha = 0.15f),
@@ -190,7 +232,7 @@ fun DisasterMapView(
                 style = Stroke(width = 1.dp.toPx(), pathEffect = PathEffect.dashPathEffect(floatArrayOf(4f, 4f)))
             )
 
-            // 7. Epicenter Pulsing Wave Animation
+            // 8. Epicenter Pulsing Wave Animation
             val pulseRadiusPx = 10.dp.toPx() + (30.dp.toPx() * pulseWave)
             val pulseAlpha = (1f - pulseWave).coerceIn(0f, 1f)
             drawCircle(
@@ -200,7 +242,7 @@ fun DisasterMapView(
                 style = Stroke(width = 2.dp.toPx())
             )
 
-            // 8. Epicenter Bullseye Center
+            // 9. Epicenter Bullseye Center
             drawCircle(
                 color = Color.White,
                 radius = 8.dp.toPx(),
@@ -212,7 +254,7 @@ fun DisasterMapView(
                 center = Offset(epiX, epiY)
             )
 
-            // 9. User Location Marker (Center)
+            // 10. User Location Marker (Center)
             drawCircle(
                 color = Color(0xFF38BDF8).copy(alpha = 0.3f),
                 radius = 12.dp.toPx(),
@@ -268,6 +310,36 @@ fun DisasterMapView(
                 .padding(start = 8.dp)
         )
 
+        // Overlay: Top-Right Detected Count Badge
+        val totalDetected = (allQuakes.size).coerceAtLeast(1)
+        Surface(
+            shape = RoundedCornerShape(8.dp),
+            color = Color(0xFF0F172A).copy(alpha = 0.85f),
+            border = androidx.compose.foundation.BorderStroke(0.5.dp, Color(0xFF334155)),
+            modifier = Modifier
+                .align(Alignment.TopEnd)
+                .padding(8.dp)
+        ) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.padding(horizontal = 7.dp, vertical = 3.dp)
+            ) {
+                Box(
+                    modifier = Modifier
+                        .size(7.dp)
+                        .clip(CircleShape)
+                        .background(Color(0xFF10B981))
+                )
+                Spacer(modifier = Modifier.width(4.dp))
+                Text(
+                    text = if (isEn) "$totalDetected Quakes Detected" else "$totalDetected Gempa Terdeteksi",
+                    fontSize = 10.sp,
+                    fontWeight = FontWeight.SemiBold,
+                    color = Color(0xFFE2E8F0)
+                )
+            }
+        }
+
         // Overlay: Floating Badge Info
         Surface(
             shape = RoundedCornerShape(8.dp),
@@ -303,7 +375,7 @@ fun DisasterMapView(
                 .align(Alignment.BottomCenter)
                 .fillMaxWidth()
                 .background(Color(0xFF0F172A).copy(alpha = 0.85f))
-                .padding(horizontal = 12.dp, vertical = 4.dp),
+                .padding(horizontal = 10.dp, vertical = 4.dp),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
@@ -314,9 +386,9 @@ fun DisasterMapView(
                         .clip(CircleShape)
                         .background(Color(0xFF38BDF8))
                 )
-                Spacer(modifier = Modifier.width(4.dp))
+                Spacer(modifier = Modifier.width(3.dp))
                 Text(
-                    text = if (isEn) "Your Position" else "Posisi Anda",
+                    text = if (isEn) "You" else "Anda",
                     fontSize = 10.sp,
                     color = Color(0xFF94A3B8)
                 )
@@ -329,27 +401,44 @@ fun DisasterMapView(
                         .clip(CircleShape)
                         .background(magColor)
                 )
-                Spacer(modifier = Modifier.width(4.dp))
+                Spacer(modifier = Modifier.width(3.dp))
                 Text(
-                    text = if (isEn) "Epicenter" else "Pusat Gempa",
+                    text = if (isEn) "Target Focus" else "Fokus Target",
                     fontSize = 10.sp,
                     color = Color(0xFF94A3B8)
                 )
             }
 
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Box(
-                    modifier = Modifier
-                        .size(6.dp)
-                        .clip(CircleShape)
-                        .background(magColor.copy(alpha = 0.3f))
-                )
-                Spacer(modifier = Modifier.width(4.dp))
-                Text(
-                    text = if (isEn) "Impact Zone" else "Zona Guncangan",
-                    fontSize = 10.sp,
-                    color = Color(0xFF94A3B8)
-                )
+            if (otherQuakeBlips.isNotEmpty()) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Box(
+                        modifier = Modifier
+                            .size(6.dp)
+                            .clip(CircleShape)
+                            .background(Color(0xFFF59E0B))
+                    )
+                    Spacer(modifier = Modifier.width(3.dp))
+                    Text(
+                        text = if (isEn) "Other Quakes (${otherQuakeBlips.count()})" else "Gempa Lain (${otherQuakeBlips.count()})",
+                        fontSize = 10.sp,
+                        color = Color(0xFF94A3B8)
+                    )
+                }
+            } else {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Box(
+                        modifier = Modifier
+                            .size(6.dp)
+                            .clip(CircleShape)
+                            .background(magColor.copy(alpha = 0.3f))
+                    )
+                    Spacer(modifier = Modifier.width(3.dp))
+                    Text(
+                        text = if (isEn) "Impact Zone" else "Zona Guncangan",
+                        fontSize = 10.sp,
+                        color = Color(0xFF94A3B8)
+                    )
+                }
             }
         }
     }

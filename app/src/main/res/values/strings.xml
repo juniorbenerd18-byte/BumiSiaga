@@ -204,6 +204,14 @@
     <string name="depth_intermediate">Gempa Menengah (60–300 km)</string>
     <string name="depth_deep">Gempa Dalam (> 300 km)</string>
     <string name="dashboard_btn_open_shakemap">Buka Shakemap Penuh</string>
+    <string name="dashboard_radar_target_nearest">Gempa Terdekat</string>
+    <string name="dashboard_radar_target_latest">Gempa Terbaru (M 5.0+)</string>
+    <string name="dashboard_radar_showing_nearest">🎯 Target: Gempa terdekat dari posisi Anda (%1$s)</string>
+    <string name="dashboard_radar_showing_latest">⚡ Target: Gempa signifikan terbaru BMKG (%1$s)</string>
+    <string name="dashboard_radar_detected_count">%1$d Gempa Terdeteksi</string>
+    <string name="dashboard_radar_select_chip">%1$s • M%2$.1f (%3$d km)</string>
+    <string name="dashboard_shakemap_fallback_notice">Menampilkan Shakemap resmi gempa terbaru BMKG (M %1$.1f). BMKG merilis shakemap untuk gempa signifikan M ≥ 5.0.</string>
+    <string name="dashboard_shakemap_policy_desc">BMKG hanya menerbitkan peta Shakemap resmi untuk gempa signifikan M ≥ 5.0. Gempa mikro/lokal tidak memiliki Shakemap dari BMKG.</string>
 
     <!-- Additional Flashlight & Quick Stats -->
     <string name="dashboard_flashlight_sos_active">Sinyal Darurat SOS Aktif</string>

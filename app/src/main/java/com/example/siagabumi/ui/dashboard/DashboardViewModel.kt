@@ -241,9 +241,13 @@ class DashboardViewModel @Inject constructor(
 
     fun setActiveLocation(wilayah: Wilayah) {
         viewModelScope.launch {
+            val (lat, lon) = com.example.siagabumi.util.GeoUtils.getApproximateCoordinates(
+                admCode = wilayah.kode,
+                locationName = wilayah.namaLengkap
+            )
             userPreferencesRepository.setUserLocation(
-                lat = 0.0,
-                lon = 0.0,
+                lat = lat,
+                lon = lon,
                 name = wilayah.namaLengkap,
                 adm4 = wilayah.kode,
                 isGps = false

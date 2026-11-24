@@ -44,7 +44,7 @@ object GempaMapper {
             if (it.startsWith("http://") || it.startsWith("https://")) {
                 it
             } else {
-                "https://static.bmkg.go.id/$it"
+                "https://data.bmkg.go.id/DataMKG/TEWS/$it"
             }
         }
 

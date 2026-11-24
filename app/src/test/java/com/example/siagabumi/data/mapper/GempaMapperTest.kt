@@ -38,7 +38,7 @@ class GempaMapperTest {
         assertEquals(126.57, domain.longitude, 0.001)
         assertEquals("Pusat gempa berada di laut 98 km BaratDaya Melonguane", domain.wilayah)
         assertEquals("II Tahuna", domain.dirasakan)
-        assertEquals("https://static.bmkg.go.id/20261122145439.mmi.jpg", domain.shakemapUrl)
+        assertEquals("https://data.bmkg.go.id/DataMKG/TEWS/20261122145439.mmi.jpg", domain.shakemapUrl)
         assertFalse(domain.isTsunamiWarning)
         assertEquals(GempaCategory.TERBARU, domain.category)
     }

@@ -285,7 +285,8 @@ fun DashboardContent(
             // Epicenter Impact Radar & Official BMKG Shakemap
             item {
                 DashboardEpicenterRadar(
-                    gempa = data.gempaTerbaru ?: data.gempaTerkiniList.firstOrNull(),
+                    gempaTerbaru = data.gempaTerbaru,
+                    gempaList = data.gempaTerkiniList,
                     userPreferences = data.userPreferences,
                     onViewAllClick = onNavigateToGempa,
                     onOpenDetailClick = onNavigateToGempaDetail,

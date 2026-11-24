@@ -10,9 +10,11 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -21,13 +23,17 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Bolt
 import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Explore
+import androidx.compose.material.icons.filled.GpsFixed
 import androidx.compose.material.icons.filled.Image
+import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Layers
 import androidx.compose.material.icons.filled.MyLocation
 import androidx.compose.material.icons.filled.NearMe
@@ -36,6 +42,8 @@ import androidx.compose.material.icons.filled.Verified
 import androidx.compose.material.icons.filled.ZoomIn
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.FilterChip
+import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -78,6 +86,11 @@ import com.example.siagabumi.ui.theme.MagYellow
 import com.example.siagabumi.util.GeoUtils
 import kotlin.math.roundToInt
 
+enum class RadarTargetMode {
+    NEAREST, // Gempa Terdekat
+    LATEST   // Gempa Terbaru BMKG
+}
+
 @Composable
 fun DashboardEpicenterRadar(
     gempa: Gempa?,
@@ -88,38 +101,109 @@ fun DashboardEpicenterRadar(
     onSyncGpsClick: (() -> Unit)? = null,
     isSyncingGps: Boolean = false
 ) {
-    if (gempa == null) return
+    DashboardEpicenterRadar(
+        gempaTerbaru = gempa,
+        gempaList = listOfNotNull(gempa),
+        userPreferences = userPreferences,
+        onViewAllClick = onViewAllClick,
+        onOpenDetailClick = onOpenDetailClick,
+        modifier = modifier,
+        onSyncGpsClick = onSyncGpsClick,
+        isSyncingGps = isSyncingGps
+    )
+}
 
+@Composable
+fun DashboardEpicenterRadar(
+    gempaTerbaru: Gempa?,
+    gempaList: List<Gempa>,
+    userPreferences: UserPreferences,
+    onViewAllClick: () -> Unit,
+    onOpenDetailClick: (String) -> Unit,
+    modifier: Modifier = Modifier,
+    onSyncGpsClick: (() -> Unit)? = null,
+    isSyncingGps: Boolean = false
+) {
     val context = LocalContext.current
     var isShakemapDialogOpen by remember { mutableStateOf(false) }
     var isRadarFullscreenOpen by remember { mutableStateOf(false) }
-    
-    // Tab 0: Shakemap BMKG (Default so official map image appears immediately), Tab 1: Radar Episentrum
+
+    // Tab 0: Shakemap BMKG, Tab 1: Radar Episentrum
     var selectedMapTab by remember { mutableIntStateOf(0) }
 
-    val distanceKm = remember(gempa, userPreferences) {
-        GeoUtils.calculateDistanceKm(
-            userPreferences.userLat,
-            userPreferences.userLon,
-            gempa.latitude,
-            gempa.longitude
-        ).roundToInt()
+    // User safe coordinates
+    val safeUserLat = remember(userPreferences) {
+        if (userPreferences.userLat == 0.0 && userPreferences.userLon == 0.0) {
+            GeoUtils.getApproximateCoordinates(userPreferences.userAdm4, userPreferences.userLocationName).first
+        } else {
+            userPreferences.userLat
+        }
+    }
+    val safeUserLon = remember(userPreferences) {
+        if (userPreferences.userLat == 0.0 && userPreferences.userLon == 0.0) {
+            GeoUtils.getApproximateCoordinates(userPreferences.userAdm4, userPreferences.userLocationName).second
+        } else {
+            userPreferences.userLon
+        }
     }
 
-    val direction = remember(gempa, userPreferences) {
+    // Deduplicate and combine all recent earthquakes
+    val allQuakes = remember(gempaTerbaru, gempaList) {
+        (listOfNotNull(gempaTerbaru) + gempaList).distinctBy { it.id }
+    }
+
+    if (allQuakes.isEmpty()) return
+
+    // Calculate distance to user for each earthquake
+    val quakesWithDistance = remember(allQuakes, safeUserLat, safeUserLon) {
+        allQuakes.map { q ->
+            val dist = GeoUtils.calculateDistanceKm(
+                safeUserLat,
+                safeUserLon,
+                q.latitude,
+                q.longitude
+            ).roundToInt()
+            q to dist
+        }.sortedBy { it.second }
+    }
+
+    val nearestQuakePair = quakesWithDistance.firstOrNull()
+    val latestQuake = gempaTerbaru ?: allQuakes.firstOrNull()
+    val latestQuakePair = remember(quakesWithDistance, latestQuake) {
+        quakesWithDistance.find { it.first.id == latestQuake?.id } ?: nearestQuakePair
+    }
+
+    var targetMode by remember { mutableStateOf(RadarTargetMode.NEAREST) }
+    var selectedQuakeId by remember { mutableStateOf<String?>(null) }
+
+    // Determine the active earthquake to display
+    val activeQuakePair = remember(selectedQuakeId, targetMode, quakesWithDistance, nearestQuakePair, latestQuakePair) {
+        if (selectedQuakeId != null) {
+            quakesWithDistance.find { it.first.id == selectedQuakeId } ?: nearestQuakePair ?: latestQuakePair
+        } else if (targetMode == RadarTargetMode.NEAREST) {
+            nearestQuakePair ?: latestQuakePair
+        } else {
+            latestQuakePair ?: nearestQuakePair
+        }
+    } ?: return
+
+    val activeGempa = activeQuakePair.first
+    val distanceKm = activeQuakePair.second
+
+    val direction = remember(activeGempa, safeUserLat, safeUserLon) {
         GeoUtils.calculateDirection(
-            userPreferences.userLat,
-            userPreferences.userLon,
-            gempa.latitude,
-            gempa.longitude
+            safeUserLat,
+            safeUserLon,
+            activeGempa.latitude,
+            activeGempa.longitude
         )
     }
 
-    val mmiEstimate = remember(gempa, distanceKm) {
+    val mmiEstimate = remember(activeGempa, distanceKm) {
         GeoUtils.estimateMmi(
-            gempa.magnitude,
+            activeGempa.magnitude,
             distanceKm.toDouble(),
-            gempa.kedalamanKm
+            activeGempa.kedalamanKm
         )
     }
 
@@ -129,6 +213,13 @@ fun DashboardEpicenterRadar(
         4 -> MagOrange
         else -> MagRed
     }
+
+    // Shakemap Resolution: If active quake has Shakemap use it; else fallback to latestQuake's shakemap
+    val fallbackShakemapUrl = activeGempa.shakemapUrl
+        ?: latestQuake?.shakemapUrl
+        ?: allQuakes.firstOrNull { !it.shakemapUrl.isNullOrEmpty() }?.shakemapUrl
+
+    val isUsingFallbackShakemap = activeGempa.shakemapUrl.isNullOrEmpty() && !fallbackShakemapUrl.isNullOrEmpty()
 
     val infiniteTransition = rememberInfiniteTransition(label = "pulseRadar")
     val pulseRadius by infiniteTransition.animateFloat(
@@ -206,6 +297,153 @@ fun DashboardEpicenterRadar(
                 modifier = Modifier.padding(16.dp),
                 verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
+                // Interactive Target Mode Selector (Gempa Terdekat vs Gempa Terbaru)
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    FilterChip(
+                        selected = targetMode == RadarTargetMode.NEAREST && selectedQuakeId == null,
+                        onClick = {
+                            targetMode = RadarTargetMode.NEAREST
+                            selectedQuakeId = null
+                        },
+                        label = {
+                            Text(
+                                text = stringResource(R.string.dashboard_radar_target_nearest) +
+                                        (nearestQuakePair?.let { " (${it.second} km)" } ?: ""),
+                                fontSize = 11.sp,
+                                fontWeight = FontWeight.Bold
+                            )
+                        },
+                        leadingIcon = {
+                            Icon(
+                                imageVector = Icons.Default.GpsFixed,
+                                contentDescription = null,
+                                modifier = Modifier.size(14.dp)
+                            )
+                        },
+                        colors = FilterChipDefaults.filterChipColors(
+                            selectedContainerColor = MaterialTheme.colorScheme.primary,
+                            selectedLabelColor = MaterialTheme.colorScheme.onPrimary,
+                            selectedLeadingIconColor = MaterialTheme.colorScheme.onPrimary
+                        ),
+                        modifier = Modifier.weight(1f)
+                    )
+
+                    FilterChip(
+                        selected = targetMode == RadarTargetMode.LATEST && selectedQuakeId == null,
+                        onClick = {
+                            targetMode = RadarTargetMode.LATEST
+                            selectedQuakeId = null
+                        },
+                        label = {
+                            Text(
+                                text = stringResource(R.string.dashboard_radar_target_latest) +
+                                        (latestQuake?.let { " (M ${it.magnitude})" } ?: ""),
+                                fontSize = 11.sp,
+                                fontWeight = FontWeight.Bold
+                            )
+                        },
+                        leadingIcon = {
+                            Icon(
+                                imageVector = Icons.Default.Bolt,
+                                contentDescription = null,
+                                modifier = Modifier.size(14.dp)
+                            )
+                        },
+                        colors = FilterChipDefaults.filterChipColors(
+                            selectedContainerColor = MaterialTheme.colorScheme.primary,
+                            selectedLabelColor = MaterialTheme.colorScheme.onPrimary,
+                            selectedLeadingIconColor = MaterialTheme.colorScheme.onPrimary
+                        ),
+                        modifier = Modifier.weight(1f)
+                    )
+                }
+
+                // If multiple earthquakes detected, show horizontal scroll selector
+                if (quakesWithDistance.size > 1) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .horizontalScroll(rememberScrollState()),
+                        horizontalArrangement = Arrangement.spacedBy(6.dp)
+                    ) {
+                        quakesWithDistance.take(8).forEach { (q, dist) ->
+                            val isSelected = activeGempa.id == q.id
+                            Surface(
+                                shape = RoundedCornerShape(12.dp),
+                                color = if (isSelected) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surface.copy(alpha = 0.6f),
+                                border = BorderStroke(
+                                    if (isSelected) 1.5.dp else 0.5.dp,
+                                    if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f)
+                                ),
+                                modifier = Modifier.clickable {
+                                    selectedQuakeId = q.id
+                                }
+                            ) {
+                                Row(
+                                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    val badgeColor = when {
+                                        q.magnitude >= 6.0 -> MagRed
+                                        q.magnitude >= 5.0 -> MagOrange
+                                        else -> MagYellow
+                                    }
+                                    Box(
+                                        modifier = Modifier
+                                            .size(7.dp)
+                                            .clip(CircleShape)
+                                            .background(badgeColor)
+                                    )
+                                    Spacer(modifier = Modifier.width(5.dp))
+                                    Text(
+                                        text = "${q.wilayah.take(15)}… M${q.magnitude} (${dist} km)",
+                                        fontSize = 10.sp,
+                                        fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
+                                        color = if (isSelected) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSurfaceVariant
+                                    )
+                                }
+                            }
+                        }
+                    }
+                }
+
+                // Clear Explainer Banner
+                Surface(
+                    shape = RoundedCornerShape(8.dp),
+                    color = MaterialTheme.colorScheme.surface.copy(alpha = 0.7f),
+                    border = BorderStroke(0.5.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f)),
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Row(
+                        modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Info,
+                            contentDescription = null,
+                            modifier = Modifier.size(13.dp),
+                            tint = MaterialTheme.colorScheme.primary
+                        )
+                        Spacer(modifier = Modifier.width(6.dp))
+                        Text(
+                            text = if (targetMode == RadarTargetMode.NEAREST && selectedQuakeId == null) {
+                                stringResource(R.string.dashboard_radar_showing_nearest, activeGempa.wilayah)
+                            } else if (targetMode == RadarTargetMode.LATEST && selectedQuakeId == null) {
+                                stringResource(R.string.dashboard_radar_showing_latest, activeGempa.wilayah)
+                            } else {
+                                "📍 Fokus: ${activeGempa.wilayah}"
+                            },
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.onSurface,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
+                        )
+                    }
+                }
+
                 // Row 1: Streamlined Distance & Direction Metrics
                 Row(
                     modifier = Modifier.fillMaxWidth(),
@@ -307,7 +545,7 @@ fun DashboardEpicenterRadar(
                                     )
                                     Spacer(modifier = Modifier.width(3.dp))
                                     Text(
-                                        text = "${gempa.kedalamanKm} km",
+                                        text = "${activeGempa.kedalamanKm} km",
                                         style = MaterialTheme.typography.labelSmall,
                                         fontWeight = FontWeight.SemiBold
                                     )
@@ -440,77 +678,96 @@ fun DashboardEpicenterRadar(
                     Spacer(modifier = Modifier.height(8.dp))
 
                     if (selectedMapTab == 0) {
-                        // Official BMKG Shakemap (Verified Map Image)
-                        if (!gempa.shakemapUrl.isNullOrEmpty()) {
-                            Box(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .height(200.dp)
-                                    .clip(RoundedCornerShape(14.dp))
-                                    .background(MaterialTheme.colorScheme.surface)
-                                    .clickable { isShakemapDialogOpen = true }
-                            ) {
-                                AsyncImage(
-                                    model = ImageRequest.Builder(context)
-                                        .data(gempa.shakemapUrl)
-                                        .crossfade(true)
-                                        .build(),
-                                    contentDescription = stringResource(R.string.dashboard_shakemap_official_badge),
-                                    contentScale = ContentScale.Crop,
-                                    modifier = Modifier.fillMaxSize()
-                                )
-
-                                Surface(
-                                    shape = RoundedCornerShape(20.dp),
-                                    color = MaterialTheme.colorScheme.surface.copy(alpha = 0.9f),
-                                    modifier = Modifier
-                                        .align(Alignment.TopStart)
-                                        .padding(8.dp)
-                                ) {
-                                    Row(
-                                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
-                                        verticalAlignment = Alignment.CenterVertically
+                        // Official BMKG Shakemap (Verified Map Image with Fallback)
+                        if (!fallbackShakemapUrl.isNullOrEmpty()) {
+                            Column(modifier = Modifier.fillMaxWidth()) {
+                                if (isUsingFallbackShakemap && latestQuake != null) {
+                                    Surface(
+                                        shape = RoundedCornerShape(8.dp),
+                                        color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.5f),
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .padding(bottom = 6.dp)
                                     ) {
-                                        Icon(
-                                            imageVector = Icons.Default.Verified,
-                                            contentDescription = null,
-                                            tint = MaterialTheme.colorScheme.primary,
-                                            modifier = Modifier.size(13.dp)
-                                        )
-                                        Spacer(modifier = Modifier.width(4.dp))
                                         Text(
-                                            text = stringResource(R.string.dashboard_shakemap_official_badge),
-                                            fontSize = 11.sp,
-                                            fontWeight = FontWeight.Bold,
-                                            color = MaterialTheme.colorScheme.onSurface
+                                            text = stringResource(R.string.dashboard_shakemap_fallback_notice, latestQuake.magnitude),
+                                            style = MaterialTheme.typography.labelSmall,
+                                            color = MaterialTheme.colorScheme.onPrimaryContainer,
+                                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
                                         )
                                     }
                                 }
 
-                                Surface(
-                                    shape = RoundedCornerShape(20.dp),
-                                    color = MaterialTheme.colorScheme.surface.copy(alpha = 0.88f),
+                                Box(
                                     modifier = Modifier
-                                        .align(Alignment.BottomEnd)
-                                        .padding(8.dp)
+                                        .fillMaxWidth()
+                                        .height(200.dp)
+                                        .clip(RoundedCornerShape(14.dp))
+                                        .background(MaterialTheme.colorScheme.surface)
+                                        .clickable { isShakemapDialogOpen = true }
                                 ) {
-                                    Row(
-                                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
-                                        verticalAlignment = Alignment.CenterVertically
+                                    AsyncImage(
+                                        model = ImageRequest.Builder(context)
+                                            .data(fallbackShakemapUrl)
+                                            .crossfade(true)
+                                            .build(),
+                                        contentDescription = stringResource(R.string.dashboard_shakemap_official_badge),
+                                        contentScale = ContentScale.Crop,
+                                        modifier = Modifier.fillMaxSize()
+                                    )
+
+                                    Surface(
+                                        shape = RoundedCornerShape(20.dp),
+                                        color = MaterialTheme.colorScheme.surface.copy(alpha = 0.9f),
+                                        modifier = Modifier
+                                            .align(Alignment.TopStart)
+                                            .padding(8.dp)
                                     ) {
-                                        Icon(
-                                            imageVector = Icons.Default.ZoomIn,
-                                            contentDescription = null,
-                                            tint = MaterialTheme.colorScheme.primary,
-                                            modifier = Modifier.size(14.dp)
-                                        )
-                                        Spacer(modifier = Modifier.width(4.dp))
-                                        Text(
-                                            text = stringResource(R.string.dashboard_btn_open_shakemap),
-                                            fontSize = 11.sp,
-                                            fontWeight = FontWeight.SemiBold,
-                                            color = MaterialTheme.colorScheme.onSurface
-                                        )
+                                        Row(
+                                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+                                            verticalAlignment = Alignment.CenterVertically
+                                        ) {
+                                            Icon(
+                                                imageVector = Icons.Default.Verified,
+                                                contentDescription = null,
+                                                tint = MaterialTheme.colorScheme.primary,
+                                                modifier = Modifier.size(13.dp)
+                                            )
+                                            Spacer(modifier = Modifier.width(4.dp))
+                                            Text(
+                                                text = stringResource(R.string.dashboard_shakemap_official_badge),
+                                                fontSize = 11.sp,
+                                                fontWeight = FontWeight.Bold,
+                                                color = MaterialTheme.colorScheme.onSurface
+                                            )
+                                        }
+                                    }
+
+                                    Surface(
+                                        shape = RoundedCornerShape(20.dp),
+                                        color = MaterialTheme.colorScheme.surface.copy(alpha = 0.88f),
+                                        modifier = Modifier
+                                            .align(Alignment.BottomEnd)
+                                            .padding(8.dp)
+                                    ) {
+                                        Row(
+                                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+                                            verticalAlignment = Alignment.CenterVertically
+                                        ) {
+                                            Icon(
+                                                imageVector = Icons.Default.ZoomIn,
+                                                contentDescription = null,
+                                                tint = MaterialTheme.colorScheme.primary,
+                                                modifier = Modifier.size(14.dp)
+                                            )
+                                            Spacer(modifier = Modifier.width(4.dp))
+                                            Text(
+                                                text = stringResource(R.string.dashboard_btn_open_shakemap),
+                                                fontSize = 11.sp,
+                                                fontWeight = FontWeight.SemiBold,
+                                                color = MaterialTheme.colorScheme.onSurface
+                                            )
+                                        }
                                     }
                                 }
                             }
@@ -523,13 +780,24 @@ fun DashboardEpicenterRadar(
                                     .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.5f)),
                                 contentAlignment = Alignment.Center
                             ) {
-                                Text(
-                                    text = stringResource(R.string.dashboard_shakemap_not_available),
-                                    style = MaterialTheme.typography.bodySmall,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                    textAlign = TextAlign.Center,
+                                Column(
+                                    horizontalAlignment = Alignment.CenterHorizontally,
                                     modifier = Modifier.padding(16.dp)
-                                )
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Default.Info,
+                                        contentDescription = null,
+                                        tint = MaterialTheme.colorScheme.primary,
+                                        modifier = Modifier.size(24.dp)
+                                    )
+                                    Spacer(modifier = Modifier.height(6.dp))
+                                    Text(
+                                        text = stringResource(R.string.dashboard_shakemap_policy_desc),
+                                        style = MaterialTheme.typography.bodySmall,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                        textAlign = TextAlign.Center
+                                    )
+                                }
                             }
                         }
                     } else {
@@ -541,13 +809,14 @@ fun DashboardEpicenterRadar(
                                 .clip(RoundedCornerShape(14.dp))
                         ) {
                             DisasterMapView(
-                                epicenterLat = gempa.latitude,
-                                epicenterLon = gempa.longitude,
-                                magnitude = gempa.magnitude,
-                                depthKm = gempa.kedalamanKm,
-                                userLat = userPreferences.userLat,
-                                userLon = userPreferences.userLon,
+                                epicenterLat = activeGempa.latitude,
+                                epicenterLon = activeGempa.longitude,
+                                magnitude = activeGempa.magnitude,
+                                depthKm = activeGempa.kedalamanKm,
+                                userLat = safeUserLat,
+                                userLon = safeUserLon,
                                 userLocationName = userPreferences.userLocationName,
+                                allQuakes = allQuakes,
                                 modifier = Modifier.fillMaxSize()
                             )
 
@@ -599,13 +868,14 @@ fun DashboardEpicenterRadar(
                     .background(Color.Black.copy(alpha = 0.95f))
             ) {
                 DisasterMapView(
-                    epicenterLat = gempa.latitude,
-                    epicenterLon = gempa.longitude,
-                    magnitude = gempa.magnitude,
-                    depthKm = gempa.kedalamanKm,
-                    userLat = userPreferences.userLat,
-                    userLon = userPreferences.userLon,
+                    epicenterLat = activeGempa.latitude,
+                    epicenterLon = activeGempa.longitude,
+                    magnitude = activeGempa.magnitude,
+                    depthKm = activeGempa.kedalamanKm,
+                    userLat = safeUserLat,
+                    userLon = safeUserLon,
                     userLocationName = userPreferences.userLocationName,
+                    allQuakes = allQuakes,
                     modifier = Modifier
                         .fillMaxSize()
                         .padding(24.dp)
@@ -630,7 +900,7 @@ fun DashboardEpicenterRadar(
     }
 
     // Zoomable Shakemap Dialog
-    if (isShakemapDialogOpen && !gempa.shakemapUrl.isNullOrEmpty()) {
+    if (isShakemapDialogOpen && !fallbackShakemapUrl.isNullOrEmpty()) {
         Dialog(
             onDismissRequest = { isShakemapDialogOpen = false },
             properties = DialogProperties(usePlatformDefaultWidth = false)
@@ -662,7 +932,7 @@ fun DashboardEpicenterRadar(
                     contentAlignment = Alignment.Center
                 ) {
                     ZoomableShakemap(
-                        imageUrl = gempa.shakemapUrl,
+                        imageUrl = fallbackShakemapUrl,
                         modifier = Modifier.fillMaxWidth()
                     )
                 }

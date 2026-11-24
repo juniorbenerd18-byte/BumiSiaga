@@ -89,9 +89,13 @@ class WilayahSearchViewModel @Inject constructor(
     fun resolveAdm4(wilayah: Wilayah, onResolved: (String) -> Unit) {
         viewModelScope.launch {
             val adm4 = wilayahRepository.resolveToAdm4(wilayah.kode)
+            val (lat, lon) = com.example.siagabumi.util.GeoUtils.getApproximateCoordinates(
+                admCode = adm4,
+                locationName = wilayah.namaLengkap
+            )
             userPreferencesRepository?.setUserLocation(
-                lat = 0.0,
-                lon = 0.0,
+                lat = lat,
+                lon = lon,
                 name = wilayah.namaLengkap,
                 adm4 = adm4,
                 isGps = false

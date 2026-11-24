@@ -37,11 +37,19 @@ class UserPreferencesRepositoryImpl @Inject constructor(
         val vibrate = prefs.getBoolean(KEY_VIBRATE, true)
         val minMag = prefs.getFloat(KEY_MIN_MAG, 5.0f).toDouble()
         val radius = prefs.getInt(KEY_RADIUS, 0)
-        val lat = prefs.getFloat(KEY_LAT, -6.2088f).toDouble()
-        val lon = prefs.getFloat(KEY_LON, 106.8456f).toDouble()
+        var lat = prefs.getFloat(KEY_LAT, -6.2088f).toDouble()
+        var lon = prefs.getFloat(KEY_LON, 106.8456f).toDouble()
         val locName = prefs.getString(KEY_LOC_NAME, "Jakarta / Nasional") ?: "Jakarta / Nasional"
         val adm4 = prefs.getString(KEY_ADM4, "31.71.03.1001") ?: "31.71.03.1001"
         val isGps = prefs.getBoolean(KEY_IS_GPS, false)
+
+        // Self-healing: if lat/lon was saved as 0.0 (Null Island), resolve real coordinates
+        if (lat == 0.0 && lon == 0.0) {
+            val (resolvedLat, resolvedLon) = com.example.siagabumi.util.GeoUtils.getApproximateCoordinates(adm4, locName)
+            lat = resolvedLat
+            lon = resolvedLon
+            prefs.edit().putFloat(KEY_LAT, lat.toFloat()).putFloat(KEY_LON, lon.toFloat()).apply()
+        }
         val lang = prefs.getString(KEY_LANG, "in") ?: "in"
         val themeStr = prefs.getString(KEY_THEME, AppThemeMode.SYSTEM.name) ?: AppThemeMode.SYSTEM.name
         val theme = try {
