@@ -158,7 +158,6 @@ fun DashboardScreen(
                 onNavigateToGempaDetail = onNavigateToGempaDetail,
                 onNavigateToSettings = onNavigateToSettings,
                 onSelectLocationAsActive = { viewModel.setActiveLocation(it) },
-                onToggleFavoriteLocation = { viewModel.toggleFavorit(it) },
                 onSyncGps = onTriggerGps,
                 isSyncingGps = isDetectingGps,
                 modifier = modifier
@@ -178,7 +177,6 @@ fun DashboardContent(
     onNavigateToGempaDetail: (String) -> Unit,
     onNavigateToSettings: () -> Unit,
     onSelectLocationAsActive: (Wilayah) -> Unit = {},
-    onToggleFavoriteLocation: (Wilayah) -> Unit = {},
     onSyncGps: () -> Unit = {},
     isSyncingGps: Boolean = false,
     modifier: Modifier = Modifier
@@ -306,7 +304,6 @@ fun DashboardContent(
                     weatherList = displayWeatherList,
                     activeAdm4 = data.userPreferences.userAdm4.ifBlank { "31.71.03.1001" },
                     onSelectLocationAsActive = onSelectLocationAsActive,
-                    onToggleFavorite = onToggleFavoriteLocation,
                     onChangeLocationClick = { onNavigateToCuaca(it.kode) },
                     onAddNewLocationClick = onNavigateToSearchWilayah
                 )

@@ -57,13 +57,15 @@ fun DashboardQuickStats(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(10.dp)
         ) {
+            val latestQuake = data.gempaTerbaru ?: data.gempaTerkiniList.firstOrNull()
+
             // Stat 1: Gempa Terkini
             QuickStatCard(
                 icon = Icons.Default.Warning,
                 iconTint = MagOrange,
                 label = stringResource(R.string.dashboard_stat_latest_quake),
-                value = data.gempaTerbaru?.let { "M ${it.magnitude}" } ?: "-",
-                subValue = data.gempaTerbaru?.wilayah?.take(18)?.let { "$it…" } ?: "-",
+                value = latestQuake?.let { "M ${it.magnitude}" } ?: stringResource(R.string.dashboard_stat_safe_label),
+                subValue = latestQuake?.wilayah?.take(18)?.let { "$it…" } ?: stringResource(R.string.dashboard_stat_tsunami_safe),
                 onClick = onQuakeClick,
                 modifier = Modifier.weight(1f)
             )
@@ -103,7 +105,7 @@ fun DashboardQuickStats(
                 icon = Icons.Default.WbSunny,
                 iconTint = Color(0xFFF59E0B),
                 label = weatherLabel,
-                value = cuaca?.kondisiSaatIni?.let { "${it.suhu}°C" } ?: "-",
+                value = cuaca?.kondisiSaatIni?.let { "${it.suhu}°C" } ?: "--",
                 subValue = weatherDesc,
                 onClick = onWeatherClick,
                 modifier = Modifier.weight(1f)

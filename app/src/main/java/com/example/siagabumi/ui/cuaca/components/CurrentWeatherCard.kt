@@ -51,8 +51,8 @@ import com.example.siagabumi.domain.model.CuacaDetail
 fun CurrentWeatherCard(
     cuacaDetail: CuacaDetail,
     onChangeLocationClick: () -> Unit,
-    onToggleFavoriteClick: () -> Unit,
     modifier: Modifier = Modifier,
+    onToggleFavoriteClick: (() -> Unit)? = null,
     isActiveLocation: Boolean = false,
     onSetAsActiveLocation: (() -> Unit)? = null
 ) {
@@ -165,13 +165,6 @@ fun CurrentWeatherCard(
                 }
 
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    IconButton(onClick = onToggleFavoriteClick) {
-                        Icon(
-                            imageVector = if (cuacaDetail.isFavorit) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
-                            contentDescription = stringResource(R.string.nav_favorit),
-                            tint = if (cuacaDetail.isFavorit) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onPrimaryContainer
-                        )
-                    }
                     IconButton(onClick = onChangeLocationClick) {
                         Icon(
                             imageVector = Icons.Default.EditLocation,

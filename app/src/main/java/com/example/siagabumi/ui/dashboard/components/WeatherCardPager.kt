@@ -54,10 +54,10 @@ fun WeatherCardPager(
     weatherList: List<CuacaDetail>,
     activeAdm4: String,
     onSelectLocationAsActive: (Wilayah) -> Unit,
-    onToggleFavorite: (Wilayah) -> Unit,
     onChangeLocationClick: (Wilayah) -> Unit,
     onAddNewLocationClick: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    onToggleFavorite: ((Wilayah) -> Unit)? = null
 ) {
     val configuration = LocalConfiguration.current
     val isLandscape = configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
@@ -93,7 +93,6 @@ fun WeatherCardPager(
                 CurrentWeatherCard(
                     cuacaDetail = cuaca,
                     onChangeLocationClick = { onChangeLocationClick(cuaca.lokasi) },
-                    onToggleFavoriteClick = { onToggleFavorite(cuaca.lokasi) },
                     isActiveLocation = isActive,
                     onSetAsActiveLocation = if (!isActive) {
                         { onSelectLocationAsActive(cuaca.lokasi) }

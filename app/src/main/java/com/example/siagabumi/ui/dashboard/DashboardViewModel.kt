@@ -201,7 +201,8 @@ class DashboardViewModel @Inject constructor(
                         UiState.Loading
                     } else {
                         val cuacaDetail = data.cuacaDetailList.firstOrNull()
-                        val isTsunami = (data.terbaru?.isTsunamiWarning == true) || data.terkini.any { it.isTsunamiWarning }
+                        val effectiveLatestQuake = data.terbaru ?: data.terkini.firstOrNull()
+                        val isTsunami = (effectiveLatestQuake?.isTsunamiWarning == true) || data.terkini.any { it.isTsunamiWarning }
 
                         val formattedLastUpdated = data.lastUpdatedMillis?.let {
                             val instant = Instant.ofEpochMilli(it)
@@ -212,7 +213,7 @@ class DashboardViewModel @Inject constructor(
 
                         UiState.Success(
                             data = DashboardScreenData(
-                                gempaTerbaru = data.terbaru,
+                                gempaTerbaru = effectiveLatestQuake,
                                 gempaTerkiniList = data.terkini,
                                 cuacaDetail = cuacaDetail,
                                 cuacaDetailList = data.cuacaDetailList,

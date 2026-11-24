@@ -51,7 +51,6 @@ fun CuacaScreen(
                 lastUpdated = state.lastUpdated,
                 onRefresh = { viewModel.refresh() },
                 onChangeLocation = onNavigateToSearchWilayah,
-                onToggleFavorite = { viewModel.toggleFavorit() },
                 modifier = modifier
             )
         }
@@ -66,7 +65,6 @@ fun CuacaContent(
     lastUpdated: String?,
     onRefresh: () -> Unit,
     onChangeLocation: () -> Unit,
-    onToggleFavorite: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     val pullToRefreshState = rememberPullToRefreshState()
@@ -91,8 +89,7 @@ fun CuacaContent(
             item {
                 CurrentWeatherCard(
                     cuacaDetail = cuacaDetail,
-                    onChangeLocationClick = onChangeLocation,
-                    onToggleFavoriteClick = onToggleFavorite
+                    onChangeLocationClick = onChangeLocation
                 )
             }
 
