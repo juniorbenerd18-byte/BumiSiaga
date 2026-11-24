@@ -1,7 +1,6 @@
 package com.example.siagabumi.ui.components
 
 import androidx.compose.animation.core.FastOutSlowInEasing
-import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.infiniteRepeatable
@@ -9,21 +8,17 @@ import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -33,24 +28,21 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.PathEffect
+import androidx.compose.ui.graphics.drawscope.DrawScope
+import androidx.compose.ui.graphics.drawscope.Fill
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.platform.LocalConfiguration
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.siagabumi.R
 import com.example.siagabumi.domain.model.Gempa
 import com.example.siagabumi.ui.theme.MagOrange
 import com.example.siagabumi.ui.theme.MagRed
 import com.example.siagabumi.ui.theme.MagYellow
-import kotlin.math.atan2
-import kotlin.math.cos
-import kotlin.math.min
-import kotlin.math.sin
+import kotlin.math.roundToInt
 
 @Composable
 fun DisasterMapView(
@@ -65,20 +57,9 @@ fun DisasterMapView(
     isInteractive: Boolean = true,
     allQuakes: List<Gempa> = emptyList()
 ) {
-    val infiniteTransition = rememberInfiniteTransition(label = "radarMapAnim")
-    
-    // Rotating radar sweep angle
-    val sweepAngle by infiniteTransition.animateFloat(
-        initialValue = 0f,
-        targetValue = 360f,
-        animationSpec = infiniteRepeatable(
-            animation = tween(4000, easing = LinearEasing),
-            repeatMode = RepeatMode.Restart
-        ),
-        label = "sweepAngle"
-    )
+    val infiniteTransition = rememberInfiniteTransition(label = "mapAnim")
 
-    // Epicenter pulse wave
+    // Epicenter shockwave pulse
     val pulseWave by infiniteTransition.animateFloat(
         initialValue = 0f,
         targetValue = 1f,
@@ -89,38 +70,9 @@ fun DisasterMapView(
         label = "pulseWave"
     )
 
-    // Safe user coordinates
+    // User safe coordinates
     val safeUserLat = if (userLat == 0.0 && userLon == 0.0) -6.2088 else userLat
     val safeUserLon = if (userLat == 0.0 && userLon == 0.0) 106.8456 else userLon
-
-    // Calculate bearing angle from user to primary epicenter
-    val bearingRad = remember(epicenterLat, epicenterLon, safeUserLat, safeUserLon) {
-        val dLon = Math.toRadians(epicenterLon - safeUserLon)
-        val lat1 = Math.toRadians(safeUserLat)
-        val lat2 = Math.toRadians(epicenterLat)
-        val y = sin(dLon) * cos(lat2)
-        val x = cos(lat1) * sin(lat2) - sin(lat1) * cos(lat2) * cos(dLon)
-        atan2(y, x) - Math.PI / 2.0 // Math angle: 0 = East, -PI/2 = North
-    }
-
-    // Calculate positions for other detected earthquakes on the radar
-    val otherQuakeBlips = remember(allQuakes, epicenterLat, epicenterLon, safeUserLat, safeUserLon) {
-        allQuakes.filter { q ->
-            (q.latitude != epicenterLat || q.longitude != epicenterLon) &&
-                    (q.latitude != 0.0 || q.longitude != 0.0)
-        }.take(12).map { q ->
-            val dLon = Math.toRadians(q.longitude - safeUserLon)
-            val lat1 = Math.toRadians(safeUserLat)
-            val lat2 = Math.toRadians(q.latitude)
-            val y = sin(dLon) * cos(lat2)
-            val x = cos(lat1) * sin(lat2) - sin(lat1) * cos(lat2) * cos(dLon)
-            val bearing = atan2(y, x) - Math.PI / 2.0
-            val distKm = com.example.siagabumi.util.GeoUtils.calculateDistanceKm(safeUserLat, safeUserLon, q.latitude, q.longitude)
-            // Distance factor scaled across radar rings (up to 3000 km)
-            val factor = (0.22f + (distKm.toFloat() / 3200f) * 0.65f).coerceIn(0.20f, 0.88f)
-            Triple(bearing, factor, q)
-        }
-    }
 
     val magColor = when {
         magnitude >= 6.0 -> MagRed
@@ -134,216 +86,148 @@ fun DisasterMapView(
         modifier = modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(14.dp))
-            .background(Color(0xFF0A1128))
+            .background(Color(0xFF091224)) // Deep oceanic navy
     ) {
         Canvas(modifier = Modifier.fillMaxSize()) {
-            val centerX = size.width / 2f
-            val centerY = size.height / 2f
-            val maxRadius = min(centerX, centerY) * 0.85f
+            val padX = 14.dp.toPx()
+            val padY = 16.dp.toPx()
 
-            // 1. Concentric Range Rings
-            val gridColor = Color(0xFF1E293B)
-            val ringCount = 3
-            for (i in 1..ringCount) {
-                val r = maxRadius * (i.toFloat() / ringCount)
-                drawCircle(
-                    color = gridColor,
-                    radius = r,
-                    center = Offset(centerX, centerY),
-                    style = Stroke(width = 1.dp.toPx(), pathEffect = PathEffect.dashPathEffect(floatArrayOf(6f, 6f)))
+            fun projectGeo(lat: Double, lon: Double): Offset {
+                val minLon = 95.0
+                val maxLon = 141.2
+                val minLat = -11.0
+                val maxLat = 6.0
+
+                val cLon = lon.coerceIn(minLon, maxLon)
+                val cLat = lat.coerceIn(minLat, maxLat)
+
+                val x = padX + ((cLon - minLon) / (maxLon - minLon)).toFloat() * (size.width - padX * 2)
+                val y = padY + ((maxLat - cLat) / (maxLat - minLat)).toFloat() * (size.height - padY * 2)
+                return Offset(x, y)
+            }
+
+            // 1. Draw Geographic Graticule Grid (Equator & Longitudes)
+            val gridColor = Color(0xFF16233B)
+            // Equator (0 deg)
+            val eqY = projectGeo(0.0, 95.0).y
+            drawLine(
+                color = Color(0xFF1E293B).copy(alpha = 0.8f),
+                start = Offset(padX, eqY),
+                end = Offset(size.width - padX, eqY),
+                strokeWidth = 1.dp.toPx(),
+                pathEffect = PathEffect.dashPathEffect(floatArrayOf(6f, 6f))
+            )
+            // Longitude Meridians: 100E, 110E, 120E, 130E, 140E
+            listOf(100.0, 110.0, 120.0, 130.0, 140.0).forEach { lon ->
+                val x = projectGeo(0.0, lon).x
+                drawLine(
+                    color = gridColor.copy(alpha = 0.5f),
+                    start = Offset(x, padY),
+                    end = Offset(x, size.height - padY),
+                    strokeWidth = 0.8.dp.toPx(),
+                    pathEffect = PathEffect.dashPathEffect(floatArrayOf(4f, 6f))
                 )
             }
 
-            // 2. Cardinal Crosshairs (North, South, East, West)
-            drawLine(
-                color = Color(0xFF1E293B).copy(alpha = 0.8f),
-                start = Offset(centerX - maxRadius, centerY),
-                end = Offset(centerX + maxRadius, centerY),
-                strokeWidth = 1.dp.toPx()
-            )
-            drawLine(
-                color = Color(0xFF1E293B).copy(alpha = 0.8f),
-                start = Offset(centerX, centerY - maxRadius),
-                end = Offset(centerX, centerY + maxRadius),
-                strokeWidth = 1.dp.toPx()
-            )
+            // 2. Draw Vector Map of Indonesian Archipelago Islands
+            val islandColor = Color(0xFF1E2E4A)
+            val islandBorder = Color(0xFF334E68)
+            drawArchipelago(::projectGeo, islandColor, islandBorder)
 
-            // 3. Secondary Quake Blips detected across Indonesia
-            otherQuakeBlips.forEach { (bearing, factor, q) ->
-                val qX = centerX + (maxRadius * factor * cos(bearing)).toFloat()
-                val qY = centerY + (maxRadius * factor * sin(bearing)).toFloat()
+            // 3. Draw Secondary Detected Earthquakes Across Indonesia
+            allQuakes.filter { q ->
+                (q.latitude != epicenterLat || q.longitude != epicenterLon) &&
+                        (q.latitude != 0.0 || q.longitude != 0.0)
+            }.take(16).forEach { q ->
+                val qPos = projectGeo(q.latitude, q.longitude)
                 val qColor = when {
                     q.magnitude >= 6.0 -> MagRed
                     q.magnitude >= 5.0 -> MagOrange
                     else -> MagYellow
                 }
                 drawCircle(
-                    color = qColor.copy(alpha = 0.45f),
-                    radius = 4.5.dp.toPx(),
-                    center = Offset(qX, qY)
+                    color = qColor.copy(alpha = 0.35f),
+                    radius = 5.dp.toPx(),
+                    center = qPos
                 )
                 drawCircle(
                     color = qColor,
-                    radius = 2.5.dp.toPx(),
-                    center = Offset(qX, qY)
+                    radius = 3.dp.toPx(),
+                    center = qPos
                 )
             }
 
-            // 4. Animated Radar Sweep Beam
-            val sweepRad = Math.toRadians(sweepAngle.toDouble())
-            val sweepEndX = centerX + (maxRadius * cos(sweepRad)).toFloat()
-            val sweepEndY = centerY + (maxRadius * sin(sweepRad)).toFloat()
-            drawLine(
-                brush = Brush.linearGradient(
-                    colors = listOf(Color(0xFF10B981).copy(alpha = 0.05f), Color(0xFF10B981).copy(alpha = 0.45f)),
-                    start = Offset(centerX, centerY),
-                    end = Offset(sweepEndX, sweepEndY)
-                ),
-                start = Offset(centerX, centerY),
-                end = Offset(sweepEndX, sweepEndY),
-                strokeWidth = 2.dp.toPx()
-            )
+            // 4. Calculate Key Coordinates
+            val userPos = projectGeo(safeUserLat, safeUserLon)
+            val epiPos = projectGeo(epicenterLat, epicenterLon)
 
-            // 5. Active Target Epicenter Position (relative to user center)
-            val targetDistanceFactor = 0.68f // placed gracefully in the outer ring
-            val epiX = centerX + (maxRadius * targetDistanceFactor * cos(bearingRad)).toFloat()
-            val epiY = centerY + (maxRadius * targetDistanceFactor * sin(bearingRad)).toFloat()
-
-            // 6. Trajectory Dotted Line from User to Active Epicenter
+            // 5. Distance Trajectory Dotted Line from User to Epicenter
             drawLine(
-                color = Color(0xFF38BDF8).copy(alpha = 0.7f),
-                start = Offset(centerX, centerY),
-                end = Offset(epiX, epiY),
+                color = Color(0xFF38BDF8).copy(alpha = 0.75f),
+                start = userPos,
+                end = epiPos,
                 strokeWidth = 2.dp.toPx(),
                 pathEffect = PathEffect.dashPathEffect(floatArrayOf(8f, 6f))
             )
 
-            // 7. Shaking Zone / Impact Radius Circle
-            val impactRadius = 36.dp.toPx()
+            // 6. Active Epicenter Impact & Shockwave Animation
+            val impactRadiusPx = 28.dp.toPx()
             drawCircle(
-                color = magColor.copy(alpha = 0.15f),
-                radius = impactRadius,
-                center = Offset(epiX, epiY)
+                color = magColor.copy(alpha = 0.12f),
+                radius = impactRadiusPx,
+                center = epiPos
             )
             drawCircle(
-                color = magColor.copy(alpha = 0.4f),
-                radius = impactRadius,
-                center = Offset(epiX, epiY),
+                color = magColor.copy(alpha = 0.35f),
+                radius = impactRadiusPx,
+                center = epiPos,
                 style = Stroke(width = 1.dp.toPx(), pathEffect = PathEffect.dashPathEffect(floatArrayOf(4f, 4f)))
             )
 
-            // 8. Epicenter Pulsing Wave Animation
-            val pulseRadiusPx = 10.dp.toPx() + (30.dp.toPx() * pulseWave)
+            // Pulsing wave
+            val pulseRadius = 8.dp.toPx() + (32.dp.toPx() * pulseWave)
             val pulseAlpha = (1f - pulseWave).coerceIn(0f, 1f)
             drawCircle(
-                color = magColor.copy(alpha = pulseAlpha * 0.7f),
-                radius = pulseRadiusPx,
-                center = Offset(epiX, epiY),
+                color = magColor.copy(alpha = pulseAlpha * 0.75f),
+                radius = pulseRadius,
+                center = epiPos,
                 style = Stroke(width = 2.dp.toPx())
             )
 
-            // 9. Epicenter Bullseye Center
+            // Epicenter Bullseye
             drawCircle(
                 color = Color.White,
-                radius = 8.dp.toPx(),
-                center = Offset(epiX, epiY)
+                radius = 7.dp.toPx(),
+                center = epiPos
             )
             drawCircle(
                 color = magColor,
-                radius = 6.dp.toPx(),
-                center = Offset(epiX, epiY)
+                radius = 5.dp.toPx(),
+                center = epiPos
             )
 
-            // 10. User Location Marker (Center)
+            // 7. User Location Pin (Center Beacon)
             drawCircle(
-                color = Color(0xFF38BDF8).copy(alpha = 0.3f),
-                radius = 12.dp.toPx(),
-                center = Offset(centerX, centerY)
+                color = Color(0xFF0284C7).copy(alpha = 0.3f),
+                radius = 11.dp.toPx(),
+                center = userPos
             )
             drawCircle(
                 color = Color.White,
                 radius = 6.dp.toPx(),
-                center = Offset(centerX, centerY)
+                center = userPos
             )
             drawCircle(
                 color = Color(0xFF0284C7),
-                radius = 4.5.dp.toPx(),
-                center = Offset(centerX, centerY)
+                radius = 4.dp.toPx(),
+                center = userPos
             )
         }
 
-        // Overlay: Cardinal Directions
-        Text(
-            text = "U",
-            fontSize = 10.sp,
-            fontWeight = FontWeight.Bold,
-            color = Color(0xFF64748B),
-            modifier = Modifier
-                .align(Alignment.TopCenter)
-                .padding(top = 6.dp)
-        )
-        Text(
-            text = "S",
-            fontSize = 10.sp,
-            fontWeight = FontWeight.Bold,
-            color = Color(0xFF64748B),
-            modifier = Modifier
-                .align(Alignment.BottomCenter)
-                .padding(bottom = 26.dp)
-        )
-        Text(
-            text = "T",
-            fontSize = 10.sp,
-            fontWeight = FontWeight.Bold,
-            color = Color(0xFF64748B),
-            modifier = Modifier
-                .align(Alignment.CenterEnd)
-                .padding(end = 8.dp)
-        )
-        Text(
-            text = "B",
-            fontSize = 10.sp,
-            fontWeight = FontWeight.Bold,
-            color = Color(0xFF64748B),
-            modifier = Modifier
-                .align(Alignment.CenterStart)
-                .padding(start = 8.dp)
-        )
-
-        // Overlay: Top-Right Detected Count Badge
-        val totalDetected = (allQuakes.size).coerceAtLeast(1)
+        // Overlay: Top-Left Title Badge
         Surface(
             shape = RoundedCornerShape(8.dp),
-            color = Color(0xFF0F172A).copy(alpha = 0.85f),
-            border = androidx.compose.foundation.BorderStroke(0.5.dp, Color(0xFF334155)),
-            modifier = Modifier
-                .align(Alignment.TopEnd)
-                .padding(8.dp)
-        ) {
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier.padding(horizontal = 7.dp, vertical = 3.dp)
-            ) {
-                Box(
-                    modifier = Modifier
-                        .size(7.dp)
-                        .clip(CircleShape)
-                        .background(Color(0xFF10B981))
-                )
-                Spacer(modifier = Modifier.width(4.dp))
-                Text(
-                    text = if (isEn) "$totalDetected Quakes Detected" else "$totalDetected Gempa Terdeteksi",
-                    fontSize = 10.sp,
-                    fontWeight = FontWeight.SemiBold,
-                    color = Color(0xFFE2E8F0)
-                )
-            }
-        }
-
-        // Overlay: Floating Badge Info
-        Surface(
-            shape = RoundedCornerShape(8.dp),
-            color = Color(0xFF0F172A).copy(alpha = 0.85f),
+            color = Color(0xFF0F172A).copy(alpha = 0.88f),
             border = androidx.compose.foundation.BorderStroke(0.5.dp, Color(0xFF334155)),
             modifier = Modifier
                 .align(Alignment.TopStart)
@@ -351,7 +235,7 @@ fun DisasterMapView(
         ) {
             Row(
                 verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier.padding(horizontal = 7.dp, vertical = 3.dp)
+                modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
             ) {
                 Box(
                     modifier = Modifier
@@ -359,7 +243,7 @@ fun DisasterMapView(
                         .clip(CircleShape)
                         .background(magColor)
                 )
-                Spacer(modifier = Modifier.width(4.dp))
+                Spacer(modifier = Modifier.width(5.dp))
                 Text(
                     text = "M %.1f • %d km".format(magnitude, depthKm),
                     fontSize = 11.sp,
@@ -369,27 +253,74 @@ fun DisasterMapView(
             }
         }
 
+        // Overlay: Top-Right Detected Count Badge
+        val totalDetected = (allQuakes.size).coerceAtLeast(1)
+        Surface(
+            shape = RoundedCornerShape(8.dp),
+            color = Color(0xFF0F172A).copy(alpha = 0.88f),
+            border = androidx.compose.foundation.BorderStroke(0.5.dp, Color(0xFF334155)),
+            modifier = Modifier
+                .align(Alignment.TopEnd)
+                .padding(8.dp)
+        ) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
+            ) {
+                Box(
+                    modifier = Modifier
+                        .size(6.dp)
+                        .clip(CircleShape)
+                        .background(Color(0xFF10B981))
+                )
+                Spacer(modifier = Modifier.width(4.dp))
+                Text(
+                    text = if (isEn) "$totalDetected Quakes Active" else "$totalDetected Gempa Aktif",
+                    fontSize = 10.sp,
+                    fontWeight = FontWeight.SemiBold,
+                    color = Color(0xFFE2E8F0)
+                )
+            }
+        }
+
         // Overlay Legend at Bottom
         Row(
             modifier = Modifier
                 .align(Alignment.BottomCenter)
                 .fillMaxWidth()
-                .background(Color(0xFF0F172A).copy(alpha = 0.85f))
-                .padding(horizontal = 10.dp, vertical = 4.dp),
+                .background(Color(0xFF0B132B).copy(alpha = 0.90f))
+                .padding(horizontal = 12.dp, vertical = 5.dp),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Box(
                     modifier = Modifier
-                        .size(6.dp)
+                        .size(7.dp)
                         .clip(CircleShape)
-                        .background(Color(0xFF38BDF8))
+                        .background(Color(0xFF0284C7))
                 )
-                Spacer(modifier = Modifier.width(3.dp))
+                Spacer(modifier = Modifier.width(4.dp))
                 Text(
-                    text = if (isEn) "You" else "Anda",
+                    text = if (isEn) "You" else "Posisi Anda",
                     fontSize = 10.sp,
+                    fontWeight = FontWeight.Medium,
+                    color = Color(0xFF94A3B8)
+                )
+            }
+
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Box(
+                    modifier = Modifier
+                        .size(7.dp)
+                        .clip(CircleShape)
+                        .background(magColor)
+                )
+                Spacer(modifier = Modifier.width(4.dp))
+                Text(
+                    text = if (isEn) "Target Epicenter" else "Episentrum Target",
+                    fontSize = 10.sp,
+                    fontWeight = FontWeight.Medium,
                     color = Color(0xFF94A3B8)
                 )
             }
@@ -399,47 +330,136 @@ fun DisasterMapView(
                     modifier = Modifier
                         .size(6.dp)
                         .clip(CircleShape)
-                        .background(magColor)
+                        .background(Color(0xFFF59E0B))
                 )
-                Spacer(modifier = Modifier.width(3.dp))
+                Spacer(modifier = Modifier.width(4.dp))
                 Text(
-                    text = if (isEn) "Target Focus" else "Fokus Target",
+                    text = if (isEn) "Other Quakes" else "Gempa Lain",
                     fontSize = 10.sp,
+                    fontWeight = FontWeight.Medium,
                     color = Color(0xFF94A3B8)
                 )
             }
-
-            if (otherQuakeBlips.isNotEmpty()) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Box(
-                        modifier = Modifier
-                            .size(6.dp)
-                            .clip(CircleShape)
-                            .background(Color(0xFFF59E0B))
-                    )
-                    Spacer(modifier = Modifier.width(3.dp))
-                    Text(
-                        text = if (isEn) "Other Quakes (${otherQuakeBlips.count()})" else "Gempa Lain (${otherQuakeBlips.count()})",
-                        fontSize = 10.sp,
-                        color = Color(0xFF94A3B8)
-                    )
-                }
-            } else {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Box(
-                        modifier = Modifier
-                            .size(6.dp)
-                            .clip(CircleShape)
-                            .background(magColor.copy(alpha = 0.3f))
-                    )
-                    Spacer(modifier = Modifier.width(3.dp))
-                    Text(
-                        text = if (isEn) "Impact Zone" else "Zona Guncangan",
-                        fontSize = 10.sp,
-                        color = Color(0xFF94A3B8)
-                    )
-                }
-            }
         }
     }
+}
+
+/**
+ * Draws simplified polygon silhouettes of major Indonesian islands
+ * based on geographic latitude and longitude coordinates.
+ */
+private fun DrawScope.drawArchipelago(
+    project: (Double, Double) -> Offset,
+    fillColor: Color,
+    borderColor: Color
+) {
+    fun drawPolygon(points: List<Pair<Double, Double>>) {
+        if (points.size < 3) return
+        val path = Path()
+        val first = project(points[0].first, points[0].second)
+        path.moveTo(first.x, first.y)
+        for (i in 1 until points.size) {
+            val pt = project(points[i].first, points[i].second)
+            path.lineTo(pt.x, pt.y)
+        }
+        path.close()
+        drawPath(path, fillColor, style = Fill)
+        drawPath(path, borderColor, style = Stroke(width = 0.8.dp.toPx()))
+    }
+
+    // 1. Sumatra Island
+    drawPolygon(
+        listOf(
+            5.5 to 95.3, 5.2 to 96.0, 4.2 to 98.2, 2.8 to 100.0,
+            1.2 to 101.8, -0.6 to 103.5, -2.0 to 104.8, -3.4 to 106.0,
+            -5.8 to 105.8, -5.5 to 104.5, -4.6 to 103.2, -3.2 to 101.8,
+            -1.6 to 100.2, 0.2 to 98.8, 2.2 to 97.2, 4.4 to 95.6, 5.5 to 95.3
+        )
+    )
+
+    // 2. Java Island & Madura
+    drawPolygon(
+        listOf(
+            -6.0 to 105.9, -6.0 to 107.0, -6.4 to 108.6, -6.9 to 110.5,
+            -6.6 to 111.6, -6.9 to 112.8, -7.8 to 114.4, -8.7 to 114.4,
+            -8.3 to 112.5, -8.1 to 110.6, -7.7 to 108.6, -7.0 to 106.5,
+            -6.8 to 105.2, -6.0 to 105.9
+        )
+    )
+    // Madura
+    drawPolygon(
+        listOf(
+            -7.0 to 112.7, -6.9 to 114.0, -7.2 to 114.1, -7.1 to 112.8, -7.0 to 112.7
+        )
+    )
+
+    // 3. Bali, Lombok, Sumbawa, Flores, Timor
+    // Bali
+    drawPolygon(
+        listOf(-8.1 to 114.5, -8.1 to 115.3, -8.8 to 115.5, -8.8 to 115.1, -8.1 to 114.5)
+    )
+    // Lombok
+    drawPolygon(
+        listOf(-8.3 to 116.0, -8.3 to 116.6, -8.9 to 116.4, -8.7 to 115.9, -8.3 to 116.0)
+    )
+    // Sumbawa
+    drawPolygon(
+        listOf(-8.4 to 116.8, -8.3 to 118.8, -8.9 to 118.6, -8.8 to 116.9, -8.4 to 116.8)
+    )
+    // Flores
+    drawPolygon(
+        listOf(-8.5 to 119.8, -8.3 to 122.9, -8.8 to 122.8, -8.8 to 119.9, -8.5 to 119.8)
+    )
+    // Timor (Indonesia)
+    drawPolygon(
+        listOf(-9.2 to 124.0, -9.0 to 125.0, -9.9 to 124.8, -10.3 to 123.5, -9.8 to 123.6, -9.2 to 124.0)
+    )
+
+    // 4. Kalimantan (Borneo - Indonesian territory)
+    drawPolygon(
+        listOf(
+            4.0 to 117.5, 2.5 to 117.8, 1.0 to 118.9, -1.2 to 117.0,
+            -3.8 to 116.2, -4.2 to 114.5, -3.2 to 112.5, -2.8 to 110.0,
+            -0.8 to 109.0, 1.0 to 109.0, 1.5 to 110.5, 2.0 to 113.0,
+            3.0 to 115.5, 4.0 to 116.0, 4.0 to 117.5
+        )
+    )
+
+    // 5. Sulawesi (The 4-armed island)
+    // North arm (Minahasa/Manado)
+    drawPolygon(
+        listOf(1.5 to 124.9, 0.8 to 123.0, 0.5 to 120.0, 1.2 to 120.8, 1.0 to 122.5, 1.8 to 125.0, 1.5 to 124.9)
+    )
+    // Central & South arm (Makassar)
+    drawPolygon(
+        listOf(-0.5 to 119.8, -3.0 to 119.0, -5.6 to 119.5, -5.5 to 120.5, -3.5 to 120.4, -2.0 to 120.2, -1.0 to 120.5, -0.5 to 119.8)
+    )
+    // Southeast arm (Kendari)
+    drawPolygon(
+        listOf(-2.5 to 121.2, -4.0 to 122.8, -5.2 to 122.5, -4.8 to 121.8, -3.5 to 121.5, -2.5 to 121.2)
+    )
+    // East arm
+    drawPolygon(
+        listOf(-0.8 to 121.5, -1.0 to 123.5, -1.6 to 123.5, -1.5 to 121.5, -0.8 to 121.5)
+    )
+
+    // 6. Maluku & Halmahera
+    // Halmahera
+    drawPolygon(
+        listOf(1.8 to 127.8, 1.5 to 128.5, 0.5 to 128.0, 0.0 to 127.3, 0.8 to 127.4, 1.8 to 127.8)
+    )
+    // Seram / Ambon
+    drawPolygon(
+        listOf(-3.0 to 128.0, -3.0 to 130.5, -3.6 to 130.0, -3.8 to 128.2, -3.0 to 128.0)
+    )
+
+    // 7. Papua Island
+    drawPolygon(
+        listOf(
+            0.0 to 131.2, -0.8 to 131.0, -1.5 to 132.5, -2.5 to 134.0,
+            -1.8 to 135.0, -2.5 to 138.0, -2.5 to 141.0, -9.0 to 141.0,
+            -8.5 to 138.0, -5.0 to 137.0, -4.5 to 135.0, -3.5 to 133.5,
+            -2.0 to 132.0, -0.5 to 132.0, 0.0 to 131.2
+        )
+    )
 }

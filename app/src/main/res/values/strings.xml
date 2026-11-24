@@ -178,23 +178,26 @@
     <string name="wilayah_search_empty_hint">Hanya memuat 10 wilayah contoh bawaan.\nMasukkan file assets/wilayah.csv untuk mencari lebih dari 80.000 kelurahan/desa se-Indonesia.</string>
     <string name="settings_notif_permission_missing">Izin notifikasi belum diaktifkan di sistem perangkat Anda. Buka Pengaturan untuk mengizinkannya.</string>
 
-    <!-- Radar Jarak Episentrum & Shakemap BMKG -->
-    <string name="dashboard_epicenter_title">Radar Jarak Episentrum</string>
-    <string name="dashboard_epicenter_subtitle">Estimasi guncangan lokal &amp; peta pemetaan bencana</string>
+    <!-- Peta Episentrum & Shakemap BMKG -->
+    <string name="dashboard_epicenter_title">Peta &amp; Episentrum Gempa</string>
+    <string name="dashboard_epicenter_subtitle">Pemetaan episentrum gempa bumi &amp; jarak dari Anda</string>
+    <string name="dashboard_map_section_title">Peta &amp; Episentrum Gempa</string>
+    <string name="dashboard_map_section_subtitle">Pemetaan episentrum gempa bumi &amp; sebarannya</string>
     <string name="dashboard_epicenter_distance_label">Jarak Episentrum</string>
     <string name="dashboard_epicenter_direction_from">%1$d km arah %2$s dari %3$s</string>
     <string name="dashboard_radar_distance_label">Jarak Episentrum</string>
-    <string name="dashboard_radar_direction">Arah %1$s</string>
-    <string name="dashboard_radar_depth">Kedalaman %1$d km (%2$s)</string>
+    <string name="dashboard_radar_direction">%1$s</string>
+    <string name="dashboard_radar_depth">%1$d km</string>
     <string name="dashboard_radar_mmi_summary">Estimasi: %1$s</string>
     <string name="dashboard_tab_shakemap">Shakemap BMKG</string>
-    <string name="dashboard_tab_interactive_map">Radar Episentrum</string>
+    <string name="dashboard_tab_interactive_map">Peta Indonesia</string>
     <string name="dashboard_map_tap_fullscreen">Ketuk untuk perbesar peta</string>
-    <string name="dashboard_map_free_notice">Radar Vektor Episentrum (100% Offline &amp; Ringan)</string>
-    <string name="dashboard_btn_open_radar">Buka Radar Penuh</string>
-    <string name="dashboard_map_legend_epicenter">Pusat Gempa</string>
-    <string name="dashboard_map_legend_user">Posisi Anda</string>
-    <string name="dashboard_map_legend_shaking_zone">Radius Guncangan</string>
+    <string name="dashboard_map_free_notice">Peta Vektor Indonesia (100% Offline &amp; Ringan)</string>
+    <string name="dashboard_btn_open_radar">Buka Peta Penuh</string>
+    <string name="dashboard_btn_open_map">Buka Peta Penuh</string>
+    <string name="dashboard_map_legend_epicenter">Episentrum</string>
+    <string name="dashboard_map_legend_user">Lokasi Anda</string>
+    <string name="dashboard_map_legend_shaking_zone">Zona Guncangan</string>
     <string name="dashboard_shakemap_not_available">Gambar shakemap BMKG belum tersedia.</string>
     <string name="dashboard_mmi_estimate_label">Estimasi Guncangan di Wilayah Anda</string>
     <string name="dashboard_shakemap_official_badge">Peta Guncangan Resmi BMKG</string>
@@ -204,13 +207,16 @@
     <string name="depth_intermediate">Gempa Menengah (60–300 km)</string>
     <string name="depth_deep">Gempa Dalam (> 300 km)</string>
     <string name="dashboard_btn_open_shakemap">Buka Shakemap Penuh</string>
-    <string name="dashboard_radar_target_nearest">Gempa Terdekat</string>
-    <string name="dashboard_radar_target_latest">Gempa Terbaru (M 5.0+)</string>
+    <string name="dashboard_radar_target_nearest">Terdekat</string>
+    <string name="dashboard_radar_target_latest">Terbaru BMKG</string>
+    <string name="dashboard_target_nearest_short">Terdekat</string>
+    <string name="dashboard_target_latest_short">Terbaru</string>
+    <string name="dashboard_epicenter_target_prefix">Pusat: %1$s (M %2$.1f)</string>
     <string name="dashboard_radar_showing_nearest">🎯 Target: Gempa terdekat dari posisi Anda (%1$s)</string>
     <string name="dashboard_radar_showing_latest">⚡ Target: Gempa signifikan terbaru BMKG (%1$s)</string>
-    <string name="dashboard_radar_detected_count">%1$d Gempa Terdeteksi</string>
+    <string name="dashboard_radar_detected_count">%1$d Gempa</string>
     <string name="dashboard_radar_select_chip">%1$s • M%2$.1f (%3$d km)</string>
-    <string name="dashboard_shakemap_fallback_notice">Menampilkan Shakemap resmi gempa terbaru BMKG (M %1$.1f). BMKG merilis shakemap untuk gempa signifikan M ≥ 5.0.</string>
+    <string name="dashboard_shakemap_fallback_notice">Menampilkan Shakemap resmi gempa terbaru BMKG (M %1$.1f).</string>
     <string name="dashboard_shakemap_policy_desc">BMKG hanya menerbitkan peta Shakemap resmi untuk gempa signifikan M ≥ 5.0. Gempa mikro/lokal tidak memiliki Shakemap dari BMKG.</string>
 
     <!-- Additional Flashlight & Quick Stats -->

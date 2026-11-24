@@ -198,12 +198,6 @@ fun MainApp() {
                                 contentDescription = stringResource(R.string.settings_title)
                             )
                         }
-                        IconButton(onClick = { navController.navigate(Screen.About.route) }) {
-                            Icon(
-                                imageVector = Icons.Default.Info,
-                                contentDescription = stringResource(R.string.nav_about)
-                            )
-                        }
                     }
                 )
             }
@@ -324,7 +318,8 @@ fun MainApp() {
             }
             composable(Screen.Settings.route) {
                 com.example.siagabumi.ui.settings.SettingsScreen(
-                    onNavigateBack = { navController.popBackStack() }
+                    onNavigateBack = { navController.popBackStack() },
+                    onNavigateToAbout = { navController.navigate(Screen.About.route) }
                 )
             }
             composable(Screen.GempaDetail.route) {

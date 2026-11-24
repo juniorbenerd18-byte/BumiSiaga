@@ -178,20 +178,23 @@
     <string name="wilayah_search_empty_hint">Only sample regions loaded.\nAdd assets/wilayah.csv to search over 80,000 villages across Indonesia.</string>
     <string name="settings_notif_permission_missing">Notification permission is not enabled on your device. Please allow it in settings.</string>
 
-    <!-- Radar Jarak Episentrum & Shakemap BMKG -->
-    <string name="dashboard_epicenter_title">Epicenter Radar &amp; Disaster Map</string>
-    <string name="dashboard_epicenter_subtitle">Local shaking estimate &amp; disaster mapping</string>
+    <!-- Epicenter Map & BMKG Shakemap -->
+    <string name="dashboard_epicenter_title">Disaster Map &amp; Epicenter</string>
+    <string name="dashboard_epicenter_subtitle">Earthquake epicenter mapping &amp; distance from you</string>
+    <string name="dashboard_map_section_title">Disaster Map &amp; Epicenter</string>
+    <string name="dashboard_map_section_subtitle">Earthquake epicenter mapping &amp; distribution</string>
     <string name="dashboard_epicenter_distance_label">Epicenter Proximity</string>
     <string name="dashboard_epicenter_direction_from">%1$d km %2$s from %3$s</string>
     <string name="dashboard_radar_distance_label">Epicenter Distance</string>
-    <string name="dashboard_radar_direction">Bearing %1$s</string>
-    <string name="dashboard_radar_depth">Depth %1$d km (%2$s)</string>
+    <string name="dashboard_radar_direction">%1$s</string>
+    <string name="dashboard_radar_depth">%1$d km</string>
     <string name="dashboard_radar_mmi_summary">Estimate: %1$s</string>
     <string name="dashboard_tab_shakemap">BMKG Shakemap</string>
-    <string name="dashboard_tab_interactive_map">Epicenter Radar</string>
-    <string name="dashboard_map_tap_fullscreen">Tap to enlarge radar</string>
-    <string name="dashboard_map_free_notice">Vector Epicenter Radar (100% Offline &amp; Fast)</string>
-    <string name="dashboard_btn_open_radar">Enlarge Radar</string>
+    <string name="dashboard_tab_interactive_map">Indonesia Map</string>
+    <string name="dashboard_map_tap_fullscreen">Tap to enlarge map</string>
+    <string name="dashboard_map_free_notice">Indonesia Vector Map (100% Offline &amp; Fast)</string>
+    <string name="dashboard_btn_open_radar">Enlarge Map</string>
+    <string name="dashboard_btn_open_map">Enlarge Map</string>
     <string name="dashboard_map_legend_epicenter">Epicenter</string>
     <string name="dashboard_map_legend_user">Your Location</string>
     <string name="dashboard_map_legend_shaking_zone">Shaking Radius</string>
@@ -204,13 +207,16 @@
     <string name="depth_intermediate">Intermediate Quake (60–300 km)</string>
     <string name="depth_deep">Deep Quake (> 300 km)</string>
     <string name="dashboard_btn_open_shakemap">Enlarge Shakemap</string>
-    <string name="dashboard_radar_target_nearest">Nearest Quake</string>
-    <string name="dashboard_radar_target_latest">Latest Quake (M 5.0+)</string>
+    <string name="dashboard_radar_target_nearest">Nearest</string>
+    <string name="dashboard_radar_target_latest">Latest BMKG</string>
+    <string name="dashboard_target_nearest_short">Nearest</string>
+    <string name="dashboard_target_latest_short">Latest</string>
+    <string name="dashboard_epicenter_target_prefix">Epicenter: %1$s (M %2$.1f)</string>
     <string name="dashboard_radar_showing_nearest">🎯 Target: Nearest earthquake to your location (%1$s)</string>
     <string name="dashboard_radar_showing_latest">⚡ Target: Latest BMKG significant earthquake (%1$s)</string>
-    <string name="dashboard_radar_detected_count">%1$d Earthquakes Detected</string>
+    <string name="dashboard_radar_detected_count">%1$d Quakes</string>
     <string name="dashboard_radar_select_chip">%1$s • M%2$.1f (%3$d km)</string>
-    <string name="dashboard_shakemap_fallback_notice">Showing official BMKG shakemap from latest earthquake (M %1$.1f). BMKG releases shakemaps for significant earthquakes (M ≥ 5.0).</string>
+    <string name="dashboard_shakemap_fallback_notice">Showing official BMKG shakemap from latest earthquake (M %1$.1f).</string>
     <string name="dashboard_shakemap_policy_desc">BMKG only releases official Shakemaps for significant earthquakes (M ≥ 5.0). Micro-quakes do not include an official BMKG shakemap.</string>
 
     <!-- Additional Flashlight & Quick Stats -->
