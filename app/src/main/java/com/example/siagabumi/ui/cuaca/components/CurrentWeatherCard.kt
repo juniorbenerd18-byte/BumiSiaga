@@ -2,10 +2,12 @@ package com.example.siagabumi.ui.cuaca.components
 
 import android.content.res.Configuration
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -22,8 +24,6 @@ import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.InvertColors
 import androidx.compose.material.icons.filled.PushPin
 import androidx.compose.material.icons.filled.WaterDrop
-import androidx.compose.material3.AssistChip
-import androidx.compose.material3.AssistChipDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
@@ -71,12 +71,15 @@ fun CurrentWeatherCard(
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
     ) {
         Column(
-            modifier = Modifier.padding(
-                horizontal = 18.dp,
-                vertical = if (isLandscape) 12.dp else 18.dp
-            )
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(
+                    horizontal = 18.dp,
+                    vertical = if (isLandscape) 10.dp else 16.dp
+                ),
+            verticalArrangement = Arrangement.SpaceBetween
         ) {
-            // Location Header
+            // Location Header (Standardized uniform height)
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -93,17 +96,18 @@ fun CurrentWeatherCard(
                             fontWeight = FontWeight.Bold,
                             color = MaterialTheme.colorScheme.onPrimaryContainer,
                             maxLines = 1,
-                            overflow = TextOverflow.Ellipsis
+                            overflow = TextOverflow.Ellipsis,
+                            modifier = Modifier.weight(1f, fill = false)
                         )
 
                         if (isActiveLocation) {
                             Surface(
                                 shape = RoundedCornerShape(6.dp),
-                                color = MaterialTheme.colorScheme.primary.copy(alpha = 0.18f)
+                                color = MaterialTheme.colorScheme.primary.copy(alpha = 0.22f)
                             ) {
                                 Row(
                                     verticalAlignment = Alignment.CenterVertically,
-                                    modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
+                                    modifier = Modifier.padding(horizontal = 7.dp, vertical = 3.dp)
                                 ) {
                                     Icon(
                                         imageVector = Icons.Default.Check,
@@ -121,28 +125,35 @@ fun CurrentWeatherCard(
                                 }
                             }
                         } else if (onSetAsActiveLocation != null) {
-                            AssistChip(
-                                onClick = onSetAsActiveLocation,
-                                label = {
-                                    Text(
-                                        text = stringResource(R.string.cuaca_set_as_main),
-                                        style = MaterialTheme.typography.labelSmall
-                                    )
-                                },
-                                leadingIcon = {
+                            Surface(
+                                shape = RoundedCornerShape(6.dp),
+                                color = MaterialTheme.colorScheme.surface.copy(alpha = 0.75f),
+                                border = BorderStroke(0.5.dp, MaterialTheme.colorScheme.outlineVariant),
+                                modifier = Modifier.clickable { onSetAsActiveLocation() }
+                            ) {
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    modifier = Modifier.padding(horizontal = 7.dp, vertical = 3.dp)
+                                ) {
                                     Icon(
                                         imageVector = Icons.Default.PushPin,
                                         contentDescription = null,
-                                        modifier = Modifier.size(12.dp)
+                                        modifier = Modifier.size(11.dp),
+                                        tint = MaterialTheme.colorScheme.primary
                                     )
-                                },
-                                colors = AssistChipDefaults.assistChipColors(
-                                    containerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.6f)
-                                ),
-                                border = BorderStroke(0.5.dp, MaterialTheme.colorScheme.outlineVariant)
-                            )
+                                    Spacer(modifier = Modifier.width(3.dp))
+                                    Text(
+                                        text = stringResource(R.string.cuaca_set_as_main),
+                                        style = MaterialTheme.typography.labelSmall,
+                                        fontWeight = FontWeight.SemiBold,
+                                        color = MaterialTheme.colorScheme.onSurface
+                                    )
+                                }
+                            }
                         }
                     }
+
+                    Spacer(modifier = Modifier.height(2.dp))
 
                     Text(
                         text = lokasi.namaLengkap,
@@ -171,8 +182,6 @@ fun CurrentWeatherCard(
                 }
             }
 
-            Spacer(modifier = Modifier.height(if (isLandscape) 8.dp else 16.dp))
-
             // Main Weather Info
             if (current != null) {
                 val isEn = configuration.locales[0].language == "en"
@@ -193,7 +202,7 @@ fun CurrentWeatherCard(
                             Column {
                                 Text(
                                     text = stringResource(R.string.cuaca_temp, current.suhu),
-                                    fontSize = 36.sp,
+                                    fontSize = 34.sp,
                                     fontWeight = FontWeight.Bold,
                                     color = MaterialTheme.colorScheme.onPrimaryContainer
                                 )
@@ -211,7 +220,7 @@ fun CurrentWeatherCard(
                                         .crossfade(true)
                                         .build(),
                                     contentDescription = displayDesc,
-                                    modifier = Modifier.size(54.dp)
+                                    modifier = Modifier.size(50.dp)
                                 )
                             }
                         }
@@ -246,7 +255,7 @@ fun CurrentWeatherCard(
                         }
                     }
                 } else {
-                    // Portrait: Classic Vertical Layout
+                    // Portrait: Standard Spaced Layout
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         verticalAlignment = Alignment.CenterVertically,
@@ -255,7 +264,7 @@ fun CurrentWeatherCard(
                         Column {
                             Text(
                                 text = stringResource(R.string.cuaca_temp, current.suhu),
-                                fontSize = 48.sp,
+                                fontSize = 44.sp,
                                 fontWeight = FontWeight.Bold,
                                 color = MaterialTheme.colorScheme.onPrimaryContainer
                             )
@@ -270,16 +279,14 @@ fun CurrentWeatherCard(
                         if (current.imageUrl.isNotEmpty()) {
                             AsyncImage(
                                 model = ImageRequest.Builder(LocalContext.current)
-                                .data(current.imageUrl)
-                                .crossfade(true)
-                                .build(),
+                                    .data(current.imageUrl)
+                                    .crossfade(true)
+                                    .build(),
                                 contentDescription = displayDesc,
-                                modifier = Modifier.size(86.dp)
+                                modifier = Modifier.size(80.dp)
                             )
                         }
                     }
-
-                    Spacer(modifier = Modifier.height(18.dp))
 
                     // 4 Metric Items Grid
                     Row(

@@ -9,7 +9,7 @@
     <string name="nav_about">Tentang</string>
 
     <!-- Dashboard Inovasi -->
-    <string name="dashboard_title">Siaga Nusantara</string>
+    <string name="dashboard_title">SiagaBumi</string>
     <string name="dashboard_status_safe">Status: Aman Terkendali</string>
     <string name="dashboard_status_safe_desc">Aktivitas seismik terpantau normal tanpa ancaman tsunami aktif.</string>
     <string name="dashboard_status_warning">Status: Waspada Gempa Signifikan</string>
@@ -179,10 +179,22 @@
     <string name="settings_notif_permission_missing">Izin notifikasi belum diaktifkan di sistem perangkat Anda. Buka Pengaturan untuk mengizinkannya.</string>
 
     <!-- Radar Jarak Episentrum & Shakemap BMKG -->
-    <string name="dashboard_epicenter_title">Radar Jarak &amp; Shakemap BMKG</string>
-    <string name="dashboard_epicenter_subtitle">Estimasi guncangan lokal dan peta guncangan resmi BMKG</string>
+    <string name="dashboard_epicenter_title">Radar Jarak Episentrum</string>
+    <string name="dashboard_epicenter_subtitle">Estimasi guncangan lokal &amp; peta pemetaan bencana</string>
     <string name="dashboard_epicenter_distance_label">Jarak Episentrum</string>
     <string name="dashboard_epicenter_direction_from">%1$d km arah %2$s dari %3$s</string>
+    <string name="dashboard_radar_distance_label">Jarak Episentrum</string>
+    <string name="dashboard_radar_direction">Arah %1$s</string>
+    <string name="dashboard_radar_depth">Kedalaman %1$d km (%2$s)</string>
+    <string name="dashboard_radar_mmi_summary">Estimasi: %1$s</string>
+    <string name="dashboard_tab_interactive_map">Peta Interaktif (OSM)</string>
+    <string name="dashboard_tab_shakemap">Shakemap BMKG</string>
+    <string name="dashboard_map_tap_fullscreen">Ketuk untuk perbesar peta interaktif</string>
+    <string name="dashboard_map_free_notice">100% Gratis &amp; Terbuka (OpenStreetMap)</string>
+    <string name="dashboard_map_legend_epicenter">Pusat Gempa</string>
+    <string name="dashboard_map_legend_user">Posisi Anda</string>
+    <string name="dashboard_map_legend_shaking_zone">Radius Guncangan</string>
+    <string name="dashboard_shakemap_not_available">Gambar shakemap BMKG belum tersedia.</string>
     <string name="dashboard_mmi_estimate_label">Estimasi Guncangan di Wilayah Anda</string>
     <string name="dashboard_shakemap_official_badge">Peta Guncangan Resmi BMKG</string>
     <string name="dashboard_shakemap_tap_to_zoom">Ketuk gambar untuk memperbesar Shakemap</string>

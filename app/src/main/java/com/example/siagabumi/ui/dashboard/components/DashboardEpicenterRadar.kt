@@ -6,6 +6,7 @@ import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -26,22 +27,25 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Explore
+import androidx.compose.material.icons.filled.Image
+import androidx.compose.material.icons.filled.Layers
+import androidx.compose.material.icons.filled.Map
 import androidx.compose.material.icons.filled.MyLocation
 import androidx.compose.material.icons.filled.NearMe
 import androidx.compose.material.icons.filled.Verified
-import androidx.compose.material.icons.filled.Vibration
 import androidx.compose.material.icons.filled.ZoomIn
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.SecondaryTabRow
 import androidx.compose.material3.Surface
+import androidx.compose.material3.Tab
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -54,6 +58,8 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
@@ -63,6 +69,7 @@ import coil.request.ImageRequest
 import com.example.siagabumi.R
 import com.example.siagabumi.domain.model.Gempa
 import com.example.siagabumi.domain.model.UserPreferences
+import com.example.siagabumi.ui.components.DisasterMapView
 import com.example.siagabumi.ui.components.ZoomableShakemap
 import com.example.siagabumi.ui.theme.MagGreen
 import com.example.siagabumi.ui.theme.MagOrange
@@ -85,6 +92,8 @@ fun DashboardEpicenterRadar(
 
     val context = LocalContext.current
     var isShakemapDialogOpen by remember { mutableStateOf(false) }
+    var isMapFullscreenOpen by remember { mutableStateOf(false) }
+    var selectedMapTab by remember { mutableIntStateOf(0) } // 0: Interactive Map, 1: BMKG Shakemap
 
     val distanceKm = remember(gempa, userPreferences) {
         GeoUtils.calculateDistanceKm(
@@ -185,32 +194,30 @@ fun DashboardEpicenterRadar(
             }
         }
 
-        Spacer(modifier = Modifier.height(12.dp))
+        Spacer(modifier = Modifier.height(10.dp))
 
         // Main Epicenter Impact Card
         Card(
-            modifier = Modifier
-                .fillMaxWidth()
-                .clickable { onOpenDetailClick(gempa.id) },
+            modifier = Modifier.fillMaxWidth(),
             shape = RoundedCornerShape(20.dp),
             colors = CardDefaults.cardColors(
                 containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.55f)
             ),
-            border = androidx.compose.foundation.BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.35f)),
+            border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.35f)),
             elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
         ) {
             Column(
                 modifier = Modifier.padding(16.dp),
-                verticalArrangement = Arrangement.spacedBy(14.dp)
+                verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
-                // Row 1: Proximity Badge & Coordinates
+                // Row 1: Streamlined Proximity Metric & Direct Stats (Decluttered)
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     // Pulsing Compass Radar Graphic
                     Box(
-                        modifier = Modifier.size(52.dp),
+                        modifier = Modifier.size(50.dp),
                         contentAlignment = Alignment.Center
                     ) {
                         Canvas(modifier = Modifier.fillMaxSize()) {
@@ -222,7 +229,7 @@ fun DashboardEpicenterRadar(
                         }
                         Box(
                             modifier = Modifier
-                                .size(40.dp)
+                                .size(38.dp)
                                 .clip(CircleShape)
                                 .background(MaterialTheme.colorScheme.primaryContainer),
                             contentAlignment = Alignment.Center
@@ -231,7 +238,7 @@ fun DashboardEpicenterRadar(
                                 imageVector = Icons.Default.NearMe,
                                 contentDescription = null,
                                 tint = MaterialTheme.colorScheme.primary,
-                                modifier = Modifier.size(22.dp)
+                                modifier = Modifier.size(20.dp)
                             )
                         }
                     }
@@ -239,44 +246,100 @@ fun DashboardEpicenterRadar(
                     Spacer(modifier = Modifier.width(12.dp))
 
                     Column(modifier = Modifier.weight(1f)) {
-                        Text(
-                            text = stringResource(
-                                R.string.dashboard_epicenter_direction_from,
-                                distanceKm,
-                                direction,
-                                userPreferences.userLocationName
-                            ),
-                            style = MaterialTheme.typography.titleSmall,
-                            fontWeight = FontWeight.Bold,
-                            color = MaterialTheme.colorScheme.onSurface
-                        )
-                        Text(
-                            text = stringResource(
-                                R.string.dashboard_depth_profile,
-                                gempa.kedalamanKm,
-                                stringResource(depthTypeRes)
-                            ),
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                        if (onSyncGpsClick != null) {
-                            Spacer(modifier = Modifier.height(6.dp))
+                        Row(
+                            verticalAlignment = Alignment.Bottom,
+                            horizontalArrangement = Arrangement.spacedBy(4.dp)
+                        ) {
+                            Text(
+                                text = "%,d".format(distanceKm).replace(',', '.'),
+                                fontSize = 24.sp,
+                                fontWeight = FontWeight.ExtraBold,
+                                color = MaterialTheme.colorScheme.onSurface
+                            )
+                            Text(
+                                text = "km",
+                                fontSize = 14.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+
+                        // Compact badges for direction & depth
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(6.dp),
+                            modifier = Modifier.padding(top = 2.dp)
+                        ) {
+                            Surface(
+                                shape = RoundedCornerShape(6.dp),
+                                color = MaterialTheme.colorScheme.surface.copy(alpha = 0.8f),
+                                border = BorderStroke(0.5.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))
+                            ) {
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Default.Explore,
+                                        contentDescription = null,
+                                        modifier = Modifier.size(11.dp),
+                                        tint = MaterialTheme.colorScheme.primary
+                                    )
+                                    Spacer(modifier = Modifier.width(3.dp))
+                                    Text(
+                                        text = stringResource(R.string.dashboard_radar_direction, direction),
+                                        style = MaterialTheme.typography.labelSmall,
+                                        fontWeight = FontWeight.SemiBold
+                                    )
+                                }
+                            }
+
+                            Surface(
+                                shape = RoundedCornerShape(6.dp),
+                                color = MaterialTheme.colorScheme.surface.copy(alpha = 0.8f),
+                                border = BorderStroke(0.5.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))
+                            ) {
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Default.Layers,
+                                        contentDescription = null,
+                                        modifier = Modifier.size(11.dp),
+                                        tint = MaterialTheme.colorScheme.onSurfaceVariant
+                                    )
+                                    Spacer(modifier = Modifier.width(3.dp))
+                                    Text(
+                                        text = "${gempa.kedalamanKm} km",
+                                        style = MaterialTheme.typography.labelSmall,
+                                        fontWeight = FontWeight.SemiBold
+                                    )
+                                }
+                            }
+                        }
+                    }
+
+                    // GPS update quick button
+                    if (onSyncGpsClick != null) {
+                        Surface(
+                            shape = RoundedCornerShape(10.dp),
+                            color = MaterialTheme.colorScheme.primary.copy(alpha = 0.12f),
+                            modifier = Modifier.clickable(enabled = !isSyncingGps) { onSyncGpsClick() }
+                        ) {
                             Row(
                                 verticalAlignment = Alignment.CenterVertically,
-                                modifier = Modifier
-                                    .clip(RoundedCornerShape(6.dp))
-                                    .clickable(enabled = !isSyncingGps) { onSyncGpsClick() }
-                                    .padding(vertical = 2.dp, horizontal = 4.dp)
+                                modifier = Modifier.padding(horizontal = 8.dp, vertical = 6.dp)
                             ) {
                                 Icon(
                                     imageVector = Icons.Default.MyLocation,
                                     contentDescription = null,
                                     tint = MaterialTheme.colorScheme.primary,
-                                    modifier = Modifier.size(13.dp)
+                                    modifier = Modifier.size(14.dp)
                                 )
                                 Spacer(modifier = Modifier.width(4.dp))
                                 Text(
-                                    text = if (isSyncingGps) stringResource(R.string.settings_gps_detecting) else stringResource(R.string.dashboard_gps_sync),
+                                    text = if (isSyncingGps) "..." else stringResource(R.string.dashboard_gps_sync),
                                     style = MaterialTheme.typography.labelSmall,
                                     color = MaterialTheme.colorScheme.primary,
                                     fontWeight = FontWeight.Bold
@@ -286,14 +349,14 @@ fun DashboardEpicenterRadar(
                     }
                 }
 
-                // Row 2: Estimated Shaking Intensity (MMI)
+                // Row 2: Streamlined Estimated Shaking (MMI)
                 Surface(
                     shape = RoundedCornerShape(12.dp),
                     color = mmiBadgeColor.copy(alpha = 0.12f),
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     Row(
-                        modifier = Modifier.padding(12.dp),
+                        modifier = Modifier.padding(10.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Surface(
@@ -305,14 +368,17 @@ fun DashboardEpicenterRadar(
                                 text = mmiEstimate.scale,
                                 color = if (mmiEstimate.level == 3) Color(0xFF1E293B) else Color.White,
                                 fontWeight = FontWeight.ExtraBold,
-                                fontSize = 13.sp,
-                                modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
+                                fontSize = 12.sp,
+                                modifier = Modifier.padding(horizontal = 7.dp, vertical = 3.dp)
                             )
                         }
 
                         Column(modifier = Modifier.weight(1f)) {
                             Text(
-                                text = stringResource(R.string.dashboard_mmi_estimate_label),
+                                text = stringResource(
+                                    R.string.dashboard_radar_mmi_summary,
+                                    mmiEstimate.scale
+                                ),
                                 fontWeight = FontWeight.Bold,
                                 fontSize = 12.sp,
                                 color = MaterialTheme.colorScheme.onSurface
@@ -320,88 +386,262 @@ fun DashboardEpicenterRadar(
                             Text(
                                 text = if (userPreferences.language == "en") mmiEstimate.descriptionEn else mmiEstimate.descriptionId,
                                 style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis
                             )
                         }
                     }
                 }
 
-                // Row 3: Official BMKG Shakemap Preview
-                if (!gempa.shakemapUrl.isNullOrEmpty()) {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(180.dp)
-                            .clip(RoundedCornerShape(14.dp))
-                            .background(MaterialTheme.colorScheme.surface)
-                            .clickable { isShakemapDialogOpen = true }
+                // Row 3: Map Section with Tabs (Free OpenStreetMap vs BMKG Shakemap)
+                Column(modifier = Modifier.fillMaxWidth()) {
+                    SecondaryTabRow(
+                        selectedTabIndex = selectedMapTab,
+                        containerColor = Color.Transparent,
+                        modifier = Modifier.fillMaxWidth()
                     ) {
-                        AsyncImage(
-                            model = ImageRequest.Builder(context)
-                                .data(gempa.shakemapUrl)
-                                .crossfade(true)
-                                .build(),
-                            contentDescription = stringResource(R.string.dashboard_shakemap_official_badge),
-                            contentScale = ContentScale.Crop,
-                            modifier = Modifier.fillMaxSize()
+                        Tab(
+                            selected = selectedMapTab == 0,
+                            onClick = { selectedMapTab = 0 },
+                            text = {
+                                Row(verticalAlignment = Alignment.CenterVertically) {
+                                    Icon(
+                                        imageVector = Icons.Default.Map,
+                                        contentDescription = null,
+                                        modifier = Modifier.size(14.dp)
+                                    )
+                                    Spacer(modifier = Modifier.width(4.dp))
+                                    Text(
+                                        text = stringResource(R.string.dashboard_tab_interactive_map),
+                                        fontSize = 11.sp,
+                                        fontWeight = if (selectedMapTab == 0) FontWeight.Bold else FontWeight.Medium
+                                    )
+                                }
+                            }
                         )
+                        Tab(
+                            selected = selectedMapTab == 1,
+                            onClick = { selectedMapTab = 1 },
+                            text = {
+                                Row(verticalAlignment = Alignment.CenterVertically) {
+                                    Icon(
+                                        imageVector = Icons.Default.Image,
+                                        contentDescription = null,
+                                        modifier = Modifier.size(14.dp)
+                                    )
+                                    Spacer(modifier = Modifier.width(4.dp))
+                                    Text(
+                                        text = stringResource(R.string.dashboard_tab_shakemap),
+                                        fontSize = 11.sp,
+                                        fontWeight = if (selectedMapTab == 1) FontWeight.Bold else FontWeight.Medium
+                                    )
+                                }
+                            }
+                        )
+                    }
 
-                        // Verified BMKG Badge
-                        Surface(
-                            shape = RoundedCornerShape(20.dp),
-                            color = MaterialTheme.colorScheme.surface.copy(alpha = 0.9f),
+                    Spacer(modifier = Modifier.height(8.dp))
+
+                    if (selectedMapTab == 0) {
+                        // 100% Free OpenStreetMap Interactive Disaster Map
+                        Box(
                             modifier = Modifier
-                                .align(Alignment.TopStart)
-                                .padding(8.dp)
+                                .fillMaxWidth()
+                                .height(190.dp)
+                                .clip(RoundedCornerShape(14.dp))
+                                .background(MaterialTheme.colorScheme.surface)
                         ) {
-                            Row(
-                                modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
-                                verticalAlignment = Alignment.CenterVertically
+                            DisasterMapView(
+                                epicenterLat = gempa.latitude,
+                                epicenterLon = gempa.longitude,
+                                magnitude = gempa.magnitude,
+                                depthKm = gempa.kedalamanKm,
+                                userLat = userPreferences.userLat,
+                                userLon = userPreferences.userLon,
+                                userLocationName = userPreferences.userLocationName,
+                                isInteractive = true,
+                                modifier = Modifier.fillMaxSize()
+                            )
+
+                            // Tap to Enlarge Button (Floating Overlay)
+                            Surface(
+                                shape = RoundedCornerShape(20.dp),
+                                color = MaterialTheme.colorScheme.surface.copy(alpha = 0.9f),
+                                border = BorderStroke(0.5.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f)),
+                                modifier = Modifier
+                                    .align(Alignment.BottomEnd)
+                                    .padding(8.dp)
+                                    .clickable { isMapFullscreenOpen = true }
                             ) {
-                                Icon(
-                                    imageVector = Icons.Default.Verified,
-                                    contentDescription = null,
-                                    tint = MaterialTheme.colorScheme.primary,
-                                    modifier = Modifier.size(14.dp)
-                                )
-                                Spacer(modifier = Modifier.width(4.dp))
+                                Row(
+                                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Default.ZoomIn,
+                                        contentDescription = null,
+                                        tint = MaterialTheme.colorScheme.primary,
+                                        modifier = Modifier.size(14.dp)
+                                    )
+                                    Spacer(modifier = Modifier.width(4.dp))
+                                    Text(
+                                        text = stringResource(R.string.dashboard_btn_open_shakemap),
+                                        fontSize = 11.sp,
+                                        fontWeight = FontWeight.SemiBold,
+                                        color = MaterialTheme.colorScheme.onSurface
+                                    )
+                                }
+                            }
+
+                            // 100% Free / OpenStreetMap Notice Badge
+                            Surface(
+                                shape = RoundedCornerShape(12.dp),
+                                color = MaterialTheme.colorScheme.surface.copy(alpha = 0.88f),
+                                modifier = Modifier
+                                    .align(Alignment.TopStart)
+                                    .padding(8.dp)
+                            ) {
                                 Text(
-                                    text = stringResource(R.string.dashboard_shakemap_official_badge),
-                                    fontSize = 11.sp,
-                                    fontWeight = FontWeight.Bold,
-                                    color = MaterialTheme.colorScheme.onSurface
+                                    text = stringResource(R.string.dashboard_map_free_notice),
+                                    fontSize = 10.sp,
+                                    fontWeight = FontWeight.Medium,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
                                 )
                             }
                         }
-
-                        // Tap to Enlarge button
-                        Surface(
-                            shape = RoundedCornerShape(20.dp),
-                            color = MaterialTheme.colorScheme.surface.copy(alpha = 0.88f),
-                            modifier = Modifier
-                                .align(Alignment.BottomEnd)
-                                .padding(8.dp)
-                        ) {
-                            Row(
-                                modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
-                                verticalAlignment = Alignment.CenterVertically
+                    } else {
+                        // Official BMKG Shakemap Preview
+                        if (!gempa.shakemapUrl.isNullOrEmpty()) {
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .height(190.dp)
+                                    .clip(RoundedCornerShape(14.dp))
+                                    .background(MaterialTheme.colorScheme.surface)
+                                    .clickable { isShakemapDialogOpen = true }
                             ) {
-                                Icon(
-                                    imageVector = Icons.Default.ZoomIn,
-                                    contentDescription = null,
-                                    tint = MaterialTheme.colorScheme.primary,
-                                    modifier = Modifier.size(15.dp)
+                                AsyncImage(
+                                    model = ImageRequest.Builder(context)
+                                        .data(gempa.shakemapUrl)
+                                        .crossfade(true)
+                                        .build(),
+                                    contentDescription = stringResource(R.string.dashboard_shakemap_official_badge),
+                                    contentScale = ContentScale.Crop,
+                                    modifier = Modifier.fillMaxSize()
                                 )
-                                Spacer(modifier = Modifier.width(4.dp))
+
+                                Surface(
+                                    shape = RoundedCornerShape(20.dp),
+                                    color = MaterialTheme.colorScheme.surface.copy(alpha = 0.9f),
+                                    modifier = Modifier
+                                        .align(Alignment.TopStart)
+                                        .padding(8.dp)
+                                ) {
+                                    Row(
+                                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+                                        verticalAlignment = Alignment.CenterVertically
+                                    ) {
+                                        Icon(
+                                            imageVector = Icons.Default.Verified,
+                                            contentDescription = null,
+                                            tint = MaterialTheme.colorScheme.primary,
+                                            modifier = Modifier.size(13.dp)
+                                        )
+                                        Spacer(modifier = Modifier.width(4.dp))
+                                        Text(
+                                            text = stringResource(R.string.dashboard_shakemap_official_badge),
+                                            fontSize = 11.sp,
+                                            fontWeight = FontWeight.Bold,
+                                            color = MaterialTheme.colorScheme.onSurface
+                                        )
+                                    }
+                                }
+
+                                Surface(
+                                    shape = RoundedCornerShape(20.dp),
+                                    color = MaterialTheme.colorScheme.surface.copy(alpha = 0.88f),
+                                    modifier = Modifier
+                                        .align(Alignment.BottomEnd)
+                                        .padding(8.dp)
+                                ) {
+                                    Row(
+                                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+                                        verticalAlignment = Alignment.CenterVertically
+                                    ) {
+                                        Icon(
+                                            imageVector = Icons.Default.ZoomIn,
+                                            contentDescription = null,
+                                            tint = MaterialTheme.colorScheme.primary,
+                                            modifier = Modifier.size(14.dp)
+                                        )
+                                        Spacer(modifier = Modifier.width(4.dp))
+                                        Text(
+                                            text = stringResource(R.string.dashboard_btn_open_shakemap),
+                                            fontSize = 11.sp,
+                                            fontWeight = FontWeight.SemiBold,
+                                            color = MaterialTheme.colorScheme.onSurface
+                                        )
+                                    }
+                                }
+                            }
+                        } else {
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .height(140.dp)
+                                    .clip(RoundedCornerShape(14.dp))
+                                    .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.5f)),
+                                contentAlignment = Alignment.Center
+                            ) {
                                 Text(
-                                    text = stringResource(R.string.dashboard_btn_open_shakemap),
-                                    fontSize = 11.sp,
-                                    fontWeight = FontWeight.SemiBold,
-                                    color = MaterialTheme.colorScheme.onSurface
+                                    text = stringResource(R.string.dashboard_shakemap_not_available),
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    textAlign = TextAlign.Center,
+                                    modifier = Modifier.padding(16.dp)
                                 )
                             }
                         }
                     }
+                }
+            }
+        }
+    }
+
+    // Fullscreen Interactive Disaster Map Dialog
+    if (isMapFullscreenOpen) {
+        Dialog(
+            onDismissRequest = { isMapFullscreenOpen = false },
+            properties = DialogProperties(usePlatformDefaultWidth = false)
+        ) {
+            Box(modifier = Modifier.fillMaxSize()) {
+                DisasterMapView(
+                    epicenterLat = gempa.latitude,
+                    epicenterLon = gempa.longitude,
+                    magnitude = gempa.magnitude,
+                    depthKm = gempa.kedalamanKm,
+                    userLat = userPreferences.userLat,
+                    userLon = userPreferences.userLon,
+                    userLocationName = userPreferences.userLocationName,
+                    isInteractive = true,
+                    modifier = Modifier.fillMaxSize()
+                )
+
+                IconButton(
+                    onClick = { isMapFullscreenOpen = false },
+                    modifier = Modifier
+                        .align(Alignment.TopEnd)
+                        .padding(16.dp)
+                        .clip(CircleShape)
+                        .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.85f))
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Close,
+                        contentDescription = "Close",
+                        tint = MaterialTheme.colorScheme.onSurface
+                    )
                 }
             }
         }

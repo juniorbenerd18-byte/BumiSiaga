@@ -1,5 +1,6 @@
 package com.example.siagabumi.ui.dashboard.components
 
+import android.content.res.Configuration
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.BorderStroke
@@ -10,6 +11,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -35,6 +37,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -56,10 +59,16 @@ fun WeatherCardPager(
     onAddNewLocationClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val configuration = LocalConfiguration.current
+    val isLandscape = configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
+    val uniformCardHeight = if (isLandscape) 130.dp else 225.dp
+
     if (weatherList.isEmpty()) {
         AddLocationWeatherCard(
             onClick = onAddNewLocationClick,
             modifier = modifier
+                .fillMaxWidth()
+                .height(uniformCardHeight)
         )
         return
     }
@@ -88,11 +97,17 @@ fun WeatherCardPager(
                     isActiveLocation = isActive,
                     onSetAsActiveLocation = if (!isActive) {
                         { onSelectLocationAsActive(cuaca.lokasi) }
-                    } else null
+                    } else null,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(uniformCardHeight)
                 )
             } else {
                 AddLocationWeatherCard(
-                    onClick = onAddNewLocationClick
+                    onClick = onAddNewLocationClick,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(uniformCardHeight)
                 )
             }
         }
@@ -137,6 +152,9 @@ fun AddLocationWeatherCard(
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val configuration = LocalConfiguration.current
+    val isLandscape = configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
+
     Card(
         modifier = modifier
             .fillMaxWidth()
@@ -150,14 +168,14 @@ fun AddLocationWeatherCard(
     ) {
         Column(
             modifier = Modifier
-                .fillMaxWidth()
-                .padding(24.dp),
+                .fillMaxSize()
+                .padding(if (isLandscape) 12.dp else 20.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
             Box(
                 modifier = Modifier
-                    .size(54.dp)
+                    .size(if (isLandscape) 38.dp else 48.dp)
                     .clip(CircleShape)
                     .background(MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.6f)),
                 contentAlignment = Alignment.Center
@@ -166,31 +184,33 @@ fun AddLocationWeatherCard(
                     imageVector = Icons.Default.AddLocationAlt,
                     contentDescription = null,
                     tint = MaterialTheme.colorScheme.primary,
-                    modifier = Modifier.size(28.dp)
+                    modifier = Modifier.size(if (isLandscape) 20.dp else 24.dp)
                 )
             }
 
-            Spacer(modifier = Modifier.height(12.dp))
+            Spacer(modifier = Modifier.height(if (isLandscape) 6.dp else 10.dp))
 
             Text(
                 text = stringResource(R.string.cuaca_add_location_card_title),
-                style = MaterialTheme.typography.titleMedium,
+                style = if (isLandscape) MaterialTheme.typography.titleSmall else MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.onSurface,
                 textAlign = TextAlign.Center
             )
 
-            Spacer(modifier = Modifier.height(6.dp))
+            if (!isLandscape) {
+                Spacer(modifier = Modifier.height(4.dp))
+                Text(
+                    text = stringResource(R.string.cuaca_add_location_card_desc),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    textAlign = TextAlign.Center,
+                    lineHeight = 16.sp,
+                    maxLines = 2
+                )
+            }
 
-            Text(
-                text = stringResource(R.string.cuaca_add_location_card_desc),
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                textAlign = TextAlign.Center,
-                lineHeight = 18.sp
-            )
-
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(if (isLandscape) 8.dp else 14.dp))
 
             Button(
                 onClick = onClick,
@@ -202,12 +222,13 @@ fun AddLocationWeatherCard(
                 Icon(
                     imageVector = Icons.Default.Search,
                     contentDescription = null,
-                    modifier = Modifier.size(16.dp)
+                    modifier = Modifier.size(15.dp)
                 )
                 Spacer(modifier = Modifier.width(6.dp))
                 Text(
                     text = stringResource(R.string.cuaca_search_new_location),
-                    fontWeight = FontWeight.SemiBold
+                    fontWeight = FontWeight.SemiBold,
+                    fontSize = 12.sp
                 )
             }
         }

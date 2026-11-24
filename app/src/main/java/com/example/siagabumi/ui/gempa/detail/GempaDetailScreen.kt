@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.Intent
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -38,6 +39,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -47,6 +49,7 @@ import com.example.siagabumi.R
 import com.example.siagabumi.domain.model.Gempa
 import com.example.siagabumi.domain.model.UiState
 import com.example.siagabumi.ui.components.BmkgAttributionFooter
+import com.example.siagabumi.ui.components.DisasterMapView
 import com.example.siagabumi.ui.components.ErrorView
 import com.example.siagabumi.ui.components.LoadingView
 import com.example.siagabumi.ui.components.MagnitudeBadge
@@ -198,6 +201,52 @@ fun GempaDetailContent(
                             icon = Icons.Default.Info,
                             label = stringResource(R.string.gempa_felt_title),
                             value = gempa.dirasakan
+                        )
+                    }
+                }
+            }
+        }
+
+        // Interactive Disaster Map (100% Free OpenStreetMap)
+        item {
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(16.dp),
+                colors = CardDefaults.cardColors(
+                    containerColor = MaterialTheme.colorScheme.surface
+                ),
+                border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)),
+                elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+            ) {
+                Column(modifier = Modifier.padding(16.dp)) {
+                    Text(
+                        text = stringResource(R.string.gempa_epicenter_map),
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Bold
+                    )
+                    Spacer(modifier = Modifier.height(2.dp))
+                    Text(
+                        text = stringResource(R.string.dashboard_map_free_notice),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                    Spacer(modifier = Modifier.height(12.dp))
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(230.dp)
+                            .clip(RoundedCornerShape(12.dp))
+                    ) {
+                        DisasterMapView(
+                            epicenterLat = gempa.latitude,
+                            epicenterLon = gempa.longitude,
+                            magnitude = gempa.magnitude,
+                            depthKm = gempa.kedalamanKm,
+                            userLat = 0.0,
+                            userLon = 0.0,
+                            userLocationName = "",
+                            isInteractive = true,
+                            modifier = Modifier.fillMaxSize()
                         )
                     }
                 }
