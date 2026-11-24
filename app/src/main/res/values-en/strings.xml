@@ -187,10 +187,11 @@
     <string name="dashboard_radar_direction">Bearing %1$s</string>
     <string name="dashboard_radar_depth">Depth %1$d km (%2$s)</string>
     <string name="dashboard_radar_mmi_summary">Estimate: %1$s</string>
-    <string name="dashboard_tab_interactive_map">Interactive Map (OSM)</string>
     <string name="dashboard_tab_shakemap">BMKG Shakemap</string>
-    <string name="dashboard_map_tap_fullscreen">Tap to enlarge interactive map</string>
-    <string name="dashboard_map_free_notice">100% Free &amp; Open Source (OpenStreetMap)</string>
+    <string name="dashboard_tab_interactive_map">Epicenter Radar</string>
+    <string name="dashboard_map_tap_fullscreen">Tap to enlarge radar</string>
+    <string name="dashboard_map_free_notice">Vector Epicenter Radar (100% Offline &amp; Fast)</string>
+    <string name="dashboard_btn_open_radar">Enlarge Radar</string>
     <string name="dashboard_map_legend_epicenter">Epicenter</string>
     <string name="dashboard_map_legend_user">Your Location</string>
     <string name="dashboard_map_legend_shaking_zone">Shaking Radius</string>

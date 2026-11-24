@@ -187,10 +187,11 @@
     <string name="dashboard_radar_direction">Arah %1$s</string>
     <string name="dashboard_radar_depth">Kedalaman %1$d km (%2$s)</string>
     <string name="dashboard_radar_mmi_summary">Estimasi: %1$s</string>
-    <string name="dashboard_tab_interactive_map">Peta Interaktif (OSM)</string>
     <string name="dashboard_tab_shakemap">Shakemap BMKG</string>
-    <string name="dashboard_map_tap_fullscreen">Ketuk untuk perbesar peta interaktif</string>
-    <string name="dashboard_map_free_notice">100% Gratis &amp; Terbuka (OpenStreetMap)</string>
+    <string name="dashboard_tab_interactive_map">Radar Episentrum</string>
+    <string name="dashboard_map_tap_fullscreen">Ketuk untuk perbesar peta</string>
+    <string name="dashboard_map_free_notice">Radar Vektor Episentrum (100% Offline &amp; Ringan)</string>
+    <string name="dashboard_btn_open_radar">Buka Radar Penuh</string>
     <string name="dashboard_map_legend_epicenter">Pusat Gempa</string>
     <string name="dashboard_map_legend_user">Posisi Anda</string>
     <string name="dashboard_map_legend_shaking_zone">Radius Guncangan</string>

@@ -29,9 +29,9 @@ import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Explore
 import androidx.compose.material.icons.filled.Image
 import androidx.compose.material.icons.filled.Layers
-import androidx.compose.material.icons.filled.Map
 import androidx.compose.material.icons.filled.MyLocation
 import androidx.compose.material.icons.filled.NearMe
+import androidx.compose.material.icons.filled.Radar
 import androidx.compose.material.icons.filled.Verified
 import androidx.compose.material.icons.filled.ZoomIn
 import androidx.compose.material3.Card
@@ -92,8 +92,10 @@ fun DashboardEpicenterRadar(
 
     val context = LocalContext.current
     var isShakemapDialogOpen by remember { mutableStateOf(false) }
-    var isMapFullscreenOpen by remember { mutableStateOf(false) }
-    var selectedMapTab by remember { mutableIntStateOf(0) } // 0: Interactive Map, 1: BMKG Shakemap
+    var isRadarFullscreenOpen by remember { mutableStateOf(false) }
+    
+    // Tab 0: Shakemap BMKG (Default so official map image appears immediately), Tab 1: Radar Episentrum
+    var selectedMapTab by remember { mutableIntStateOf(0) }
 
     val distanceKm = remember(gempa, userPreferences) {
         GeoUtils.calculateDistanceKm(
@@ -119,12 +121,6 @@ fun DashboardEpicenterRadar(
             distanceKm.toDouble(),
             gempa.kedalamanKm
         )
-    }
-
-    val depthTypeRes = when {
-        gempa.kedalamanKm <= 60 -> R.string.depth_shallow
-        gempa.kedalamanKm <= 300 -> R.string.depth_intermediate
-        else -> R.string.depth_deep
     }
 
     val mmiBadgeColor = when (mmiEstimate.level) {
@@ -210,7 +206,7 @@ fun DashboardEpicenterRadar(
                 modifier = Modifier.padding(16.dp),
                 verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
-                // Row 1: Streamlined Proximity Metric & Direct Stats (Decluttered)
+                // Row 1: Streamlined Distance & Direction Metrics
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     verticalAlignment = Alignment.CenterVertically
@@ -320,7 +316,7 @@ fun DashboardEpicenterRadar(
                         }
                     }
 
-                    // GPS update quick button
+                    // GPS update button
                     if (onSyncGpsClick != null) {
                         Surface(
                             shape = RoundedCornerShape(10.dp),
@@ -394,7 +390,7 @@ fun DashboardEpicenterRadar(
                     }
                 }
 
-                // Row 3: Map Section with Tabs (Free OpenStreetMap vs BMKG Shakemap)
+                // Row 3: Visual Disaster Map / Shakemap Section
                 Column(modifier = Modifier.fillMaxWidth()) {
                     SecondaryTabRow(
                         selectedTabIndex = selectedMapTab,
@@ -407,13 +403,13 @@ fun DashboardEpicenterRadar(
                             text = {
                                 Row(verticalAlignment = Alignment.CenterVertically) {
                                     Icon(
-                                        imageVector = Icons.Default.Map,
+                                        imageVector = Icons.Default.Image,
                                         contentDescription = null,
                                         modifier = Modifier.size(14.dp)
                                     )
                                     Spacer(modifier = Modifier.width(4.dp))
                                     Text(
-                                        text = stringResource(R.string.dashboard_tab_interactive_map),
+                                        text = stringResource(R.string.dashboard_tab_shakemap),
                                         fontSize = 11.sp,
                                         fontWeight = if (selectedMapTab == 0) FontWeight.Bold else FontWeight.Medium
                                     )
@@ -426,13 +422,13 @@ fun DashboardEpicenterRadar(
                             text = {
                                 Row(verticalAlignment = Alignment.CenterVertically) {
                                     Icon(
-                                        imageVector = Icons.Default.Image,
+                                        imageVector = Icons.Default.Radar,
                                         contentDescription = null,
                                         modifier = Modifier.size(14.dp)
                                     )
                                     Spacer(modifier = Modifier.width(4.dp))
                                     Text(
-                                        text = stringResource(R.string.dashboard_tab_shakemap),
+                                        text = stringResource(R.string.dashboard_tab_interactive_map),
                                         fontSize = 11.sp,
                                         fontWeight = if (selectedMapTab == 1) FontWeight.Bold else FontWeight.Medium
                                     )
@@ -444,80 +440,12 @@ fun DashboardEpicenterRadar(
                     Spacer(modifier = Modifier.height(8.dp))
 
                     if (selectedMapTab == 0) {
-                        // 100% Free OpenStreetMap Interactive Disaster Map
-                        Box(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(190.dp)
-                                .clip(RoundedCornerShape(14.dp))
-                                .background(MaterialTheme.colorScheme.surface)
-                        ) {
-                            DisasterMapView(
-                                epicenterLat = gempa.latitude,
-                                epicenterLon = gempa.longitude,
-                                magnitude = gempa.magnitude,
-                                depthKm = gempa.kedalamanKm,
-                                userLat = userPreferences.userLat,
-                                userLon = userPreferences.userLon,
-                                userLocationName = userPreferences.userLocationName,
-                                isInteractive = true,
-                                modifier = Modifier.fillMaxSize()
-                            )
-
-                            // Tap to Enlarge Button (Floating Overlay)
-                            Surface(
-                                shape = RoundedCornerShape(20.dp),
-                                color = MaterialTheme.colorScheme.surface.copy(alpha = 0.9f),
-                                border = BorderStroke(0.5.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f)),
-                                modifier = Modifier
-                                    .align(Alignment.BottomEnd)
-                                    .padding(8.dp)
-                                    .clickable { isMapFullscreenOpen = true }
-                            ) {
-                                Row(
-                                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
-                                    verticalAlignment = Alignment.CenterVertically
-                                ) {
-                                    Icon(
-                                        imageVector = Icons.Default.ZoomIn,
-                                        contentDescription = null,
-                                        tint = MaterialTheme.colorScheme.primary,
-                                        modifier = Modifier.size(14.dp)
-                                    )
-                                    Spacer(modifier = Modifier.width(4.dp))
-                                    Text(
-                                        text = stringResource(R.string.dashboard_btn_open_shakemap),
-                                        fontSize = 11.sp,
-                                        fontWeight = FontWeight.SemiBold,
-                                        color = MaterialTheme.colorScheme.onSurface
-                                    )
-                                }
-                            }
-
-                            // 100% Free / OpenStreetMap Notice Badge
-                            Surface(
-                                shape = RoundedCornerShape(12.dp),
-                                color = MaterialTheme.colorScheme.surface.copy(alpha = 0.88f),
-                                modifier = Modifier
-                                    .align(Alignment.TopStart)
-                                    .padding(8.dp)
-                            ) {
-                                Text(
-                                    text = stringResource(R.string.dashboard_map_free_notice),
-                                    fontSize = 10.sp,
-                                    fontWeight = FontWeight.Medium,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                    modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
-                                )
-                            }
-                        }
-                    } else {
-                        // Official BMKG Shakemap Preview
+                        // Official BMKG Shakemap (Verified Map Image)
                         if (!gempa.shakemapUrl.isNullOrEmpty()) {
                             Box(
                                 modifier = Modifier
                                     .fillMaxWidth()
-                                    .height(190.dp)
+                                    .height(200.dp)
                                     .clip(RoundedCornerShape(14.dp))
                                     .background(MaterialTheme.colorScheme.surface)
                                     .clickable { isShakemapDialogOpen = true }
@@ -604,19 +532,72 @@ fun DashboardEpicenterRadar(
                                 )
                             }
                         }
+                    } else {
+                        // 100% Native Vector Radar Map (Never goes black, zero network dependency)
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(200.dp)
+                                .clip(RoundedCornerShape(14.dp))
+                        ) {
+                            DisasterMapView(
+                                epicenterLat = gempa.latitude,
+                                epicenterLon = gempa.longitude,
+                                magnitude = gempa.magnitude,
+                                depthKm = gempa.kedalamanKm,
+                                userLat = userPreferences.userLat,
+                                userLon = userPreferences.userLon,
+                                userLocationName = userPreferences.userLocationName,
+                                modifier = Modifier.fillMaxSize()
+                            )
+
+                            // Tap to Enlarge Radar Button
+                            Surface(
+                                shape = RoundedCornerShape(20.dp),
+                                color = MaterialTheme.colorScheme.surface.copy(alpha = 0.9f),
+                                border = BorderStroke(0.5.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f)),
+                                modifier = Modifier
+                                    .align(Alignment.BottomEnd)
+                                    .padding(8.dp)
+                                    .clickable { isRadarFullscreenOpen = true }
+                            ) {
+                                Row(
+                                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Default.ZoomIn,
+                                        contentDescription = null,
+                                        tint = MaterialTheme.colorScheme.primary,
+                                        modifier = Modifier.size(14.dp)
+                                    )
+                                    Spacer(modifier = Modifier.width(4.dp))
+                                    Text(
+                                        text = stringResource(R.string.dashboard_btn_open_radar),
+                                        fontSize = 11.sp,
+                                        fontWeight = FontWeight.SemiBold,
+                                        color = MaterialTheme.colorScheme.onSurface
+                                    )
+                                }
+                            }
+                        }
                     }
                 }
             }
         }
     }
 
-    // Fullscreen Interactive Disaster Map Dialog
-    if (isMapFullscreenOpen) {
+    // Fullscreen Native Radar Dialog
+    if (isRadarFullscreenOpen) {
         Dialog(
-            onDismissRequest = { isMapFullscreenOpen = false },
+            onDismissRequest = { isRadarFullscreenOpen = false },
             properties = DialogProperties(usePlatformDefaultWidth = false)
         ) {
-            Box(modifier = Modifier.fillMaxSize()) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(Color.Black.copy(alpha = 0.95f))
+            ) {
                 DisasterMapView(
                     epicenterLat = gempa.latitude,
                     epicenterLon = gempa.longitude,
@@ -625,22 +606,23 @@ fun DashboardEpicenterRadar(
                     userLat = userPreferences.userLat,
                     userLon = userPreferences.userLon,
                     userLocationName = userPreferences.userLocationName,
-                    isInteractive = true,
-                    modifier = Modifier.fillMaxSize()
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(24.dp)
                 )
 
                 IconButton(
-                    onClick = { isMapFullscreenOpen = false },
+                    onClick = { isRadarFullscreenOpen = false },
                     modifier = Modifier
                         .align(Alignment.TopEnd)
                         .padding(16.dp)
                         .clip(CircleShape)
-                        .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.85f))
+                        .background(Color.White.copy(alpha = 0.2f))
                 ) {
                     Icon(
                         imageVector = Icons.Default.Close,
                         contentDescription = "Close",
-                        tint = MaterialTheme.colorScheme.onSurface
+                        tint = Color.White
                     )
                 }
             }

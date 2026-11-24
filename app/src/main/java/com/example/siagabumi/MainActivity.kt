@@ -162,15 +162,13 @@ fun MainApp() {
     val bottomNavItems = listOf(
         Triple(Screen.Dashboard.route, R.string.nav_dashboard, Icons.Default.Dashboard),
         Triple(Screen.Gempa.route, R.string.nav_gempa, Icons.Default.Warning),
-        Triple(Screen.Cuaca.route, R.string.nav_cuaca, Icons.Default.Cloud),
-        Triple(Screen.Favorit.route, R.string.nav_favorit, Icons.Default.Favorite)
+        Triple(Screen.Cuaca.route, R.string.nav_cuaca, Icons.Default.Cloud)
     )
 
     val isTopLevelDestination = currentDestination in listOf(
         Screen.Dashboard.route,
         Screen.Gempa.route,
-        Screen.Cuaca.route,
-        Screen.Favorit.route
+        Screen.Cuaca.route
     )
 
     Scaffold(
@@ -189,7 +187,6 @@ fun MainApp() {
                                 Screen.Dashboard.route -> stringResource(R.string.dashboard_title)
                                 Screen.Gempa.route -> stringResource(R.string.nav_gempa)
                                 Screen.Cuaca.route -> stringResource(R.string.nav_cuaca)
-                                Screen.Favorit.route -> stringResource(R.string.nav_favorit)
                                 else -> stringResource(R.string.app_name)
                             }
                         )
