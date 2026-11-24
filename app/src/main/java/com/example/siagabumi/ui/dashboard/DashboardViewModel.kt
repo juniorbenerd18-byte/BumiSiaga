@@ -7,7 +7,6 @@ import com.example.siagabumi.data.repository.WilayahRepositoryImpl
 import com.example.siagabumi.domain.model.CuacaDetail
 import com.example.siagabumi.domain.model.Gempa
 import com.example.siagabumi.domain.model.GempaCategory
-import com.example.siagabumi.domain.model.PrakiraanCuaca
 import com.example.siagabumi.domain.model.UiState
 import com.example.siagabumi.domain.model.UserPreferences
 import com.example.siagabumi.domain.model.Wilayah
@@ -23,7 +22,10 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import java.time.Instant
 import java.time.LocalDate
@@ -35,6 +37,7 @@ data class DashboardScreenData(
     val gempaTerbaru: Gempa? = null,
     val gempaTerkiniList: List<Gempa> = emptyList(),
     val cuacaDetail: CuacaDetail? = null,
+    val cuacaDetailList: List<CuacaDetail> = emptyList(),
     val isTsunamiAlert: Boolean = false,
     val isRefreshing: Boolean = false,
     val isOfflineCached: Boolean = false,
@@ -51,7 +54,7 @@ data class DashboardScreenData(
 private data class DashboardDataState(
     val terbaru: Gempa?,
     val terkini: List<Gempa>,
-    val cuacaList: List<PrakiraanCuaca>,
+    val cuacaDetailList: List<CuacaDetail>,
     val lastUpdatedMillis: Long?,
     val userPreferences: UserPreferences
 )
@@ -149,14 +152,36 @@ class DashboardViewModel @Inject constructor(
                     wilayahRepository.getWilayahByKode(activeAdm4) ?: WilayahRepositoryImpl.DEFAULT_WILAYAH
                 }
 
+                val allLocations = listOf(activeWilayah) + favoritList.filter { it.kode != activeWilayah.kode }
+
+                val weatherFlowList = if (allLocations.isEmpty()) {
+                    flowOf(emptyList<CuacaDetail>())
+                } else {
+                    combine(allLocations.map { loc ->
+                        cuacaRepository.getPrakiraanCuaca(loc.kode).map { forecastList ->
+                            val kondisiSaatIni = CuacaMapper.findKondisiSaatIni(forecastList)
+                            val today = LocalDate.now().toString()
+                            val hariIniList = forecastList.filter { it.tanggal == today }.ifEmpty { forecastList.take(8) }
+                            val ringkasan = CuacaMapper.groupDailyForecast(forecastList)
+                            CuacaDetail(
+                                lokasi = loc,
+                                kondisiSaatIni = kondisiSaatIni,
+                                prakiraanHariIni3Jam = hariIniList,
+                                ringkasanHarian = ringkasan,
+                                isFavorit = favoritList.any { it.kode == loc.kode }
+                            )
+                        }
+                    }) { it.toList() }
+                }
+
                 val dataFlow = combine(
                     gempaRepository.getGempaTerbaru(),
                     gempaRepository.getGempaTerkini(),
-                    cuacaRepository.getPrakiraanCuaca(activeAdm4),
+                    weatherFlowList,
                     gempaRepository.getCacheLastUpdated(GempaCategory.TERKINI),
                     userPreferencesRepository.getUserPreferences()
-                ) { terbaru, terkini, cuacaList, lastUpdatedMillis, currentPrefs ->
-                    DashboardDataState(terbaru, terkini, cuacaList, lastUpdatedMillis, currentPrefs)
+                ) { terbaru, terkini, weatherDetails, lastUpdatedMillis, currentPrefs ->
+                    DashboardDataState(terbaru, terkini, weatherDetails, lastUpdatedMillis, currentPrefs)
                 }
 
                 val statusFlow = combine(
@@ -168,27 +193,14 @@ class DashboardViewModel @Inject constructor(
 
                 combine(dataFlow, statusFlow) { data, status ->
                     val hasQuakeData = data.terbaru != null || data.terkini.isNotEmpty()
-                    val hasCuacaData = data.cuacaList.isNotEmpty()
+                    val hasCuacaData = data.cuacaDetailList.any { it.kondisiSaatIni != null }
 
                     if (!hasQuakeData && !hasCuacaData && status.networkError && !status.refreshing) {
                         UiState.Error("Gagal memuat dashboard. Periksa koneksi internet.")
                     } else if (!hasQuakeData && !hasCuacaData && !status.refreshing) {
                         UiState.Loading
                     } else {
-                        val cuacaDetail = if (data.cuacaList.isNotEmpty()) {
-                            val kondisiSaatIni = CuacaMapper.findKondisiSaatIni(data.cuacaList)
-                            val today = LocalDate.now().toString()
-                            val hariIniList = data.cuacaList.filter { it.tanggal == today }.ifEmpty { data.cuacaList.take(8) }
-                            val ringkasan = CuacaMapper.groupDailyForecast(data.cuacaList)
-                            CuacaDetail(
-                                lokasi = activeWilayah,
-                                kondisiSaatIni = kondisiSaatIni,
-                                prakiraanHariIni3Jam = hariIniList,
-                                ringkasanHarian = ringkasan,
-                                isFavorit = favoritList.any { it.kode == activeAdm4 }
-                            )
-                        } else null
-
+                        val cuacaDetail = data.cuacaDetailList.firstOrNull()
                         val isTsunami = (data.terbaru?.isTsunamiWarning == true) || data.terkini.any { it.isTsunamiWarning }
 
                         val formattedLastUpdated = data.lastUpdatedMillis?.let {
@@ -203,6 +215,7 @@ class DashboardViewModel @Inject constructor(
                                 gempaTerbaru = data.terbaru,
                                 gempaTerkiniList = data.terkini,
                                 cuacaDetail = cuacaDetail,
+                                cuacaDetailList = data.cuacaDetailList,
                                 isTsunamiAlert = isTsunami,
                                 isRefreshing = status.refreshing,
                                 isOfflineCached = status.networkError,
@@ -220,6 +233,25 @@ class DashboardViewModel @Inject constructor(
         }
     }
 
+    fun toggleFavorit(wilayah: Wilayah) {
+        viewModelScope.launch {
+            cuacaRepository.toggleFavorit(wilayah)
+        }
+    }
+
+    fun setActiveLocation(wilayah: Wilayah) {
+        viewModelScope.launch {
+            userPreferencesRepository.setUserLocation(
+                lat = 0.0,
+                lon = 0.0,
+                name = wilayah.namaLengkap,
+                adm4 = wilayah.kode,
+                isGps = false
+            )
+            cuacaRepository.refreshCuaca(wilayah.kode, force = true)
+        }
+    }
+
     fun loadData() {
         viewModelScope.launch {
             _isRefreshing.value = true
@@ -228,6 +260,14 @@ class DashboardViewModel @Inject constructor(
             val prefs = userPreferencesRepository.getPreferencesSync()
             val activeAdm4 = if (prefs.userAdm4.isNotBlank()) prefs.userAdm4 else WilayahRepositoryImpl.DEFAULT_WILAYAH.kode
             val r2 = cuacaRepository.refreshCuaca(activeAdm4, force = false)
+            try {
+                val favList = cuacaRepository.getAllFavorit().first()
+                favList.forEach { fav ->
+                    if (fav.kode != activeAdm4) {
+                        cuacaRepository.refreshCuaca(fav.kode, force = false)
+                    }
+                }
+            } catch (_: Exception) {}
             _isRefreshing.value = false
             _networkError.value = r1.isFailure && r2.isFailure
         }
@@ -240,6 +280,14 @@ class DashboardViewModel @Inject constructor(
             val prefs = userPreferencesRepository.getPreferencesSync()
             val activeAdm4 = if (prefs.userAdm4.isNotBlank()) prefs.userAdm4 else WilayahRepositoryImpl.DEFAULT_WILAYAH.kode
             val r2 = cuacaRepository.refreshCuaca(activeAdm4, force = true)
+            try {
+                val favList = cuacaRepository.getAllFavorit().first()
+                favList.forEach { fav ->
+                    if (fav.kode != activeAdm4) {
+                        cuacaRepository.refreshCuaca(fav.kode, force = true)
+                    }
+                }
+            } catch (_: Exception) {}
             _isRefreshing.value = false
             _networkError.value = r1.isFailure && r2.isFailure
         }

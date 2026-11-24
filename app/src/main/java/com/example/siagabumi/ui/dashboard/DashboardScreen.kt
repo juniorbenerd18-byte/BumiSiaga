@@ -39,6 +39,7 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.siagabumi.R
 import com.example.siagabumi.domain.model.UiState
+import com.example.siagabumi.domain.model.Wilayah
 import com.example.siagabumi.ui.components.BmkgAttributionFooter
 import com.example.siagabumi.ui.components.ErrorView
 import com.example.siagabumi.ui.components.LoadingView
@@ -49,6 +50,7 @@ import com.example.siagabumi.ui.dashboard.components.DashboardEpicenterRadar
 import com.example.siagabumi.ui.dashboard.components.DashboardQuickStats
 import com.example.siagabumi.ui.dashboard.components.DashboardStatusHero
 import com.example.siagabumi.ui.dashboard.components.EmergencyFlashlightCard
+import com.example.siagabumi.ui.dashboard.components.WeatherCardPager
 
 @Composable
 fun DashboardScreen(
@@ -154,6 +156,8 @@ fun DashboardScreen(
                 onNavigateToSearchWilayah = onNavigateToSearchWilayah,
                 onNavigateToGempaDetail = onNavigateToGempaDetail,
                 onNavigateToSettings = onNavigateToSettings,
+                onSelectLocationAsActive = { viewModel.setActiveLocation(it) },
+                onToggleFavoriteLocation = { viewModel.toggleFavorit(it) },
                 onSyncGps = onTriggerGps,
                 isSyncingGps = isDetectingGps,
                 modifier = modifier
@@ -172,6 +176,8 @@ fun DashboardContent(
     onNavigateToSearchWilayah: () -> Unit,
     onNavigateToGempaDetail: (String) -> Unit,
     onNavigateToSettings: () -> Unit,
+    onSelectLocationAsActive: (Wilayah) -> Unit = {},
+    onToggleFavoriteLocation: (Wilayah) -> Unit = {},
     onSyncGps: () -> Unit = {},
     isSyncingGps: Boolean = false,
     modifier: Modifier = Modifier
@@ -288,15 +294,17 @@ fun DashboardContent(
                 )
             }
 
-            // Quick Weather Glance
-            data.cuacaDetail?.let { cuaca ->
-                item {
-                    CurrentWeatherCard(
-                        cuacaDetail = cuaca,
-                        onChangeLocationClick = onNavigateToSearchWilayah,
-                        onToggleFavoriteClick = { onNavigateToCuaca(cuaca.lokasi.kode) }
-                    )
-                }
+            // Multi-Location Horizontal Weather Cards (Swipeable)
+            val displayWeatherList = data.cuacaDetailList.ifEmpty { listOfNotNull(data.cuacaDetail) }
+            item {
+                WeatherCardPager(
+                    weatherList = displayWeatherList,
+                    activeAdm4 = data.userPreferences.userAdm4.ifBlank { "31.71.03.1001" },
+                    onSelectLocationAsActive = onSelectLocationAsActive,
+                    onToggleFavorite = onToggleFavoriteLocation,
+                    onChangeLocationClick = { onNavigateToCuaca(it.kode) },
+                    onAddNewLocationClick = onNavigateToSearchWilayah
+                )
             }
 
             // Emergency Flashlight & SOS Strobe Tool

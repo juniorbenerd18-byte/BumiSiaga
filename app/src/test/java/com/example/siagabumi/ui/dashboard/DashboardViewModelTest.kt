@@ -200,5 +200,33 @@ class DashboardViewModelTest {
         val data = (state as UiState.Success).data
         assertEquals("32.73.01.1001", data.cuacaDetail?.lokasi?.kode)
         assertEquals("Bandung", data.cuacaDetail?.lokasi?.nama)
+        assertEquals(2, data.cuacaDetailList.size)
+        assertEquals("32.73.01.1001", data.cuacaDetailList[0].lokasi.kode)
+        assertEquals("31.71.03.1001", data.cuacaDetailList[1].lokasi.kode)
+    }
+
+    @Test
+    fun dashboard_setActiveLocation_updatesActiveLocation() = runTest {
+        val gempaRepo = FakeGempaRepo()
+        val cuacaRepo = FakeCuacaRepo()
+        val wilayahRepo = FakeWilayahRepo()
+        val userPrefsRepo = FakeUserPreferencesRepo()
+
+        val viewModel = DashboardViewModel(gempaRepo, cuacaRepo, wilayahRepo, userPrefsRepo)
+
+        val newWilayah = com.example.siagabumi.domain.model.Wilayah(
+            kode = "35.78.01.1001",
+            nama = "Surabaya",
+            level = 4,
+            parentKode = "35.78.01",
+            namaLengkap = "Genteng, Kota Surabaya, Jawa Timur"
+        )
+
+        viewModel.setActiveLocation(newWilayah)
+        advanceUntilIdle()
+
+        val currentPrefs = userPrefsRepo.getPreferencesSync()
+        assertEquals("35.78.01.1001", currentPrefs.userAdm4)
+        assertEquals("Genteng, Kota Surabaya, Jawa Timur", currentPrefs.userLocationName)
     }
 }

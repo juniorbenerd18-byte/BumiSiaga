@@ -82,6 +82,11 @@
     <string name="cuaca_favorite_added">Added to favorites</string>
     <string name="cuaca_favorite_removed">Removed from favorites</string>
     <string name="cuaca_empty">Select a location to view weather forecasts</string>
+    <string name="cuaca_main_location_badge">Primary Location</string>
+    <string name="cuaca_set_as_main">Set as Primary</string>
+    <string name="cuaca_add_location_card_title">Add Another Location</string>
+    <string name="cuaca_add_location_card_desc">Monitor weather across multiple locations side by side by swiping horizontally</string>
+    <string name="cuaca_search_new_location">Select &amp; Add Location</string>
 
     <!-- Wilayah -->
     <string name="wilayah_search_title">Select Location</string>

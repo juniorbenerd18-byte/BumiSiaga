@@ -11,9 +11,9 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import java.net.URLDecoder
@@ -43,6 +43,12 @@ class GempaDetailViewModel @Inject constructor(
 
     private val _refreshTrigger = MutableStateFlow(0)
 
+    init {
+        viewModelScope.launch {
+            gempaRepository.refreshAll(force = false)
+        }
+    }
+
     val uiState: StateFlow<UiState<Gempa>> = _refreshTrigger.flatMapLatest {
         gempaRepository.getGempaById(gempaId)
             .flatMapLatest { gempa ->
@@ -55,11 +61,11 @@ class GempaDetailViewModel @Inject constructor(
                             if (altGempa != null) {
                                 flowOf(UiState.Success(altGempa))
                             } else {
-                                fallbackToTerbaru()
+                                fallbackSearchAll()
                             }
                         }
                     } else {
-                        fallbackToTerbaru()
+                        fallbackSearchAll()
                     }
                 }
             }
@@ -69,9 +75,29 @@ class GempaDetailViewModel @Inject constructor(
         initialValue = UiState.Loading
     )
 
-    private fun fallbackToTerbaru() = gempaRepository.getGempaTerbaru().map { latest ->
-        if (latest != null && (gempaId.isEmpty() || latest.id == gempaId || latest.id.replace(" ", "+") == gempaId.replace(" ", "+"))) {
-            UiState.Success(latest)
+    private fun fallbackSearchAll() = combine(
+        gempaRepository.getGempaTerbaru(),
+        gempaRepository.getGempaTerkini(),
+        gempaRepository.getGempaDirasakan()
+    ) { terbaru, terkini, dirasakan ->
+        val allGempa = (listOfNotNull(terbaru) + terkini + dirasakan).distinctBy { it.id }
+        val target = gempaId.trim()
+        val match = allGempa.find { it.id == target }
+            ?: allGempa.find { it.id.replace(" ", "+") == target.replace(" ", "+") }
+            ?: allGempa.find { it.id.replace("+", " ") == target.replace("+", " ") }
+            ?: allGempa.find { 
+                val c1 = it.id.replace(" ", "").replace("+", "")
+                val c2 = target.replace(" ", "").replace("+", "")
+                c1.isNotEmpty() && c1 == c2
+            }
+            ?: allGempa.find {
+                val coords = it.coordinates.replace(" ", "")
+                coords.isNotEmpty() && target.contains(coords)
+            }
+            ?: if (target.isEmpty()) terbaru ?: terkini.firstOrNull() else null
+
+        if (match != null) {
+            UiState.Success(match)
         } else {
             UiState.Error("Data detail gempa tidak ditemukan.")
         }

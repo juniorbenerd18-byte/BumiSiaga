@@ -82,6 +82,11 @@
     <string name="cuaca_favorite_added">Ditambahkan ke favorit</string>
     <string name="cuaca_favorite_removed">Dihapus dari favorit</string>
     <string name="cuaca_empty">Pilih wilayah untuk melihat prakiraan cuaca</string>
+    <string name="cuaca_main_location_badge">Lokasi Utama</string>
+    <string name="cuaca_set_as_main">Jadikan Lokasi Utama</string>
+    <string name="cuaca_add_location_card_title">Tambah Wilayah Lain</string>
+    <string name="cuaca_add_location_card_desc">Pantau cuaca beberapa lokasi sekaligus dengan menggeser kartu ke samping</string>
+    <string name="cuaca_search_new_location">Pilih &amp; Tambah Wilayah</string>
 
     <!-- Wilayah -->
     <string name="wilayah_search_title">Pilih Wilayah</string>
