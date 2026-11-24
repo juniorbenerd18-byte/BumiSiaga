@@ -89,8 +89,25 @@ fun DisasterMapView(
             .background(Color(0xFF091224)) // Deep oceanic navy
     ) {
         Canvas(modifier = Modifier.fillMaxSize()) {
-            val padX = 14.dp.toPx()
-            val padY = 16.dp.toPx()
+            val padX = 12.dp.toPx()
+            val padY = 12.dp.toPx()
+            val bottomLegendSpace = 28.dp.toPx()
+
+            // True geographic aspect ratio of Indonesia: 46.2° lon / 17.0° lat ≈ 2.7176 : 1
+            val geoAspectRatio = 46.2f / 17.0f
+
+            val availW = (size.width - padX * 2).coerceAtLeast(10f)
+            val availH = (size.height - padY * 2 - bottomLegendSpace).coerceAtLeast(10f)
+
+            // Letterbox fitting: ensure width and height scale at exact 1:1 geographic ratio
+            val (drawW, drawH) = if (availW / availH > geoAspectRatio) {
+                (availH * geoAspectRatio) to availH
+            } else {
+                availW to (availW / geoAspectRatio)
+            }
+
+            val offsetX = padX + (availW - drawW) / 2f
+            val offsetY = padY + (availH - drawH) / 2f
 
             fun projectGeo(lat: Double, lon: Double): Offset {
                 val minLon = 95.0
@@ -101,19 +118,37 @@ fun DisasterMapView(
                 val cLon = lon.coerceIn(minLon, maxLon)
                 val cLat = lat.coerceIn(minLat, maxLat)
 
-                val x = padX + ((cLon - minLon) / (maxLon - minLon)).toFloat() * (size.width - padX * 2)
-                val y = padY + ((maxLat - cLat) / (maxLat - minLat)).toFloat() * (size.height - padY * 2)
+                val normX = ((cLon - minLon) / (maxLon - minLon)).toFloat()
+                val normY = ((maxLat - cLat) / (maxLat - minLat)).toFloat()
+
+                val x = offsetX + normX * drawW
+                val y = offsetY + normY * drawH
                 return Offset(x, y)
             }
 
-            // 1. Draw Geographic Graticule Grid (Equator & Longitudes)
+            // 1. Draw Map Framing Container
+            drawRoundRect(
+                color = Color(0xFF0D172E),
+                topLeft = Offset(offsetX, offsetY),
+                size = androidx.compose.ui.geometry.Size(drawW, drawH),
+                cornerRadius = androidx.compose.ui.geometry.CornerRadius(10.dp.toPx(), 10.dp.toPx())
+            )
+            drawRoundRect(
+                color = Color(0xFF1E2E4A).copy(alpha = 0.7f),
+                topLeft = Offset(offsetX, offsetY),
+                size = androidx.compose.ui.geometry.Size(drawW, drawH),
+                cornerRadius = androidx.compose.ui.geometry.CornerRadius(10.dp.toPx(), 10.dp.toPx()),
+                style = Stroke(width = 0.8.dp.toPx())
+            )
+
+            // 2. Draw Geographic Graticule Grid (Equator & Longitudes)
             val gridColor = Color(0xFF16233B)
             // Equator (0 deg)
             val eqY = projectGeo(0.0, 95.0).y
             drawLine(
                 color = Color(0xFF1E293B).copy(alpha = 0.8f),
-                start = Offset(padX, eqY),
-                end = Offset(size.width - padX, eqY),
+                start = Offset(offsetX, eqY),
+                end = Offset(offsetX + drawW, eqY),
                 strokeWidth = 1.dp.toPx(),
                 pathEffect = PathEffect.dashPathEffect(floatArrayOf(6f, 6f))
             )
@@ -122,19 +157,19 @@ fun DisasterMapView(
                 val x = projectGeo(0.0, lon).x
                 drawLine(
                     color = gridColor.copy(alpha = 0.5f),
-                    start = Offset(x, padY),
-                    end = Offset(x, size.height - padY),
+                    start = Offset(x, offsetY),
+                    end = Offset(x, offsetY + drawH),
                     strokeWidth = 0.8.dp.toPx(),
                     pathEffect = PathEffect.dashPathEffect(floatArrayOf(4f, 6f))
                 )
             }
 
-            // 2. Draw Vector Map of Indonesian Archipelago Islands
+            // 3. Draw Vector Map of Indonesian Archipelago Islands
             val islandColor = Color(0xFF1E2E4A)
             val islandBorder = Color(0xFF334E68)
             drawArchipelago(::projectGeo, islandColor, islandBorder)
 
-            // 3. Draw Secondary Detected Earthquakes Across Indonesia
+            // 4. Draw Secondary Detected Earthquakes Across Indonesia
             allQuakes.filter { q ->
                 (q.latitude != epicenterLat || q.longitude != epicenterLon) &&
                         (q.latitude != 0.0 || q.longitude != 0.0)

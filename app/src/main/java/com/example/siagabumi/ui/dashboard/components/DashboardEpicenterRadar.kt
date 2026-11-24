@@ -698,35 +698,133 @@ fun DashboardEpicenterRadar(
             Box(
                 modifier = Modifier
                     .fillMaxSize()
-                    .background(Color.Black.copy(alpha = 0.95f))
+                    .background(Color(0xFF070D1E))
             ) {
-                DisasterMapView(
-                    epicenterLat = activeGempa.latitude,
-                    epicenterLon = activeGempa.longitude,
-                    magnitude = activeGempa.magnitude,
-                    depthKm = activeGempa.kedalamanKm,
-                    userLat = safeUserLat,
-                    userLon = safeUserLon,
-                    userLocationName = userPreferences.userLocationName,
-                    allQuakes = allQuakes,
+                Column(
                     modifier = Modifier
                         .fillMaxSize()
-                        .padding(24.dp)
-                )
-
-                IconButton(
-                    onClick = { isMapFullscreenOpen = false },
-                    modifier = Modifier
-                        .align(Alignment.TopEnd)
-                        .padding(16.dp)
-                        .clip(CircleShape)
-                        .background(Color.White.copy(alpha = 0.2f))
+                        .padding(16.dp),
+                    verticalArrangement = Arrangement.spacedBy(14.dp)
                 ) {
-                    Icon(
-                        imageVector = Icons.Default.Close,
-                        contentDescription = "Close",
-                        tint = Color.White
-                    )
+                    // Dialog Header
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text(
+                                text = stringResource(R.string.dashboard_map_section_title),
+                                style = MaterialTheme.typography.titleMedium,
+                                fontWeight = FontWeight.Bold,
+                                color = Color.White
+                            )
+                            Text(
+                                text = "${allQuakes.size} gempa terdeteksi di katalog BMKG",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = Color(0xFF94A3B8)
+                            )
+                        }
+
+                        IconButton(
+                            onClick = { isMapFullscreenOpen = false },
+                            modifier = Modifier
+                                .clip(CircleShape)
+                                .background(Color.White.copy(alpha = 0.15f))
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Close,
+                                contentDescription = "Close",
+                                tint = Color.White
+                            )
+                        }
+                    }
+
+                    // Map Container with proper aspect-fit geometry
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .weight(1f)
+                            .clip(RoundedCornerShape(16.dp))
+                    ) {
+                        DisasterMapView(
+                            epicenterLat = activeGempa.latitude,
+                            epicenterLon = activeGempa.longitude,
+                            magnitude = activeGempa.magnitude,
+                            depthKm = activeGempa.kedalamanKm,
+                            userLat = safeUserLat,
+                            userLon = safeUserLon,
+                            userLocationName = userPreferences.userLocationName,
+                            allQuakes = allQuakes,
+                            modifier = Modifier.fillMaxSize()
+                        )
+                    }
+
+                    // Earthquake Details Bottom Card
+                    Card(
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(16.dp),
+                        colors = CardDefaults.cardColors(
+                            containerColor = Color(0xFF0F172A)
+                        ),
+                        border = BorderStroke(1.dp, Color(0xFF1E293B))
+                    ) {
+                        Column(
+                            modifier = Modifier.padding(14.dp),
+                            verticalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Text(
+                                    text = activeGempa.wilayah,
+                                    style = MaterialTheme.typography.titleSmall,
+                                    fontWeight = FontWeight.Bold,
+                                    color = Color.White,
+                                    modifier = Modifier.weight(1f)
+                                )
+                                Spacer(modifier = Modifier.width(8.dp))
+                                Surface(
+                                    shape = RoundedCornerShape(8.dp),
+                                    color = mmiBadgeColor
+                                ) {
+                                    Text(
+                                        text = "M %.1f".format(activeGempa.magnitude),
+                                        fontWeight = FontWeight.Bold,
+                                        fontSize = 12.sp,
+                                        color = if (mmiEstimate.level == 3) Color(0xFF1E293B) else Color.White,
+                                        modifier = Modifier.padding(horizontal = 7.dp, vertical = 3.dp)
+                                    )
+                                }
+                            }
+
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Text(
+                                    text = "📏 %,d km (%s)".format(distanceKm, direction).replace(',', '.'),
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = Color(0xFF38BDF8),
+                                    fontWeight = FontWeight.SemiBold
+                                )
+                                Text(
+                                    text = "🌊 Kedalaman: ${activeGempa.kedalamanKm} km",
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = Color(0xFF94A3B8)
+                                )
+                                Text(
+                                    text = "⚡ ${mmiEstimate.scale}",
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = mmiBadgeColor,
+                                    fontWeight = FontWeight.Bold
+                                )
+                            }
+                        }
+                    }
                 }
             }
         }
