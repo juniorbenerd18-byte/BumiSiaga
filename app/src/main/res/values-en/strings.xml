@@ -165,7 +165,7 @@
     <string name="map_btn_center_quake">Focus Latest Quake</string>
     <string name="map_btn_center_indonesia">Center Indonesia</string>
     <string name="map_free_source_badge">100% Free Open-Source Map (OpenStreetMap)</string>
-    <string name="dashboard_btn_quick_emergency">Emergency Call</string>
+    <string name="dashboard_btn_quick_emergency">Hotline 117</string>
     <string name="dashboard_btn_change_location">Change Location</string>
     <string name="dashboard_btn_refresh">Refresh Data</string>
     <string name="dashboard_btn_settings">Settings</string>

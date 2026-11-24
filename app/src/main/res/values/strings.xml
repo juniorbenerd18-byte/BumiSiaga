@@ -165,7 +165,7 @@
     <string name="map_btn_center_quake">Pusatkan Gempa Terbaru</string>
     <string name="map_btn_center_indonesia">Pusatkan Indonesia</string>
     <string name="map_free_source_badge">100% Peta Open-Source Bebas Biaya (OpenStreetMap)</string>
-    <string name="dashboard_btn_quick_emergency">Panggilan Darurat</string>
+    <string name="dashboard_btn_quick_emergency">Darurat 117</string>
     <string name="dashboard_btn_change_location">Ubah Lokasi</string>
     <string name="dashboard_btn_refresh">Perbarui Data</string>
     <string name="dashboard_btn_settings">Pengaturan</string>

@@ -18,6 +18,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -42,6 +43,7 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
+import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -56,9 +58,13 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -209,10 +215,20 @@ fun SettingsScreen(
                             horizontalArrangement = Arrangement.spacedBy(8.dp)
                         ) {
                             listOf(3.0, 4.0, 5.0, 6.0).forEach { mag ->
+                                val isSelected = prefs.minMagnitudeAlert == mag
                                 FilterChip(
-                                    selected = prefs.minMagnitudeAlert == mag,
+                                    selected = isSelected,
                                     onClick = { viewModel.setMinMagnitude(mag) },
                                     label = { Text("M ≥ ${mag.toInt()}.0") },
+                                    colors = FilterChipDefaults.filterChipColors(
+                                        selectedContainerColor = MaterialTheme.colorScheme.primaryContainer,
+                                        selectedLabelColor = MaterialTheme.colorScheme.onPrimaryContainer
+                                    ),
+                                    border = FilterChipDefaults.filterChipBorder(
+                                        enabled = prefs.notificationsEnabled,
+                                        selected = isSelected,
+                                        selectedBorderColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.5f)
+                                    ),
                                     enabled = prefs.notificationsEnabled
                                 )
                             }
@@ -243,10 +259,20 @@ fun SettingsScreen(
                                 500 to stringResource(R.string.settings_radius_500km)
                             )
                             radiusOptions.forEach { (radiusKm, label) ->
+                                val isSelected = prefs.nearbyRadiusKm == radiusKm
                                 FilterChip(
-                                    selected = prefs.nearbyRadiusKm == radiusKm,
+                                    selected = isSelected,
                                     onClick = { viewModel.setNearbyRadius(radiusKm) },
                                     label = { Text(label) },
+                                    colors = FilterChipDefaults.filterChipColors(
+                                        selectedContainerColor = MaterialTheme.colorScheme.primaryContainer,
+                                        selectedLabelColor = MaterialTheme.colorScheme.onPrimaryContainer
+                                    ),
+                                    border = FilterChipDefaults.filterChipBorder(
+                                        enabled = prefs.notificationsEnabled,
+                                        selected = isSelected,
+                                        selectedBorderColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.5f)
+                                    ),
                                     enabled = prefs.notificationsEnabled
                                 )
                             }
@@ -319,34 +345,32 @@ fun SettingsScreen(
                     )
 
                     Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(10.dp)
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clip(RoundedCornerShape(12.dp))
+                            .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f))
+                            .padding(4.dp),
+                        horizontalArrangement = Arrangement.spacedBy(4.dp)
                     ) {
-                        FilterChip(
+                        ThemeOptionItem(
+                            icon = Icons.Default.PhoneAndroid,
+                            label = stringResource(R.string.settings_theme_system),
                             selected = prefs.themeMode == AppThemeMode.SYSTEM,
                             onClick = { viewModel.setThemeMode(AppThemeMode.SYSTEM) },
-                            label = { Text(stringResource(R.string.settings_theme_system)) },
-                            leadingIcon = {
-                                Icon(Icons.Default.PhoneAndroid, contentDescription = null, modifier = Modifier.size(16.dp))
-                            },
                             modifier = Modifier.weight(1f)
                         )
-                        FilterChip(
+                        ThemeOptionItem(
+                            icon = Icons.Default.LightMode,
+                            label = stringResource(R.string.settings_theme_light),
                             selected = prefs.themeMode == AppThemeMode.LIGHT,
                             onClick = { viewModel.setThemeMode(AppThemeMode.LIGHT) },
-                            label = { Text(stringResource(R.string.settings_theme_light)) },
-                            leadingIcon = {
-                                Icon(Icons.Default.LightMode, contentDescription = null, modifier = Modifier.size(16.dp))
-                            },
                             modifier = Modifier.weight(1f)
                         )
-                        FilterChip(
+                        ThemeOptionItem(
+                            icon = Icons.Default.DarkMode,
+                            label = stringResource(R.string.settings_theme_dark),
                             selected = prefs.themeMode == AppThemeMode.DARK,
                             onClick = { viewModel.setThemeMode(AppThemeMode.DARK) },
-                            label = { Text(stringResource(R.string.settings_theme_dark)) },
-                            leadingIcon = {
-                                Icon(Icons.Default.DarkMode, contentDescription = null, modifier = Modifier.size(16.dp))
-                            },
                             modifier = Modifier.weight(1f)
                         )
                     }
@@ -374,25 +398,23 @@ fun SettingsScreen(
                     verticalArrangement = Arrangement.spacedBy(10.dp)
                 ) {
                     Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(10.dp)
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clip(RoundedCornerShape(12.dp))
+                            .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f))
+                            .padding(4.dp),
+                        horizontalArrangement = Arrangement.spacedBy(4.dp)
                     ) {
-                        FilterChip(
+                        LanguageOptionItem(
+                            label = stringResource(R.string.settings_lang_id),
                             selected = prefs.language == "in",
                             onClick = { viewModel.setLanguage("in") },
-                            label = { Text(stringResource(R.string.settings_lang_id)) },
-                            leadingIcon = {
-                                Icon(Icons.Default.Language, contentDescription = null, modifier = Modifier.size(16.dp))
-                            },
                             modifier = Modifier.weight(1f)
                         )
-                        FilterChip(
+                        LanguageOptionItem(
+                            label = stringResource(R.string.settings_lang_en),
                             selected = prefs.language == "en",
                             onClick = { viewModel.setLanguage("en") },
-                            label = { Text(stringResource(R.string.settings_lang_en)) },
-                            leadingIcon = {
-                                Icon(Icons.Default.Language, contentDescription = null, modifier = Modifier.size(16.dp))
-                            },
                             modifier = Modifier.weight(1f)
                         )
                     }
@@ -486,6 +508,85 @@ fun SettingsScreen(
             }
 
             Spacer(modifier = Modifier.height(16.dp))
+        }
+    }
+}
+
+@Composable
+private fun ThemeOptionItem(
+    icon: ImageVector,
+    label: String,
+    selected: Boolean,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Surface(
+        shape = RoundedCornerShape(9.dp),
+        color = if (selected) MaterialTheme.colorScheme.primaryContainer else Color.Transparent,
+        border = if (selected) BorderStroke(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.5f)) else null,
+        modifier = modifier.clickable { onClick() }
+    ) {
+        Row(
+            modifier = Modifier
+                .padding(vertical = 10.dp, horizontal = 4.dp)
+                .fillMaxWidth(),
+            horizontalArrangement = Arrangement.Center,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Icon(
+                imageVector = icon,
+                contentDescription = null,
+                tint = if (selected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.size(16.dp)
+            )
+            Spacer(modifier = Modifier.width(6.dp))
+            Text(
+                text = label,
+                fontSize = 12.sp,
+                fontWeight = if (selected) FontWeight.Bold else FontWeight.Medium,
+                color = if (selected) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSurfaceVariant,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
+        }
+    }
+}
+
+@Composable
+private fun LanguageOptionItem(
+    label: String,
+    selected: Boolean,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Surface(
+        shape = RoundedCornerShape(9.dp),
+        color = if (selected) MaterialTheme.colorScheme.primaryContainer else Color.Transparent,
+        border = if (selected) BorderStroke(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.5f)) else null,
+        modifier = modifier.clickable { onClick() }
+    ) {
+        Row(
+            modifier = Modifier
+                .padding(vertical = 10.dp, horizontal = 6.dp)
+                .fillMaxWidth(),
+            horizontalArrangement = Arrangement.Center,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Icon(
+                imageVector = Icons.Default.Language,
+                contentDescription = null,
+                tint = if (selected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.size(16.dp)
+            )
+            Spacer(modifier = Modifier.width(6.dp))
+            Text(
+                text = label,
+                fontSize = 12.sp,
+                fontWeight = if (selected) FontWeight.Bold else FontWeight.Medium,
+                color = if (selected) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSurfaceVariant,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
         }
     }
 }
